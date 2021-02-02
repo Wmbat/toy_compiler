@@ -1,0 +1,28 @@
+spdlog = spdlog%lib{spdlog}
+
+import libs = range-v3%lib{range-v3}
+import libs += libcaramel%lib{caramel}
+import libs += monads%lib{monads}
+
+import doctest = doctest%lib{doctest}
+
+./: exe{toy_compiler}: libue{toy_compiler}: {hxx ixx txx cxx}{** -**.test...} $spdlog $libs
+
+# Unit tests.
+#
+exe{*.test}:
+{
+  test = true
+  install = false
+}
+
+for t: cxx{**.test...}
+{
+  d = $directory($t)
+  n = $name($t)...
+
+  ./: $d/exe{$n}: $t $d/{hxx ixx txx}{+$n} $d/testscript{+$n} $doctest
+  $d/exe{$n}: libue{toy_compiler}: bin.whole = false
+}
+
+cxx.poptions =+ "-I$out_root" "-I$src_root"

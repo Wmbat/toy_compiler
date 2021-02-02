@@ -1,0 +1,7 @@
+toy_compiler
+*.test
+
+# Testscript output directory (can be symlink).
+#
+test-toy_compiler
+test-*.test
