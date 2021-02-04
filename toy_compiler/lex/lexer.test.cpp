@@ -1,21 +1,34 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <toy_compiler/lexer.hpp>
+#include <toy_compiler/lex/lexer.hpp>
 
+#include <range/v3/view/enumerate.hpp>
 #include <range/v3/view/iota.hpp>
 
 namespace vi = ranges::views;
 
-TEST_SUITE("Lexer test suite") // NOLINT
+TEST_SUITE("Lexer test suite")
 {
-   TEST_CASE("id test") // NOLINT
+   TEST_CASE("non-existant file")
+   {
+      lexer lex;
+
+      auto maybe = lex.tokenize_file("tests/file_that_doesn't_exist.txt");
+
+      REQUIRE(!maybe);
+   }
+   TEST_CASE("id test")
    {
       SUBCASE("standard")
       {
          lexer lex;
 
-         auto data = lex.tokenize_file("tests/files/id.txt");
+         auto maybe = lex.tokenize_file("tests/id.txt");
+
+         REQUIRE(maybe.has_value());
+
+         auto data = maybe.value();
 
          CHECK(std::size(data) == 11);
 
@@ -29,7 +42,11 @@ TEST_SUITE("Lexer test suite") // NOLINT
       {
          lexer lex;
 
-         auto data = lex.tokenize_file("tests/files/id_tabs.txt");
+         auto maybe = lex.tokenize_file("tests/id_tabs.txt");
+
+         REQUIRE(maybe.has_value());
+
+         auto data = maybe.value();
 
          CHECK(std::size(data) == 11);
 
@@ -43,7 +60,11 @@ TEST_SUITE("Lexer test suite") // NOLINT
       {
          lexer lex;
 
-         auto data = lex.tokenize_file("tests/files/id_invalid.txt");
+         auto maybe = lex.tokenize_file("tests/id_invalid.txt");
+
+         REQUIRE(maybe.has_value());
+
+         auto data = maybe.value();
 
          CHECK(std::size(data) == 9);
          CHECK(data.lookup(0).tok == to_string(token_type::invalid_id));
@@ -66,13 +87,17 @@ TEST_SUITE("Lexer test suite") // NOLINT
          CHECK(data.lookup(8).line == 2);
       }
    }
-   TEST_CASE("keyword test") // NOLINT
+   TEST_CASE("keyword test")
    {
       SUBCASE("positive keywords")
       {
          lexer lex;
 
-         auto data = lex.tokenize_file("tests/files/keyword_positive.txt");
+         auto maybe = lex.tokenize_file("tests/keyword_positive.txt");
+
+         REQUIRE(maybe.has_value());
+
+         auto data = maybe.value();
 
          for (std::size_t line_counter = 0; auto i : vi::iota(0u, std::size(keywords)))
          {
@@ -90,7 +115,11 @@ TEST_SUITE("Lexer test suite") // NOLINT
       {
          lexer lex;
 
-         auto data = lex.tokenize_file("tests/files/keyword.txt");
+         auto maybe = lex.tokenize_file("tests/keyword.txt");
+
+         REQUIRE(maybe.has_value());
+
+         auto data = maybe.value();
 
          CHECK(std::size(data) == 12);
 
@@ -142,5 +171,46 @@ TEST_SUITE("Lexer test suite") // NOLINT
          CHECK(data.lookup(11).lexeme == "private");
          CHECK(data.lookup(11).line == 4);
       }
+   }
+   TEST_CASE("integer test")
+   {
+      SUBCASE("valid")
+      {
+         lexer lex;
+
+         auto maybe = lex.tokenize_file("tests/num.txt");
+
+         REQUIRE(maybe);
+
+         auto data = maybe.value();
+
+         for (std::uint32_t index = 1; auto& tok : data)
+         {
+            CHECK(tok.tok == to_string(token_type::integer_lit));
+            CHECK(tok.line == index++);
+         }
+      }
+
+      SUBCASE("invalid")
+      {
+         lexer lex;
+
+         auto maybe = lex.tokenize_file("tests/num_invalid.txt");
+
+         REQUIRE(maybe);
+
+         auto data = maybe.value();
+
+         for (std::uint32_t index = 1; auto& tok : data)
+         {
+            CHECK(tok.tok == to_string(token_type::invalid_num));
+            CHECK(tok.line == index++);
+         }
+      }
+   }
+   TEST_CASE("float test")
+   {
+      SUBCASE("valid") {}
+      SUBCASE("invalid") {}
    }
 }

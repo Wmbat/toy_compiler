@@ -1,5 +1,7 @@
 #pragma once
 
+#include <fmt/core.h>
+
 #include <array>
 #include <compare>
 #include <string>
@@ -43,4 +45,20 @@ struct token
    std::uint32_t line{};   // NOLINT
 
    auto operator<=>(const token& other) const -> std::strong_ordering = default;
+};
+
+template <>
+struct fmt::formatter<token>
+{
+   template <typename ParseContex>
+   constexpr auto parse(ParseContex& ctx)
+   {
+      return ctx.begin();
+   }
+
+   template <typename FormatContext>
+   auto format(const token& tok, FormatContext& ctx)
+   {
+      return fmt::format_to(ctx.out(), "[{0}, {1}, {2}]", tok.tok, tok.lexeme, tok.line);
+   }
 };

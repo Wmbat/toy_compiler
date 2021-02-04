@@ -27,12 +27,12 @@ digraph dfa {
   // integers
   "1" -> "4" [label="nonzero"]
   "4" -> "4" [label="digit"]
-  "4" -> "40"
-  "4" -> "5" [label="space"]
+  "4" -> "40" [label="letter"]
+  "4" -> "5" 
 
   "1" -> "6" [label="0"]
-  "6" -> "40"
-  "6" -> "5" [label="space"]
+  "6" -> "40" [label="letter"]
+  "6" -> "5" 
 
   // Floats
   "4" -> "7" [label="dot"]

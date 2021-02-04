@@ -1,17 +1,7 @@
-#include <toy_compiler/application.hpp>
+#include <toy_compiler/core/application.hpp>
 
 #include <range/v3/range/conversion.hpp>
 #include <range/v3/view/drop.hpp>
-
-#include <spdlog/spdlog.h>
-
-#include <libcaramel/containers/dynamic_array.hpp>
-
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <span>
-#include <string_view>
 
 namespace views = ranges::views;
 
@@ -29,4 +19,3 @@ auto main(int argc, char** argv) -> int
 
    application app{arguments};
 }
-
