@@ -13,8 +13,10 @@ namespace fs = std::filesystem;
 
 namespace detail
 {
+   auto is_alphabet(char c) noexcept -> bool;
    auto is_alphanum(char c) noexcept -> bool;
    auto is_digit(char c) noexcept -> bool;
+   auto is_punctuation(char c) noexcept -> bool;
 } // namespace detail
 
 /**
@@ -36,19 +38,42 @@ public:
    auto tokenize_file(const fs::path& path) -> monad::maybe<crl::dynamic_array<token>>;
 
 private:
-   auto next_token(const std::string_view data, std::uint32_t line_index) const -> token;
-
-   auto create_alphanumeric_lexeme(const std::string_view data, std::uint32_t line_index) const
-      -> token;
-   auto handle_valid_id(const std::string_view data, std::uint32_t line_index) const -> token;
-   auto handle_leading_underscore(const std::string_view data, std::uint32_t line_index) const
+   [[nodiscard]] auto next_token(const std::string_view data, std::uint32_t line_index) const
       -> token;
 
-   auto create_digit_lexeme(const std::string_view data, std::uint32_t line_index) const -> token;
-   auto handle_leading_zero(const std::string_view data, std::uint32_t line) const -> token;
-   auto handle_regular_digit(const std::string_view data, std::uint32_t line) const -> token;
+   // ID & KEYWORD
 
-   auto trim_leading_whitespaces(const std::string_view data) const -> std::string_view;
+   [[nodiscard]] auto create_alphanumeric_token(const std::string_view data,
+                                                std::uint32_t line) const -> token;
+   [[nodiscard]] auto handle_valid_id(const std::string_view data, std::uint32_t line) const
+      -> token;
+   [[nodiscard]] auto handle_alpha_leading_underscore(const std::string_view data,
+                                                      std::uint32_t line) const -> token;
+
+   // FLOATS & INTS
+
+   [[nodiscard]] auto create_digit_token(const std::string_view data,
+                                         std::uint32_t line_index) const -> token;
+   [[nodiscard]] auto handle_leading_zero(const std::string_view data, std::uint32_t line) const
+      -> token;
+   [[nodiscard]] auto handle_continued_leading_zero(const std::string_view data,
+                                                    std::uint32_t line) const -> token;
+   [[nodiscard]] auto handle_leading_nonzero(const std::string_view data, std::uint32_t line) const
+      -> token;
+
+   [[nodiscard]] auto handle_floats(const std::string_view data, std::uint32_t line) const -> token;
+   [[nodiscard]] auto handle_float_zero(const std::string_view data, std::uint32_t line) const
+      -> token;
+   [[nodiscard]] auto handle_float_nonzero(const std::string_view data, std::uint32_t line) const
+      -> token;
+
+   // PUNCTUATION
+   [[nodiscard]] auto create_punctuation_token(const std::string_view data,
+                                               std::uint32_t line) const -> token;
+   [[nodiscard]] auto handle_colon(std::string_view data, std::uint32_t line) const -> token;
+
+   [[nodiscard]] auto trim_leading_whitespaces(const std::string_view data) const
+      -> std::string_view;
 
 private:
    util::logger_wrapper m_log;

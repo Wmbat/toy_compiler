@@ -1,11 +1,27 @@
 #pragma once
 
+#include <libcaramel/containers/dynamic_array.hpp>
+
 #include <fmt/core.h>
 
 #include <array>
 #include <compare>
 #include <string>
 #include <string_view>
+
+namespace grammar
+{
+   constexpr char period = '.';
+   constexpr char comma = ',';
+   constexpr char colon = ':';
+   constexpr char semi_colon = ';';
+   constexpr char open_parenth = '(';
+   constexpr char close_parenth = ')';
+   constexpr char open_square = '[';
+   constexpr char close_square = ']';
+   constexpr char open_curly = '{';
+   constexpr char close_curly = '}';
+} // namespace grammar
 
 enum struct token_type : std::uint32_t
 {
@@ -17,12 +33,18 @@ enum struct token_type : std::uint32_t
    invalid_char,
    invalid_id,
    invalid_num,
-   invalid_str
+   invalid_str,
+   period,
+   comma,
+   colon,
+   double_colon,
+   semi_colon,
 };
 
-constexpr std::array token_names{"none",       "id",          "integer_lit",
-                                 "float_lit",  "string_lit",  "invalid_char",
-                                 "invalid_id", "invalid_num", "invalid_str"};
+constexpr std::array token_names{
+   "none",         "id",         "integer_lit",  "float_lit",       "str_lit",
+   "invalid_char", "invalid_id", "invalid_num",  "invalid_str_lit", "period",
+   "comma",        "colon",      "double_colon", "semi_colon"};
 
 constexpr auto to_string(token_type type) -> std::string_view
 {
@@ -35,8 +57,9 @@ constexpr auto to_string(token_type type) -> std::string_view
    "write",  "return",  "main", "inherits", "break", "continue"};
 [[maybe_unused]] constexpr std::array operators{"==", "<>", "<", ">", "<=", ">=", "+", "-",
                                                 "*",  "/",  "=", "|", "&",  "!",  "?"};
-[[maybe_unused]] constexpr std::array punctuations{"(", ")", "{", "}", "[", "]",
-                                                   ";", ",", ".", ":", "::"};
+
+[[maybe_unused]] constexpr std::array punctuations{grammar::period, grammar::comma, grammar::colon,
+                                                   grammar::semi_colon};
 
 struct token
 {

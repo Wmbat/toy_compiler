@@ -1,4 +1,0 @@
-: Test script
-cp -r $src_base/lex/tests ./
-
-$* 2>- != 0

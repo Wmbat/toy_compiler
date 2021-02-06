@@ -210,7 +210,89 @@ TEST_SUITE("Lexer test suite")
    }
    TEST_CASE("float test")
    {
-      SUBCASE("valid") {}
-      SUBCASE("invalid") {}
+      SUBCASE("valid")
+      {
+         lexer lex;
+
+         auto maybe = lex.tokenize_file("tests/float_valid.txt");
+
+         REQUIRE(maybe);
+
+         auto data = maybe.value();
+
+         for (std::uint32_t index = 1; auto& tok : data)
+         {
+            if (index < 5)
+            {
+               CHECK(tok.tok == to_string(token_type::float_lit));
+               CHECK(tok.line == index++);
+            }
+         }
+
+         CHECK((std::end(data) - 2)->tok == to_string(token_type::float_lit));
+         CHECK((std::end(data) - 2)->line == 5);
+         CHECK((std::end(data) - 1)->tok == to_string(token_type::invalid_id));
+         CHECK((std::end(data) - 1)->line == 5);
+      }
+      SUBCASE("invalid")
+      {
+         lexer lex;
+
+         auto maybe = lex.tokenize_file("tests/float_invalid.txt");
+
+         REQUIRE(maybe);
+
+         const auto data = maybe.value();
+
+         for (std::uint32_t index = 1; auto& tok : data)
+         {
+            CHECK(tok.tok == to_string(token_type::invalid_num));
+            CHECK(tok.line == index++);
+         }
+      }
+   }
+   TEST_CASE("punctuation test")
+   {
+      lexer lex;
+
+      auto maybe = lex.tokenize_file("tests/punctuation_valid.txt");
+
+      REQUIRE(maybe);
+
+      const auto data = maybe.value();
+
+      CHECK(*(std::begin(data) + 0) ==
+            token{.tok = to_string(token_type::period), .lexeme = ".", .line = 1});
+      CHECK(*(std::begin(data) + 1) ==
+            token{.tok = to_string(token_type::semi_colon), .lexeme = ";", .line = 1});
+      CHECK(*(std::begin(data) + 2) ==
+            token{.tok = to_string(token_type::comma), .lexeme = ",", .line = 1});
+      CHECK(*(std::begin(data) + 3) ==
+            token{.tok = to_string(token_type::double_colon), .lexeme = "::", .line = 1});
+      CHECK(*(std::begin(data) + 4) ==
+            token{.tok = to_string(token_type::colon), .lexeme = ":", .line = 1});
+   }
+   TEST_CASE("invalid characters")
+   {
+      lexer lex;
+
+      auto maybe = lex.tokenize_file("tests/chars_invalid.txt");
+
+      REQUIRE(maybe);
+
+      const auto data = maybe.value();
+
+      CHECK(*(std::begin(data) + 0) ==
+            token{.tok = to_string(token_type::invalid_char), .lexeme = "@", .line = 1});
+      CHECK(*(std::begin(data) + 1) ==
+            token{.tok = to_string(token_type::invalid_char), .lexeme = "#", .line = 1});
+      CHECK(*(std::begin(data) + 2) ==
+            token{.tok = to_string(token_type::invalid_char), .lexeme = "$", .line = 1});
+      CHECK(*(std::begin(data) + 3) ==
+            token{.tok = to_string(token_type::invalid_char), .lexeme = "'", .line = 1});
+      CHECK(*(std::begin(data) + 4) ==
+            token{.tok = to_string(token_type::invalid_char), .lexeme = "\\", .line = 1});
+      CHECK(*(std::begin(data) + 5) ==
+            token{.tok = to_string(token_type::invalid_char), .lexeme = "~", .line = 1});
    }
 }

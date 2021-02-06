@@ -2,18 +2,29 @@ digraph dfa {
   "" [shape=none]
   "1" [shape=circle]
   "2" [shape=circle]
-  "3" [shape=doublecircle, label="ID", color=red]
+  "3" [shape=circle]
   "4" [shape=circle]
-  "5" [shape=doublecircle, label="INT", color=red]
+  "5" [shape=circle]
   "6" [shape=circle]
   "7" [shape=circle]
-  "8" [shape=doublecircle, label="FLOAT", color=blue]
+  "8" [shape=circle]
   "9" [shape=circle]
-  "10" [shape=circle]
-  "11" [shape=doublecircle, label="CMT", color=red]
-  "12" [shape=circle]
-  "13" [shape=doublecircle, label="STR", color=red]
+  "100" [shape=circle]
+  "101" [shape=circle]
+
+  // final states
+  "30" [shape=doublecircle, label="ID", color=red]
+  "31" [shape=doublecircle, label="INT", color=red]
+  "32" [shape=doublecircle, label="CMT", color=red]
+  "33" [shape=doublecircle, label="FLOAT", color=red]
+  "34" [shape=doublecircle, label="FLOAT", color=red]
+  "35" [shape=doublecircle, label="STR", color=red]
+
+  // errors
   "40" [shape=doublecircle, label="ERR", color=red, style=filled]
+  "41" [shape=doublecircle, label="ERR", color=red, style=filled]
+  "42" [shape=doublecircle, label="ERR", color=red, style=filled]
+  "43" [shape=doublecircle, label="ERR", color=red, style=filled]
 
   "" -> "1"
   "1" -> "1" [label="space"]
@@ -22,37 +33,43 @@ digraph dfa {
   // Id
   "1" -> "2" [label="letter"]
   "2" -> "2" [label="alphanum"]
-  "2" -> "3"
+  "2" -> "30"
 
   // integers
-  "1" -> "4" [label="nonzero"]
-  "4" -> "4" [label="digit"]
-  "4" -> "40" [label="letter"]
-  "4" -> "5" 
+  "1" -> "3" [label="nonzero"]
+  "3" -> "3" [label="digit"]
+  "3" -> "42" [label="letter"]
+  "3" -> "31" 
 
-  "1" -> "6" [label="0"]
-  "6" -> "40" [label="letter"]
-  "6" -> "5" 
+  "1" -> "4" [label="0"]
+  "4" -> "40" [label="letter"]
+  "4" -> "31" 
 
   // Floats
-  "4" -> "7" [label="dot"]
-  "7" -> "7" [label="digit"]
-  "7" -> "8" [label="nonzero"]
-  "7" -> "40"
-
-  "4" -> "8" [label=".0"]
+  "31" -> "5" [label="period"]
+  "5" -> "6" [label="nonzero"]
+  "5" -> "43"
+  "6" -> "6" [label="digit"]
+  "6" -> "101" [label="nonzero"]
+  "101" -> "33"
+  "101" -> "41" [label="letter"]
+  "6" -> "41" [label="letter"]
+  "5" -> "100" [label="0"]
+  "100" -> "6" [label="digit"]
+  "100" -> "34"
+  "100" -> "41" [label="letter"]
 
   // comments
-  "1" -> "9" [label="/*"]
-  "9" -> "9"
-  "9" -> "11" [label="*/"]
+  "1" -> "7" [label="/*"]
+  "7" -> "7"
+  "7" -> "32" [label="*/"]
     
-  "1" -> "10" [label="//"]
-  "10" -> "10"
-  "10" -> "11" [label="newline"]
+  "1" -> "8" [label="//"]
+  "8" -> "8"
+  "8" -> "32" [label="newline"]
 
   // String literal
-  "1" -> "12" [label="\""]
-  "12" -> "12" [label="ascii"]
-  "12" -> "13" [label="\""]
+  "1" -> "9" [label="\""]
+  "9" -> "9" [label="ascii"]
+  "9" -> "35" [label="\""]
 }
