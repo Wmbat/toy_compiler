@@ -1,0 +1,10 @@
+
+: Tests
+: Unit testing for the lexer.hpp public API.
+
+ln -s $src_base/lex/test_files $~/ ;
+
+$* 1>>~/EOE/ == 0
+\[doctest\] Status: FAILURE!
+\[doctest\] Status: SUCCESS!
+EOE

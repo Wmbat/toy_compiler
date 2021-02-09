@@ -1,20 +1,34 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#define DOCTEST_CONFIG_IMPLEMENT
 #include <doctest/doctest.h>
 
 #include <toy_compiler/lex/lexer.hpp>
+
+#include <fmt/ranges.h>
 
 #include <range/v3/view/enumerate.hpp>
 #include <range/v3/view/iota.hpp>
 
 namespace vi = ranges::views;
 
+int main(int argc, char** argv)
+{
+   doctest::Context context;
+   context.applyCommandLine(argc, argv);
+   context.setOption("no-breaks", true);
+
+   int res = context.run(); // run
+
+   if (context.shouldExit())
+      return res;
+
+   return res;
+}
+
 TEST_SUITE("Lexer test suite")
 {
    TEST_CASE("non-existant file")
    {
-      lexer lex;
-
-      auto maybe = lex.tokenize_file("tests/file_that_doesn't_exist.txt");
+      auto maybe = lex::tokenize_file("test_files/file_that_doesn't_exist.txt");
 
       REQUIRE(!maybe);
    }
@@ -22,9 +36,7 @@ TEST_SUITE("Lexer test suite")
    {
       SUBCASE("standard")
       {
-         lexer lex;
-
-         auto maybe = lex.tokenize_file("tests/id.txt");
+         auto maybe = lex::tokenize_file("test_files/id.txt");
 
          REQUIRE(maybe.has_value());
 
@@ -34,15 +46,13 @@ TEST_SUITE("Lexer test suite")
 
          for (auto& token : data)
          {
-            CHECK(token.tok == to_string(token_type::id));
+            CHECK(token.tok == to_string(lex::token_type::id));
          }
       }
 
       SUBCASE("standard with tabs")
       {
-         lexer lex;
-
-         auto maybe = lex.tokenize_file("tests/id_tabs.txt");
+         auto maybe = lex::tokenize_file("test_files/id_tabs.txt");
 
          REQUIRE(maybe.has_value());
 
@@ -52,70 +62,64 @@ TEST_SUITE("Lexer test suite")
 
          for (auto& token : data)
          {
-            CHECK(token.tok == to_string(token_type::id));
+            CHECK(token.tok == to_string(lex::token_type::id));
          }
       }
 
       SUBCASE("invalid")
       {
-         lexer lex;
-
-         auto maybe = lex.tokenize_file("tests/id_invalid.txt");
+         auto maybe = lex::tokenize_file("test_files/id_invalid.txt");
 
          REQUIRE(maybe.has_value());
 
          auto data = maybe.value();
 
          CHECK(std::size(data) == 9);
-         CHECK(data.lookup(0).tok == to_string(token_type::invalid_id));
+         CHECK(data.lookup(0).tok == to_string(lex::token_type::invalid_id));
          CHECK(data.lookup(0).line == 1);
-         CHECK(data.lookup(1).tok == to_string(token_type::id));
+         CHECK(data.lookup(1).tok == to_string(lex::token_type::id));
          CHECK(data.lookup(1).line == 1);
-         CHECK(data.lookup(2).tok == to_string(token_type::id));
+         CHECK(data.lookup(2).tok == to_string(lex::token_type::id));
          CHECK(data.lookup(2).line == 1);
-         CHECK(data.lookup(3).tok == to_string(token_type::id));
+         CHECK(data.lookup(3).tok == to_string(lex::token_type::id));
          CHECK(data.lookup(3).line == 1);
-         CHECK(data.lookup(4).tok == to_string(token_type::id));
+         CHECK(data.lookup(4).tok == to_string(lex::token_type::id));
          CHECK(data.lookup(4).line == 1);
-         CHECK(data.lookup(5).tok == to_string(token_type::id));
+         CHECK(data.lookup(5).tok == to_string(lex::token_type::id));
          CHECK(data.lookup(6).line == 1);
-         CHECK(data.lookup(6).tok == to_string(token_type::invalid_id));
+         CHECK(data.lookup(6).tok == to_string(lex::token_type::invalid_id));
          CHECK(data.lookup(6).line == 1);
-         CHECK(data.lookup(7).tok == to_string(token_type::invalid_char));
+         CHECK(data.lookup(7).tok == to_string(lex::token_type::invalid_char));
          CHECK(data.lookup(7).line == 1);
-         CHECK(data.lookup(8).tok == to_string(token_type::invalid_id));
+         CHECK(data.lookup(8).tok == to_string(lex::token_type::invalid_id));
          CHECK(data.lookup(8).line == 2);
       }
    }
    TEST_CASE("keyword test")
    {
-      SUBCASE("positive keywords")
+      SUBCASE("positive lex::keywords")
       {
-         lexer lex;
-
-         auto maybe = lex.tokenize_file("tests/keyword_positive.txt");
+         auto maybe = lex::tokenize_file("test_files/keyword_positive.txt");
 
          REQUIRE(maybe.has_value());
 
          auto data = maybe.value();
 
-         for (std::size_t line_counter = 0; auto i : vi::iota(0u, std::size(keywords)))
+         for (std::size_t line_counter = 0; auto i : vi::iota(0u, std::size(lex::keywords)))
          {
-            if (i % 7 == 0)
+            if (i % 7 == 0) // NOLINT
             {
                line_counter++;
             }
 
-            CHECK(data.lookup(i).tok == keywords.at(i));
-            CHECK(data.lookup(i).lexeme == keywords.at(i));
+            CHECK(data.lookup(i).tok == lex::keywords.at(i));
+            CHECK(data.lookup(i).lexeme == lex::keywords.at(i));
             CHECK(data.lookup(i).line == line_counter);
          }
       }
       SUBCASE("mixed")
       {
-         lexer lex;
-
-         auto maybe = lex.tokenize_file("tests/keyword.txt");
+         auto maybe = lex::tokenize_file("test_files/keyword.txt");
 
          REQUIRE(maybe.has_value());
 
@@ -176,9 +180,7 @@ TEST_SUITE("Lexer test suite")
    {
       SUBCASE("valid")
       {
-         lexer lex;
-
-         auto maybe = lex.tokenize_file("tests/num.txt");
+         auto maybe = lex::tokenize_file("test_files/num.txt");
 
          REQUIRE(maybe);
 
@@ -186,16 +188,14 @@ TEST_SUITE("Lexer test suite")
 
          for (std::uint32_t index = 1; auto& tok : data)
          {
-            CHECK(tok.tok == to_string(token_type::integer_lit));
+            CHECK(tok.tok == to_string(lex::token_type::integer_lit));
             CHECK(tok.line == index++);
          }
       }
 
       SUBCASE("invalid")
       {
-         lexer lex;
-
-         auto maybe = lex.tokenize_file("tests/num_invalid.txt");
+         auto maybe = lex::tokenize_file("test_files/num_invalid.txt");
 
          REQUIRE(maybe);
 
@@ -203,7 +203,7 @@ TEST_SUITE("Lexer test suite")
 
          for (std::uint32_t index = 1; auto& tok : data)
          {
-            CHECK(tok.tok == to_string(token_type::invalid_num));
+            CHECK(tok.tok == to_string(lex::token_type::invalid_num));
             CHECK(tok.line == index++);
          }
       }
@@ -212,9 +212,7 @@ TEST_SUITE("Lexer test suite")
    {
       SUBCASE("valid")
       {
-         lexer lex;
-
-         auto maybe = lex.tokenize_file("tests/float_valid.txt");
+         auto maybe = lex::tokenize_file("test_files/float_valid.txt");
 
          REQUIRE(maybe);
 
@@ -222,23 +220,21 @@ TEST_SUITE("Lexer test suite")
 
          for (std::uint32_t index = 1; auto& tok : data)
          {
-            if (index < 5)
+            if (index < 5) // NOLINT
             {
-               CHECK(tok.tok == to_string(token_type::float_lit));
+               CHECK(tok.tok == to_string(lex::token_type::float_lit));
                CHECK(tok.line == index++);
             }
          }
 
-         CHECK((std::end(data) - 2)->tok == to_string(token_type::float_lit));
+         CHECK((std::end(data) - 2)->tok == to_string(lex::token_type::float_lit));
          CHECK((std::end(data) - 2)->line == 5);
-         CHECK((std::end(data) - 1)->tok == to_string(token_type::invalid_id));
+         CHECK((std::end(data) - 1)->tok == to_string(lex::token_type::invalid_id));
          CHECK((std::end(data) - 1)->line == 5);
       }
       SUBCASE("invalid")
       {
-         lexer lex;
-
-         auto maybe = lex.tokenize_file("tests/float_invalid.txt");
+         auto maybe = lex::tokenize_file("test_files/float_invalid.txt");
 
          REQUIRE(maybe);
 
@@ -246,53 +242,100 @@ TEST_SUITE("Lexer test suite")
 
          for (std::uint32_t index = 1; auto& tok : data)
          {
-            CHECK(tok.tok == to_string(token_type::invalid_num));
+            CHECK(tok.tok == to_string(lex::token_type::invalid_num));
             CHECK(tok.line == index++);
+         }
+      }
+   }
+   TEST_CASE("string test")
+   {
+      SUBCASE("valid")
+      {
+         auto maybe = lex::tokenize_file("test_files/string_valid.txt");
+
+         REQUIRE(maybe);
+
+         const auto data = maybe.value();
+
+         for (auto& tok : data)
+         {
+            CHECK(tok.tok == to_string(lex::token_type::string_lit));
+         }
+      }
+      SUBCASE("invalid")
+      {
+         auto maybe = lex::tokenize_file("test_files/string_invalid.txt");
+
+         REQUIRE(maybe);
+
+         const auto data = maybe.value();
+
+         CHECK(std::size(data) == 3);
+
+         for (auto& tok : data)
+         {
+            CHECK(tok.tok == to_string(lex::token_type::invalid_str));
          }
       }
    }
    TEST_CASE("punctuation test")
    {
-      lexer lex;
-
-      auto maybe = lex.tokenize_file("tests/punctuation_valid.txt");
+      auto maybe = lex::tokenize_file("test_files/punctuation_valid.txt");
 
       REQUIRE(maybe);
 
       const auto data = maybe.value();
 
       CHECK(*(std::begin(data) + 0) ==
-            token{.tok = to_string(token_type::period), .lexeme = ".", .line = 1});
+            lex::token{.tok = to_string(lex::token_type::period), .lexeme = ".", .line = 1});
       CHECK(*(std::begin(data) + 1) ==
-            token{.tok = to_string(token_type::semi_colon), .lexeme = ";", .line = 1});
+            lex::token{.tok = to_string(lex::token_type::semi_colon), .lexeme = ";", .line = 1});
       CHECK(*(std::begin(data) + 2) ==
-            token{.tok = to_string(token_type::comma), .lexeme = ",", .line = 1});
+            lex::token{.tok = to_string(lex::token_type::comma), .lexeme = ",", .line = 1});
       CHECK(*(std::begin(data) + 3) ==
-            token{.tok = to_string(token_type::double_colon), .lexeme = "::", .line = 1});
+            lex::token{.tok = to_string(lex::token_type::double_colon), .lexeme = "::", .line = 1});
       CHECK(*(std::begin(data) + 4) ==
-            token{.tok = to_string(token_type::colon), .lexeme = ":", .line = 1});
+            lex::token{.tok = to_string(lex::token_type::colon), .lexeme = ":", .line = 1});
+   }
+   TEST_CASE("braces test")
+   {
+      auto maybe = lex::tokenize_file("test_files/braces_valid.txt");
+      REQUIRE(maybe);
+
+      const auto data = maybe.value();
+
+      CHECK(*(std::begin(data) + 0) ==
+            lex::token{.tok = to_string(lex::token_type::open_parenth), .lexeme = "(", .line = 1});
+      CHECK(*(std::begin(data) + 1) ==
+            lex::token{.tok = to_string(lex::token_type::close_parenth), .lexeme = ")", .line = 1});
+      CHECK(*(std::begin(data) + 2) ==
+            lex::token{.tok = to_string(lex::token_type::open_curly), .lexeme = "{", .line = 1});
+      CHECK(*(std::begin(data) + 3) ==
+            lex::token{.tok = to_string(lex::token_type::close_curly), .lexeme = "}", .line = 1});
+      CHECK(*(std::begin(data) + 4) ==
+            lex::token{.tok = to_string(lex::token_type::open_square), .lexeme = "[", .line = 1});
+      CHECK(*(std::begin(data) + 5) ==
+            lex::token{.tok = to_string(lex::token_type::close_square), .lexeme = "]", .line = 1});
    }
    TEST_CASE("invalid characters")
    {
-      lexer lex;
-
-      auto maybe = lex.tokenize_file("tests/chars_invalid.txt");
+      auto maybe = lex::tokenize_file("test_files/chars_invalid.txt");
 
       REQUIRE(maybe);
 
       const auto data = maybe.value();
 
       CHECK(*(std::begin(data) + 0) ==
-            token{.tok = to_string(token_type::invalid_char), .lexeme = "@", .line = 1});
+            lex::token{.tok = to_string(lex::token_type::invalid_char), .lexeme = "@", .line = 1});
       CHECK(*(std::begin(data) + 1) ==
-            token{.tok = to_string(token_type::invalid_char), .lexeme = "#", .line = 1});
+            lex::token{.tok = to_string(lex::token_type::invalid_char), .lexeme = "#", .line = 1});
       CHECK(*(std::begin(data) + 2) ==
-            token{.tok = to_string(token_type::invalid_char), .lexeme = "$", .line = 1});
+            lex::token{.tok = to_string(lex::token_type::invalid_char), .lexeme = "$", .line = 1});
       CHECK(*(std::begin(data) + 3) ==
-            token{.tok = to_string(token_type::invalid_char), .lexeme = "'", .line = 1});
+            lex::token{.tok = to_string(lex::token_type::invalid_char), .lexeme = "'", .line = 1});
       CHECK(*(std::begin(data) + 4) ==
-            token{.tok = to_string(token_type::invalid_char), .lexeme = "\\", .line = 1});
+            lex::token{.tok = to_string(lex::token_type::invalid_char), .lexeme = "\\", .line = 1});
       CHECK(*(std::begin(data) + 5) ==
-            token{.tok = to_string(token_type::invalid_char), .lexeme = "~", .line = 1});
+            lex::token{.tok = to_string(lex::token_type::invalid_char), .lexeme = "~", .line = 1});
    }
 }

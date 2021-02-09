@@ -1,341 +1,239 @@
 #include <toy_compiler/lex/lexer.hpp>
 
+#include <toy_compiler/lex/utility.hpp>
+
+#include <range/v3/range/conversion.hpp>
+#include <range/v3/view/take_while.hpp>
+
 #include <fstream>
 #include <iostream>
 
-#include <range/v3/algorithm/find.hpp>
-#include <range/v3/range/conversion.hpp>
-#include <range/v3/view/tail.hpp>
-#include <range/v3/view/take_while.hpp>
-
 namespace vi = ranges::views;
+namespace fs = std::filesystem;
 
-namespace detail
+namespace lex
 {
-   auto is_alphabet(char c) noexcept -> bool { return std::isalpha(c); }
-   auto is_alphanum(char c) noexcept -> bool { return std::isalnum(c) || c == '_'; }
-   auto is_digit(char c) noexcept -> bool { return std::isdigit(c); }
-   auto is_punctuation(char c) noexcept -> bool
+   auto next_token(const std::string_view data, std::uint32_t line) -> token;
+   auto trim_leading_whitespaces(const std::string_view data)
+      -> std::pair<std::string_view, std::uint32_t>;
+
+   auto tokenize_file(const fs::path& path, util::logger_wrapper log)
+      -> monad::maybe<crl::dynamic_array<token>>
    {
-      return ranges::find(punctuations, c) != std::end(punctuations);
-   }
-} // namespace detail
+      std::ifstream file{path, std::ios::in};
 
-lexer::lexer(util::logger_wrapper log) : m_log{log} {}
-
-auto lexer::tokenize_file(const fs::path& path) -> monad::maybe<crl::dynamic_array<token>>
-{
-   std::ifstream file{path, std::ios::in};
-
-   if (!file.is_open())
-   {
-      return monad::none;
-   }
-
-   m_log.info("tokenizing file: {}", path.c_str());
-
-   crl::dynamic_array<token> tokens;
-
-   std::string line;
-   std::uint32_t line_counter = 0;
-   while (std::getline(file, line))
-   {
-      std::string_view line_data = trim_leading_whitespaces(line);
-      while (std::size(line_data) != 0)
+      if (!file.is_open())
       {
-         auto tok = next_token(line_data, line_counter);
-         tokens.append(tok);
-
-         line_data = trim_leading_whitespaces(line_data.substr(std::size(tok.lexeme)));
+         return monad::none;
       }
 
-      line_counter++;
+      log.info("tokenizing file: {}", path.c_str());
+
+      crl::dynamic_array<token> tokens;
+
+      // TODO: look into reading file 1 kb at a time
+      std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
+      std::uint32_t line_counter = 1;
+
+      const auto [data, inc] = trim_leading_whitespaces(content);
+      std::string_view char_view = data;
+      line_counter += inc;
+
+      while (std::size(char_view) != 0)
+      {
+         const auto tok = next_token(char_view, line_counter);
+         const auto [data, inc] = trim_leading_whitespaces(char_view.substr(std::size(tok.lexeme)));
+
+         char_view = data;
+         line_counter += inc;
+         tokens.append(tok);
+      }
+
+      log.info("tokenization of file {} completed", path.c_str());
+
+      return tokens;
    }
 
-   m_log.info("tokenization of file {} completed", path.c_str());
-
-   return tokens;
-}
-
-auto lexer::next_token(const std::string_view data, std::uint32_t line_index) const -> token
-{
-   const std::uint32_t line = line_index + 1;
-   const char first = data.at(0);
-
-   if (std::isalpha(first) || first == '_')
+   auto next_token(const std::string_view data, std::uint32_t line) -> token
    {
-      return create_alphanumeric_token(data, line);
+      const char first = data.at(0);
+
+      if (std::isalpha(first) || first == '_')
+      {
+         return tokenize_alphanum(data, line);
+      }
+
+      if (is_digit(first))
+      {
+         return tokenize_numeric(data, line);
+      }
+
+      if (is_quote(first))
+      {
+         return tokenize_string(data, line);
+      }
+
+      if (is_punctuation(first))
+      {
+         return tokenize_punctuation(data, line);
+      }
+
+      if (is_braces(first))
+      {
+         return tokenize_braces(data, line);
+      }
+
+      return {.tok = to_string(token_type::invalid_char), .lexeme = {first}, .line = line};
    }
 
-   if (detail::is_digit(first))
+   auto newline_counter(const std::string_view data) -> std::uint32_t
    {
-      return create_digit_token(data, line_index);
-   }
+      std::uint32_t newline_count = 0;
+      for (char c : data)
+      {
+         if (is_newline(c))
+         {
+            ++newline_count;
+         }
+      }
 
-   if (detail::is_punctuation(first))
+      return newline_count;
+   }
+   auto trim_leading_whitespaces(const std::string_view data)
+      -> std::pair<std::string_view, std::uint32_t>
    {
-      return create_punctuation_token(data, line);
+      const std::size_t first = data.find_first_not_of(" \t\n");
+
+      return {data.substr(std::min(first, std::size(data))),
+              newline_counter(data.substr(0, first))};
    }
 
-   return {.tok = to_string(token_type::invalid_char), .lexeme = {first}, .line = line};
-}
+   // PUNCTUATION
 
-auto lexer::create_alphanumeric_token(const std::string_view data, std::uint32_t line) const
-   -> token
-{
-   const char first = data.at(0);
-
-   if (std::isalpha(first))
+   auto handle_colon(std::string_view data, std::uint32_t line) -> token
    {
-      return handle_valid_id(data, line);
+      const auto lexeme = data.substr(0, std::min(data.find_first_not_of(':'), std::size(data)));
+
+      if (std::size(lexeme) >= 2)
+      {
+         // clang-format off
+         return {
+            .tok = to_string(token_type::double_colon), 
+            .lexeme = {std::begin(lexeme), std::begin(lexeme) + 2}, 
+            .line = line
+         };
+         // clang-format on
+      }
+
+      return {.tok = to_string(token_type::colon), .lexeme = std::string{lexeme}, .line = line};
    }
 
-   return handle_alpha_leading_underscore(data, line);
-}
-
-auto lexer::handle_valid_id(const std::string_view data, std::uint32_t line) const -> token
-{
-   const auto lexeme = data | vi::take_while(detail::is_alphanum) | ranges::to<std::string>;
-
-   if (auto* it = ranges::find(keywords, lexeme); it != std::end(keywords))
+   auto tokenize_punctuation(const std::string_view data, std::uint32_t line) -> token
    {
-      return {.tok = *it, .lexeme = lexeme, .line = line};
+      // NOLINTNEXTLINE
+      assert(is_punctuation(data.at(0)) && "first character must be a punctuation symbol");
+
+      const char first = data.at(0);
+
+      if (first == grammar::period)
+      {
+         return {.tok = to_string(token_type::period), .lexeme = {first}, .line = line};
+      }
+
+      if (first == grammar::comma)
+      {
+         return {.tok = to_string(token_type::comma), .lexeme = {first}, .line = line};
+      }
+
+      if (first == grammar::semi_colon)
+      {
+         return {.tok = to_string(token_type::semi_colon), .lexeme = {first}, .line = line};
+      }
+
+      if (first == grammar::colon)
+      {
+         return handle_colon(data, line);
+      }
+
+      return {.tok = to_string(token_type::invalid_char), .lexeme{first}, .line = line};
    }
 
-   return {.tok = to_string(token_type::id), .lexeme = lexeme, .line = line};
-}
+   // STRING TOKENIZATION
 
-auto lexer::handle_alpha_leading_underscore(const std::string_view data, std::uint32_t line) const
-   -> token
-{
-   const auto lexeme = data | vi::take_while(detail::is_alphanum) | ranges::to<std::string>;
-
-   if (std::size(lexeme) == 1)
-   {
-      return {.tok = to_string(token_type::invalid_char), .lexeme = lexeme, .line = line};
-   }
-
-   return {.tok = to_string(token_type::invalid_id), .lexeme = lexeme, .line = line};
-}
-
-auto lexer::create_digit_token(const std::string_view data, std::uint32_t line_index) const -> token
-{
-   const std::uint32_t line = line_index + 1;
-   const char first = data.at(0);
-
-   if (first == '0')
-   {
-      return handle_leading_zero(data, line);
-   }
-
-   return handle_leading_nonzero(data, line);
-}
-
-auto lexer::handle_leading_zero(const std::string_view data, std::uint32_t line) const -> token
-{
-   const char first = data.at(0);
-   if (std::size(data) == 1)
-   {
-      return {.tok = to_string(token_type::integer_lit), .lexeme = {first}, .line = line};
-   }
-
-   const char second = data.at(1);
-   if (detail::is_alphanum(second))
-   {
-      return handle_continued_leading_zero(data, line);
-   }
-
-   if (second == grammar::period)
-   {
-      const auto float_token = handle_floats(data.substr(1), line);
-      // clang-format off
-      return {
-         .tok = float_token.tok, 
-         .lexeme = first + float_token.lexeme, 
-         .line = float_token.line
-      };
-      // clang-format on
-   }
-
-   return {.tok = to_string(token_type::integer_lit), .lexeme = {first}, .line = line};
-}
-auto lexer::handle_continued_leading_zero(const std::string_view data, std::uint32_t line) const
-   -> token
-{
-   const auto lexeme = data | vi::take_while(detail::is_alphanum) | ranges::to<std::string>;
-   const auto* const last = std::begin(data) + std::size(lexeme);
-
-   if (last != std::end(data) && *last == grammar::period)
-   {
-      const auto float_token = handle_floats({last, std::end(data)}, line);
-
-      return {.tok = to_string(token_type::invalid_num),
-              .lexeme = lexeme + float_token.lexeme,
-              .line = float_token.line};
-   }
-
-   return {.tok = to_string(token_type::invalid_num), .lexeme = lexeme, .line = line};
-}
-auto lexer::handle_leading_nonzero(const std::string_view data, std::uint32_t line) const -> token
-{
-   const auto lexeme = data | vi::take_while(detail::is_digit) | ranges::to<std::string>;
-   const auto* const last = std::begin(data) + std::size(lexeme);
-
-   if (last == std::end(data))
-   {
-      return {.tok = to_string(token_type::integer_lit), .lexeme = lexeme, .line = line};
-   }
-
-   if (detail::is_alphanum(*last))
+   auto handle_terminated_string(const std::string_view data, std::uint32_t line) -> token
    {
       // clang-format off
-      const auto error_lex = data 
-         | vi::take_while([](char c) { return detail::is_digit(c) || detail::is_alphanum(c); }) 
+      const auto lexeme = data 
+         | vi::take_while([](char c) { return is_alphanum(c) || (c == ' '); }) 
          | ranges::to<std::string>;
       // clang-format on
 
-      return {.tok = to_string(token_type::invalid_num), .lexeme = error_lex, .line = line};
-      // handle error
-   }
-
-   if (*last == grammar::period)
-   {
-      auto float_token = handle_floats(data.substr(std::size(lexeme)), line);
-
-      // clang-format off
-      return {
-         .tok = float_token.tok, 
-         .lexeme = lexeme + float_token.lexeme, 
-         .line = float_token.line
-      };
-      // clang-format on
-   }
-
-   return {.tok = to_string(token_type::integer_lit), .lexeme = lexeme, .line = line};
-}
-
-auto lexer::handle_floats(const std::string_view data, std::uint32_t line) const -> token
-{
-   const char period = *std::begin(data);
-   const auto* const first = std::begin(data) + 1;
-
-   if (std::size(data) == 1) // if nothing after period
-   {
-      return {.tok = to_string(token_type::invalid_num), .lexeme = {period}, .line = line};
-   }
-
-   if (*first == '0')
-   {
-      return handle_float_zero(data.substr(1), line);
-   }
-
-   if (detail::is_digit(*first))
-   {
-      return handle_float_nonzero(data.substr(1), line);
-   }
-
-   return {.tok = to_string(token_type::invalid_num), .lexeme = {period}, .line = line};
-}
-auto lexer::handle_float_zero(const std::string_view data, std::uint32_t line) const -> token
-{
-   if (std::size(data) == 1) // only 0
-   {
-      return {.tok = to_string(token_type::float_lit), .lexeme = ".0", .line = line};
-   }
-
-   const char first = *(std::begin(data) + 1);
-   if (detail::is_digit(first))
-   {
-      return handle_float_nonzero(data, line);
-   }
-
-   if (std::isalpha(first))
-   {
-      const auto lexeme = data | vi::take_while(detail::is_alphanum) | ranges::to<std::string>;
-
-      return {.tok = to_string(token_type::invalid_num), .lexeme = "." + lexeme, .line = line};
-   }
-
-   return {.tok = to_string(token_type::float_lit), .lexeme = ".0", .line = line};
-}
-auto lexer::handle_float_nonzero(const std::string_view data, std::uint32_t line) const -> token
-{
-   const auto lexeme = data | vi::take_while(detail::is_digit) | ranges::to<std::string>;
-   const auto* end = std::begin(data) + std::size(lexeme);
-
-   if (end == std::end(data)) // end of token
-   {
-      const auto* last = std::begin(data) + std::size(lexeme) - 1;
-      if (*last == '0')
+      if (std::size(lexeme) == std::size(data))
       {
-         return {.tok = to_string(token_type::invalid_num), .lexeme = "." + lexeme, .line = line};
+         return {.tok = to_string(token_type::string_lit),
+                 .lexeme = '\"' + std::string{data} + '\"',
+                 .line = line};
       }
 
-      return {.tok = to_string(token_type::float_lit), .lexeme = "." + lexeme, .line = line};
+      return {.tok = to_string(token_type::invalid_str),
+              .lexeme = '\"' + std::string{data} + '\"',
+              .line = line};
    }
 
-   if (std::isalpha(*end))
+   auto tokenize_string(const std::string_view data, std::uint32_t line) -> token
    {
-      const std::string_view leftovers = {end, std::end(data)};
-      const auto extra = leftovers | vi::take_while(detail::is_alphanum) | ranges::to<std::string>;
+      // NOLINTNEXTLINE
+      assert(data.at(0) == '\"' && "first character must be a quotation mark (\")");
 
-      // clang-format off
-      return {
-         .tok = to_string(token_type::invalid_num), 
-         .lexeme = "." + lexeme + extra, 
-         .line = line
-      };
-      // clang-format on
+      const auto next_newline = data.substr(1).find_first_of('\n');
+      const auto next_quotation_mark = data.substr(1).find_first_of('\"');
+
+      if (next_newline >= next_quotation_mark && next_quotation_mark != std::string_view::npos)
+      {
+         return handle_terminated_string(data.substr(1, next_quotation_mark), line);
+      }
+
+      return {.tok = to_string(token_type::invalid_str),
+              .lexeme = std::string{data.substr(0, next_newline + 1)},
+              .line = line};
    }
 
-   return {.tok = to_string(token_type::float_lit), .lexeme = "." + lexeme, .line = line};
-}
+   // BRACES
 
-auto lexer::create_punctuation_token(const std::string_view data, std::uint32_t line) const -> token
-{
-   const char first = data.at(0);
-
-   if (first == grammar::period)
+   auto tokenize_braces(const std::string_view data, std::uint32_t line) -> token
    {
-      return {.tok = to_string(token_type::period), .lexeme = {first}, .line = line};
+      // NOLINTNEXTLINE
+      assert(is_braces(data.at(0)) && "first character must be a brace");
+
+      const char lexeme = data.at(0);
+
+      if (lexeme == grammar::open_curly)
+      {
+         return {.tok = to_string(token_type::open_curly), .lexeme = {lexeme}, .line = line};
+      }
+      if (lexeme == grammar::close_curly)
+      {
+         return {.tok = to_string(token_type::close_curly), .lexeme = {lexeme}, .line = line};
+      }
+      if (lexeme == grammar::open_square)
+      {
+         return {.tok = to_string(token_type::open_square), .lexeme = {lexeme}, .line = line};
+      }
+      if (lexeme == grammar::close_square)
+      {
+         return {.tok = to_string(token_type::close_square), .lexeme = {lexeme}, .line = line};
+      }
+      if (lexeme == grammar::open_parenth)
+      {
+         return {.tok = to_string(token_type::open_parenth), .lexeme = {lexeme}, .line = line};
+      }
+      if (lexeme == grammar::close_parenth)
+      {
+         return {.tok = to_string(token_type::close_parenth), .lexeme = {lexeme}, .line = line};
+      }
+
+      return {.tok = to_string(token_type::invalid_char), .lexeme = {lexeme}, .line = line};
    }
 
-   if (first == grammar::comma)
-   {
-      return {.tok = to_string(token_type::comma), .lexeme = {first}, .line = line};
-   }
-
-   if (first == grammar::semi_colon)
-   {
-      return {.tok = to_string(token_type::semi_colon), .lexeme = {first}, .line = line};
-   }
-
-   if (first == grammar::colon)
-   {
-      return handle_colon(data, line);
-   }
-
-   return {};
-}
-auto lexer::handle_colon(std::string_view data, std::uint32_t line) const -> token
-{
-   const auto lexeme = data.substr(0, std::min(data.find_first_not_of(':'), std::size(data)));
-
-   if (std::size(lexeme) >= 2)
-   {
-      // clang-format off
-      return {
-         .tok = to_string(token_type::double_colon), 
-         .lexeme = {std::begin(lexeme), std::begin(lexeme) + 2}, 
-         .line = line
-      };
-      // clang-format on
-   }
-
-   return {.tok = to_string(token_type::colon), .lexeme = std::string{lexeme}, .line = line};
-}
-
-auto lexer::trim_leading_whitespaces(const std::string_view data) const -> std::string_view
-{
-   return data.substr(std::min(data.find_first_not_of(" \t"), std::size(data)));
-}
+} // namespace lex

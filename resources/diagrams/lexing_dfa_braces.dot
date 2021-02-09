@@ -1,0 +1,23 @@
+digraph dfa {
+  "" [shape=none]
+  "1" [shape=circle]
+
+  "20" [shape=doublecircle, label="OPEN_CURLY", color=red]
+  "21" [shape=doublecircle, label="CLOSE_CURLY", color=red]
+  "22" [shape=doublecircle, label="OPEN_SQUARE", color=red]
+  "23" [shape=doublecircle, label="CLOSE_SQUARE", color=red]
+  "24" [shape=doublecircle, label="OPEN_PAR", color=red]
+  "25" [shape=doublecircle, label="CLOSE_PAR", color=red]
+
+  "40" [shape=doublecircle, label="ERR", color=red, style=filled]
+
+  "1" -> "1" [label="space"]
+  "1" -> "40"
+
+  "1" -> "20" [label="{"]
+  "1" -> "21" [label="}"]
+  "1" -> "22" [label="["]
+  "1" -> "23" [label="]"]
+  "1" -> "24" [label="("]
+  "1" -> "25" [label=")"]
+}

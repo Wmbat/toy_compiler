@@ -20,4 +20,4 @@ C++ executable
 
 ## TODO
 
-* [ ] Transition from hand-written scanner to table driven scanner
+* [ ] Instead of loading the whole file, load file into chunks
