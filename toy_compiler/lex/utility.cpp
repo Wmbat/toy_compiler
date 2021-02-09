@@ -16,6 +16,7 @@ namespace lex
 
    auto is_alphabet(char c) noexcept -> bool { return std::isalpha(c); }
    auto is_alphanum(char c) noexcept -> bool { return std::isalnum(c) || c == '_'; }
+   auto is_slash(char c) noexcept -> bool { return c == '/'; }
    auto is_quote(char c) noexcept -> bool { return c == '\"'; }
    auto is_digit(char c) noexcept -> bool { return std::isdigit(c); }
    auto is_punctuation(char c) noexcept -> bool

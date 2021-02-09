@@ -74,6 +74,11 @@ namespace lex
          return tokenize_string(data, line);
       }
 
+      if (is_slash(first))
+      {
+         return tokenize_comments(data, line);
+      }
+
       if (is_punctuation(first))
       {
          return tokenize_punctuation(data, line);
@@ -236,4 +241,48 @@ namespace lex
       return {.tok = to_string(token_type::invalid_char), .lexeme = {lexeme}, .line = line};
    }
 
+   // COMMENTS
+
+   auto tokenize_comments(const std::string_view data, std::uint32_t line) -> token
+   {
+      // NOLINTNEXTLINE
+      assert(std::size(data) != 0 && "Cannot pass empty data");
+      // NOLINTNEXTLINE
+      assert(is_slash(data.at(0)) && "first character must be a backslash");
+
+      if (std::size(data) > 1)
+      {
+         const char second = data.at(1);
+         if (is_slash(second))
+         {
+            const auto lexeme = data.substr(0, data.find_first_of('\n'));
+
+            return {.tok = to_string(token_type::line_comment),
+                    .lexeme = std::string{lexeme},
+                    .line = line};
+         }
+
+         if (second == '*')
+         {
+            const auto pos = data.find("*/");
+            if (pos != std::string_view::npos)
+            {
+               return {.tok = to_string(token_type::block_comment),
+                       .lexeme = std::string{data.substr(0, pos + 2)},
+                       .line = line};
+            }
+
+            return {.tok = to_string(token_type::invalid_cmt),
+                    .lexeme = std::string{data},
+                    .line = line};
+         }
+
+         return {.tok = to_string(token_type::invalid_char), .lexeme = {data.at(0)}, .line = line};
+      }
+      return {.tok = to_string(token_type::invalid_char), .lexeme = {data.at(0)}, .line = line};
+   }
+
+   // OPERATORS
+
+   auto tokenize_operator(const std::string_view data, std::uint32_t line) -> token {}
 } // namespace lex

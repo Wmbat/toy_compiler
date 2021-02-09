@@ -32,10 +32,6 @@ namespace lex
       integer_lit,
       float_lit,
       string_lit,
-      invalid_char,
-      invalid_id,
-      invalid_num,
-      invalid_str,
       period,
       comma,
       colon,
@@ -46,14 +42,28 @@ namespace lex
       open_square,
       close_square,
       open_parenth,
-      close_parenth
+      close_parenth,
+      line_comment,
+      block_comment,
+      invalid_char,
+      invalid_id,
+      invalid_num,
+      invalid_str,
+      invalid_cmt
    };
 
-   constexpr std::array token_names{
-      "none",         "id",          "integer_lit",  "float_lit",       "str_lit",
-      "invalid_char", "invalid_id",  "invalid_num",  "invalid_str_lit", "period",
-      "comma",        "colon",       "double_colon", "semi_colon",      "open_curly",
-      "close_curly",  "open_square", "close_square", "open_parenth",    "close_parenth"};
+   constexpr std::array token_names{"none",         "id",
+                                    "integer_lit",  "float_lit",
+                                    "str_lit",      "period",
+                                    "comma",        "colon",
+                                    "double_colon", "semi_colon",
+                                    "open_curly",   "close_curly",
+                                    "open_square",  "close_square",
+                                    "open_parenth", "close_parenth",
+                                    "line_cmt",     "block_cmt",
+                                    "invalid_char", "invalid_id",
+                                    "invalid_num",  "invalid_str_lit",
+                                    "invalid_cmt"};
 
    constexpr auto to_string(token_type type) -> std::string_view
    {

@@ -1,0 +1,7 @@
+// This as a valid single line comment wishta 95741 ACGLRP"L){
+/* this s a valid block comment */
+/*
+this is a multiline block comment
+
+*/
+/* this is another test */

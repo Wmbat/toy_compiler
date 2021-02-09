@@ -20,4 +20,5 @@ namespace lex
    auto tokenize_numeric(const std::string_view data, std::uint32_t line) -> token;
    auto tokenize_punctuation(const std::string_view data, std::uint32_t line) -> token;
    auto tokenize_string(const std::string_view data, std::uint32_t line) -> token;
+   auto tokenize_operator(const std::string_view data, std::uint32_t line) -> token;
 } // namespace lex

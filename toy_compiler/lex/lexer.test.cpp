@@ -317,6 +317,31 @@ TEST_SUITE("Lexer test suite")
       CHECK(*(std::begin(data) + 5) ==
             lex::token{.tok = to_string(lex::token_type::close_square), .lexeme = "]", .line = 1});
    }
+   TEST_CASE("comment test")
+   {
+      SUBCASE("valid")
+      {
+         auto maybe = lex::tokenize_file("test_files/comment_valid.txt");
+         REQUIRE(maybe);
+
+         const auto data = maybe.value();
+
+         CHECK((std::begin(data) + 0)->tok == lex::to_string(lex::token_type::line_comment));
+         CHECK((std::begin(data) + 1)->tok == lex::to_string(lex::token_type::block_comment));
+         CHECK((std::begin(data) + 2)->tok == lex::to_string(lex::token_type::block_comment));
+         CHECK((std::begin(data) + 3)->tok == lex::to_string(lex::token_type::block_comment));
+         CHECK((std::begin(data) + 3)->line == 4);
+      }
+      SUBCASE("invalid")
+      {
+         auto maybe = lex::tokenize_file("test_files/comment_invalid.txt");
+         REQUIRE(maybe);
+
+         const auto data = maybe.value();
+
+         CHECK(std::begin(data)->tok == lex::to_string(lex::token_type::invalid_cmt));
+      }
+   }
    TEST_CASE("invalid characters")
    {
       auto maybe = lex::tokenize_file("test_files/chars_invalid.txt");

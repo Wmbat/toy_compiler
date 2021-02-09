@@ -7,6 +7,7 @@ namespace lex
    auto is_alphabet(char c) noexcept -> bool;
    auto is_alphanum(char c) noexcept -> bool;
    auto is_digit(char c) noexcept -> bool;
+   auto is_slash(char c) noexcept -> bool;
    auto is_quote(char c) noexcept -> bool;
    auto is_punctuation(char c) noexcept -> bool;
    auto is_braces(char c) noexcept -> bool;
