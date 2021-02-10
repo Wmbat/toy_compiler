@@ -32,12 +32,12 @@ namespace lex
    {
       const auto lexeme = data | vi::take_while(is_alphanum) | ranges::to<std::string>;
 
-      if (auto* it = ranges::find(keywords, lexeme); it != std::end(keywords))
+      if (const auto* it = ranges::find(keywords, lexeme); it != std::end(keywords))
       {
-         return {.tok = *it, .lexeme = lexeme, .line = line};
+         return {.type = *it, .lexeme = lexeme, .line = line};
       }
 
-      return {.tok = to_string(token_type::id), .lexeme = lexeme, .line = line};
+      return {.type = to_string_view(token_type::id), .lexeme = lexeme, .line = line};
    }
    auto handle_leading_underscore(const std::string_view data, std::uint32_t line) -> token
    {
@@ -45,9 +45,9 @@ namespace lex
 
       if (std::size(lexeme) == 1)
       {
-         return {.tok = to_string(token_type::invalid_char), .lexeme = lexeme, .line = line};
+         return {.type = to_string_view(token_type::invalid_char), .lexeme = lexeme, .line = line};
       }
 
-      return {.tok = to_string(token_type::invalid_id), .lexeme = lexeme, .line = line};
+      return {.type = to_string_view(token_type::invalid_id), .lexeme = lexeme, .line = line};
    }
 } // namespace lex

@@ -2,6 +2,8 @@
 
 #include <toy_compiler/lex/utility.hpp>
 
+#include <range/v3/algorithm/count.hpp>
+#include <range/v3/algorithm/replace.hpp>
 #include <range/v3/range/conversion.hpp>
 #include <range/v3/view/take_while.hpp>
 
@@ -16,6 +18,29 @@ namespace lex
    auto next_token(const std::string_view data, std::uint32_t line) -> token;
    auto trim_leading_whitespaces(const std::string_view data)
       -> std::pair<std::string_view, std::uint32_t>;
+   auto check_for_newlines(const lex::token& tok) -> std::uint32_t
+   {
+      if (tok.type == to_string_view(token_type::block_cmt))
+      {
+         return static_cast<std::uint32_t>(ranges::count(tok.lexeme, '\n'));
+      }
+
+      return 0;
+   }
+   auto fix_comment_strings(const lex::token& tok) -> std::string
+   {
+      if (tok.type == to_string_view(token_type::block_cmt))
+      {
+         return to_literal(tok.lexeme);
+      }
+
+      if (tok.type == to_string_view(token_type::line_cmt))
+      {
+         return to_literal(tok.lexeme);
+      }
+
+      return tok.lexeme;
+   }
 
    auto tokenize_file(const fs::path& path, util::logger_wrapper log)
       -> monad::maybe<crl::dynamic_array<token>>
@@ -42,11 +67,15 @@ namespace lex
 
       while (std::size(char_view) != 0)
       {
-         const auto tok = next_token(char_view, line_counter);
+         auto tok = next_token(char_view, line_counter);
          const auto [data, inc] = trim_leading_whitespaces(char_view.substr(std::size(tok.lexeme)));
+         const auto extra = check_for_newlines(tok);
+
+         tok.lexeme = fix_comment_strings(tok);
 
          char_view = data;
-         line_counter += inc;
+         line_counter += inc + extra;
+
          tokens.append(tok);
       }
 
@@ -58,6 +87,11 @@ namespace lex
    auto next_token(const std::string_view data, std::uint32_t line) -> token
    {
       const char first = data.at(0);
+
+      if (std::size(data) >= 2 && is_comment(data.substr(0, 2)))
+      {
+         return tokenize_comments(data, line);
+      }
 
       if (std::isalpha(first) || first == '_')
       {
@@ -74,11 +108,6 @@ namespace lex
          return tokenize_string(data, line);
       }
 
-      if (is_slash(first))
-      {
-         return tokenize_comments(data, line);
-      }
-
       if (is_punctuation(first))
       {
          return tokenize_punctuation(data, line);
@@ -89,7 +118,12 @@ namespace lex
          return tokenize_braces(data, line);
       }
 
-      return {.tok = to_string(token_type::invalid_char), .lexeme = {first}, .line = line};
+      if (is_operator(first))
+      {
+         return tokenize_operator(data, line);
+      }
+
+      return {.type = to_string_view(token_type::invalid_char), .lexeme = {first}, .line = line};
    }
 
    auto newline_counter(const std::string_view data) -> std::uint32_t
@@ -108,7 +142,7 @@ namespace lex
    auto trim_leading_whitespaces(const std::string_view data)
       -> std::pair<std::string_view, std::uint32_t>
    {
-      const std::size_t first = data.find_first_not_of(" \t\n");
+      const std::size_t first = data.find_first_not_of(" \n\f\r\t\v");
 
       return {data.substr(std::min(first, std::size(data))),
               newline_counter(data.substr(0, first))};
@@ -124,14 +158,15 @@ namespace lex
       {
          // clang-format off
          return {
-            .tok = to_string(token_type::double_colon), 
+            .type = to_string_view(token_type::double_colon), 
             .lexeme = {std::begin(lexeme), std::begin(lexeme) + 2}, 
             .line = line
          };
          // clang-format on
       }
 
-      return {.tok = to_string(token_type::colon), .lexeme = std::string{lexeme}, .line = line};
+      return {
+         .type = to_string_view(token_type::colon), .lexeme = std::string{lexeme}, .line = line};
    }
 
    auto tokenize_punctuation(const std::string_view data, std::uint32_t line) -> token
@@ -143,17 +178,17 @@ namespace lex
 
       if (first == grammar::period)
       {
-         return {.tok = to_string(token_type::period), .lexeme = {first}, .line = line};
+         return {.type = to_string_view(token_type::period), .lexeme = {first}, .line = line};
       }
 
       if (first == grammar::comma)
       {
-         return {.tok = to_string(token_type::comma), .lexeme = {first}, .line = line};
+         return {.type = to_string_view(token_type::comma), .lexeme = {first}, .line = line};
       }
 
       if (first == grammar::semi_colon)
       {
-         return {.tok = to_string(token_type::semi_colon), .lexeme = {first}, .line = line};
+         return {.type = to_string_view(token_type::semi_colon), .lexeme = {first}, .line = line};
       }
 
       if (first == grammar::colon)
@@ -161,7 +196,7 @@ namespace lex
          return handle_colon(data, line);
       }
 
-      return {.tok = to_string(token_type::invalid_char), .lexeme{first}, .line = line};
+      return {.type = to_string_view(token_type::invalid_char), .lexeme{first}, .line = line};
    }
 
    // STRING TOKENIZATION
@@ -176,12 +211,12 @@ namespace lex
 
       if (std::size(lexeme) == std::size(data))
       {
-         return {.tok = to_string(token_type::string_lit),
+         return {.type = to_string_view(token_type::str_lit),
                  .lexeme = '\"' + std::string{data} + '\"',
                  .line = line};
       }
 
-      return {.tok = to_string(token_type::invalid_str),
+      return {.type = to_string_view(token_type::invalid_str),
               .lexeme = '\"' + std::string{data} + '\"',
               .line = line};
    }
@@ -199,7 +234,7 @@ namespace lex
          return handle_terminated_string(data.substr(1, next_quotation_mark), line);
       }
 
-      return {.tok = to_string(token_type::invalid_str),
+      return {.type = to_string_view(token_type::invalid_str),
               .lexeme = std::string{data.substr(0, next_newline + 1)},
               .line = line};
    }
@@ -215,30 +250,33 @@ namespace lex
 
       if (lexeme == grammar::open_curly)
       {
-         return {.tok = to_string(token_type::open_curly), .lexeme = {lexeme}, .line = line};
+         return {.type = to_string_view(token_type::open_curly), .lexeme = {lexeme}, .line = line};
       }
       if (lexeme == grammar::close_curly)
       {
-         return {.tok = to_string(token_type::close_curly), .lexeme = {lexeme}, .line = line};
+         return {.type = to_string_view(token_type::close_curly), .lexeme = {lexeme}, .line = line};
       }
       if (lexeme == grammar::open_square)
       {
-         return {.tok = to_string(token_type::open_square), .lexeme = {lexeme}, .line = line};
+         return {.type = to_string_view(token_type::open_square), .lexeme = {lexeme}, .line = line};
       }
       if (lexeme == grammar::close_square)
       {
-         return {.tok = to_string(token_type::close_square), .lexeme = {lexeme}, .line = line};
+         return {
+            .type = to_string_view(token_type::close_square), .lexeme = {lexeme}, .line = line};
       }
       if (lexeme == grammar::open_parenth)
       {
-         return {.tok = to_string(token_type::open_parenth), .lexeme = {lexeme}, .line = line};
+         return {
+            .type = to_string_view(token_type::open_parenth), .lexeme = {lexeme}, .line = line};
       }
       if (lexeme == grammar::close_parenth)
       {
-         return {.tok = to_string(token_type::close_parenth), .lexeme = {lexeme}, .line = line};
+         return {
+            .type = to_string_view(token_type::close_parenth), .lexeme = {lexeme}, .line = line};
       }
 
-      return {.tok = to_string(token_type::invalid_char), .lexeme = {lexeme}, .line = line};
+      return {.type = to_string_view(token_type::invalid_char), .lexeme = {lexeme}, .line = line};
    }
 
    // COMMENTS
@@ -246,43 +284,131 @@ namespace lex
    auto tokenize_comments(const std::string_view data, std::uint32_t line) -> token
    {
       // NOLINTNEXTLINE
-      assert(std::size(data) != 0 && "Cannot pass empty data");
+      assert(std::size(data) >= 0 && "Cannot pass empty data");
       // NOLINTNEXTLINE
-      assert(is_slash(data.at(0)) && "first character must be a backslash");
+      assert(is_comment(data.substr(0, 2)));
 
-      if (std::size(data) > 1)
+      const auto start = data.substr(0, 2);
+      if (start == "/*")
       {
-         const char second = data.at(1);
-         if (is_slash(second))
+         const auto pos = data.find("*/");
+         if (pos != std::string_view::npos)
          {
-            const auto lexeme = data.substr(0, data.find_first_of('\n'));
-
-            return {.tok = to_string(token_type::line_comment),
-                    .lexeme = std::string{lexeme},
+            return {.type = to_string_view(token_type::block_cmt),
+                    .lexeme = std::string{data.substr(0, pos + 2)},
                     .line = line};
          }
 
-         if (second == '*')
-         {
-            const auto pos = data.find("*/");
-            if (pos != std::string_view::npos)
-            {
-               return {.tok = to_string(token_type::block_comment),
-                       .lexeme = std::string{data.substr(0, pos + 2)},
-                       .line = line};
-            }
-
-            return {.tok = to_string(token_type::invalid_cmt),
-                    .lexeme = std::string{data},
-                    .line = line};
-         }
-
-         return {.tok = to_string(token_type::invalid_char), .lexeme = {data.at(0)}, .line = line};
+         return {.type = to_string_view(token_type::invalid_cmt),
+                 .lexeme = std::string{data},
+                 .line = line};
       }
-      return {.tok = to_string(token_type::invalid_char), .lexeme = {data.at(0)}, .line = line};
+
+      return {.type = to_string_view(token_type::line_cmt),
+              .lexeme = std::string{data.substr(0, data.find_first_of('\n'))},
+              .line = line};
    }
 
    // OPERATORS
 
-   auto tokenize_operator(const std::string_view data, std::uint32_t line) -> token {}
+   auto handle_leading_less_than(const std::string_view data, std::uint32_t line) -> token
+   {
+      if (std::size(data) > 1)
+      {
+         if (data.at(1) == '=')
+         {
+            return {.type = to_string_view(token_type::less_equal_than),
+                    .lexeme = std::string{data.substr(0, 2)},
+                    .line = line};
+         }
+
+         if (data.at(1) == '>')
+         {
+            return {.type = to_string_view(token_type::not_equal),
+                    .lexeme = std::string{data.substr(0, 2)},
+                    .line = line};
+         }
+      }
+
+      return {.type = to_string_view(token_type::less_than), .lexeme = {data.at(0)}, .line = line};
+   }
+   auto handle_leading_greater_than(const std::string_view data, std::uint32_t line) -> token
+   {
+      if (std::size(data) > 1 && data.at(1) == '=')
+      {
+         return {.type = to_string_view(token_type::greater_equal_than),
+                 .lexeme = std::string{data.substr(0, 2)},
+                 .line = line};
+      }
+
+      return {
+         .type = to_string_view(token_type::greater_than), .lexeme = {data.at(0)}, .line = line};
+   }
+   auto handle_leading_equal(const std::string_view data, std::uint32_t line) -> token
+   {
+      if (std::size(data) > 1 && data.at(1) == '=')
+      {
+         return {.type = to_string_view(token_type::double_equal),
+                 .lexeme = std::string{data.substr(0, 2)},
+                 .line = line};
+      }
+
+      return {.type = to_string_view(token_type::equal), .lexeme = {data.at(0)}, .line = line};
+   }
+
+   auto tokenize_operator(const std::string_view data, std::uint32_t line) -> token
+   {
+      const auto first = data.at(0);
+      if (first == '+')
+      {
+         return {.type = to_string_view(token_type::add), .lexeme = {first}, .line = line};
+      }
+
+      if (first == '-')
+      {
+         return {.type = to_string_view(token_type::sub), .lexeme = {first}, .line = line};
+      }
+
+      if (first == '*')
+      {
+         return {.type = to_string_view(token_type::mult), .lexeme = {first}, .line = line};
+      }
+
+      if (first == '/')
+      {
+         return {.type = to_string_view(token_type::div), .lexeme = {first}, .line = line};
+      }
+
+      if (first == '|')
+      {
+         return {.type = to_string_view(token_type::or_op), .lexeme = {first}, .line = line};
+      }
+
+      if (first == '&')
+      {
+         return {.type = to_string_view(token_type::and_op), .lexeme = {first}, .line = line};
+      }
+
+      if (first == '!')
+      {
+         return {.type = to_string_view(token_type::not_op), .lexeme = {first}, .line = line};
+      }
+
+      if (first == '?')
+      {
+         return {.type = to_string_view(token_type::qmark), .lexeme = {first}, .line = line};
+      }
+
+      if (first == '<')
+      {
+         return handle_leading_less_than(data, line);
+      }
+
+      if (first == '>')
+      {
+         return handle_leading_greater_than(data, line);
+      }
+
+      return handle_leading_equal(data, line);
+   }
 } // namespace lex

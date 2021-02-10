@@ -1,3 +1,0 @@
-"this is an {} invalid string literal"
-"here is a non terminated string literal
-"some more invalid chars: \n[]-.$*13"

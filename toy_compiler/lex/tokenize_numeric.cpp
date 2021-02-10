@@ -35,7 +35,7 @@ namespace lex
       const char first = data.at(0);
       if (std::size(data) == 1)
       {
-         return {.tok = to_string(token_type::integer_lit), .lexeme = {first}, .line = line};
+         return {.type = to_string_view(token_type::integer_lit), .lexeme = {first}, .line = line};
       }
 
       const char second = data.at(1);
@@ -48,12 +48,12 @@ namespace lex
          {
             const auto float_token = handle_fraction({last, std::end(data)}, line);
 
-            return {.tok = to_string(token_type::invalid_num),
+            return {.type = to_string_view(token_type::invalid_num),
                     .lexeme = lexeme + float_token.lexeme,
                     .line = float_token.line};
          }
 
-         return {.tok = to_string(token_type::invalid_num), .lexeme = lexeme, .line = line};
+         return {.type = to_string_view(token_type::invalid_num), .lexeme = lexeme, .line = line};
       }
 
       if (second == grammar::period)
@@ -61,14 +61,14 @@ namespace lex
          const auto float_token = handle_fraction(data.substr(1), line);
          // clang-format off
          return {
-            .tok = float_token.tok, 
+            .type = float_token.type, 
             .lexeme = first + float_token.lexeme, 
             .line = float_token.line
          };
          // clang-format on
       }
 
-      return {.tok = to_string(token_type::integer_lit), .lexeme = {first}, .line = line};
+      return {.type = to_string_view(token_type::integer_lit), .lexeme = {first}, .line = line};
    }
    auto handle_leading_nonzero(const std::string_view data, std::uint32_t line) -> token
    {
@@ -77,7 +77,7 @@ namespace lex
 
       if (last == std::end(data))
       {
-         return {.tok = to_string(token_type::integer_lit), .lexeme = lexeme, .line = line};
+         return {.type = to_string_view(token_type::integer_lit), .lexeme = lexeme, .line = line};
       }
 
       if (is_alphanum(*last))
@@ -88,24 +88,19 @@ namespace lex
             | ranges::to<std::string>;
          // clang-format on
 
-         return {.tok = to_string(token_type::invalid_num), .lexeme = error_lex, .line = line};
-         // handle error
+         return {.type = to_string_view(token_type::invalid_num), .lexeme = error_lex, .line = line};
       }
 
       if (*last == grammar::period)
       {
          auto float_token = handle_fraction(data.substr(std::size(lexeme)), line);
 
-         // clang-format off
-         return {
-            .tok = float_token.tok, 
-            .lexeme = lexeme + float_token.lexeme, 
-            .line = float_token.line
-         };
-         // clang-format on
+         return {.type = float_token.type,
+                 .lexeme = lexeme + float_token.lexeme,
+                 .line = float_token.line};
       }
 
-      return {.tok = to_string(token_type::integer_lit), .lexeme = lexeme, .line = line};
+      return {.type = to_string_view(token_type::integer_lit), .lexeme = lexeme, .line = line};
    }
    auto handle_fraction(const std::string_view data, std::uint32_t line) -> token
    {
@@ -114,7 +109,7 @@ namespace lex
 
       if (std::size(data) == 1) // if nothing after period
       {
-         return {.tok = to_string(token_type::invalid_num), .lexeme = {period}, .line = line};
+         return {.type = to_string_view(token_type::invalid_num), .lexeme = {period}, .line = line};
       }
 
       if (*first == '0')
@@ -127,13 +122,13 @@ namespace lex
          return handle_fraction_nonzero(data.substr(1), line);
       }
 
-      return {.tok = to_string(token_type::invalid_num), .lexeme = {period}, .line = line};
+      return {.type = to_string_view(token_type::invalid_num), .lexeme = {period}, .line = line};
    }
    auto handle_fraction_leading_zero(const std::string_view data, std::uint32_t line) -> token
    {
       if (std::size(data) == 1) // only 0
       {
-         return {.tok = to_string(token_type::float_lit), .lexeme = ".0", .line = line};
+         return {.type = to_string_view(token_type::float_lit), .lexeme = ".0", .line = line};
       }
 
       const char first = *(std::begin(data) + 1);
@@ -146,10 +141,10 @@ namespace lex
       {
          const auto lexeme = data | vi::take_while(is_alphanum) | ranges::to<std::string>;
 
-         return {.tok = to_string(token_type::invalid_num), .lexeme = "." + lexeme, .line = line};
+         return {.type = to_string_view(token_type::invalid_num), .lexeme = "." + lexeme, .line = line};
       }
 
-      return {.tok = to_string(token_type::float_lit), .lexeme = ".0", .line = line};
+      return {.type = to_string_view(token_type::float_lit), .lexeme = ".0", .line = line};
    }
    auto handle_fraction_nonzero(const std::string_view data, std::uint32_t line) -> token
    {
@@ -161,7 +156,7 @@ namespace lex
          const std::string_view leftovers = {lexeme_end, std::end(data)};
          const auto extra = leftovers | vi::take_while(is_alphanum) | ranges::to<std::string>;
 
-         return {.tok = to_string(token_type::invalid_num),
+         return {.type = to_string_view(token_type::invalid_num),
                  .lexeme = "." + lexeme + extra,
                  .line = line};
       }
@@ -169,9 +164,9 @@ namespace lex
       const auto last = std::end(lexeme) - 1;
       if (*last == '0')
       {
-         return {.tok = to_string(token_type::invalid_num), .lexeme = "." + lexeme, .line = line};
+         return {.type = to_string_view(token_type::invalid_num), .lexeme = "." + lexeme, .line = line};
       }
 
-      return {.tok = to_string(token_type::float_lit), .lexeme = "." + lexeme, .line = line};
+      return {.type = to_string_view(token_type::float_lit), .lexeme = "." + lexeme, .line = line};
    }
 } // namespace lex

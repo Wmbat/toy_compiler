@@ -31,20 +31,35 @@ namespace lex
       id,
       integer_lit,
       float_lit,
-      string_lit,
+      str_lit,
       period,
       comma,
       colon,
       double_colon,
       semi_colon,
+      add,
+      sub,
+      mult,
+      div,
+      equal,
+      or_op,
+      and_op,
+      not_op,
+      qmark,
+      double_equal,
+      less_than,
+      less_equal_than,
+      greater_than,
+      greater_equal_than,
+      not_equal,
       open_curly,
       close_curly,
       open_square,
       close_square,
       open_parenth,
       close_parenth,
-      line_comment,
-      block_comment,
+      line_cmt,
+      block_cmt,
       invalid_char,
       invalid_id,
       invalid_num,
@@ -52,20 +67,27 @@ namespace lex
       invalid_cmt
    };
 
-   constexpr std::array token_names{"none",         "id",
-                                    "integer_lit",  "float_lit",
-                                    "str_lit",      "period",
-                                    "comma",        "colon",
-                                    "double_colon", "semi_colon",
-                                    "open_curly",   "close_curly",
-                                    "open_square",  "close_square",
-                                    "open_parenth", "close_parenth",
-                                    "line_cmt",     "block_cmt",
-                                    "invalid_char", "invalid_id",
-                                    "invalid_num",  "invalid_str_lit",
-                                    "invalid_cmt"};
+   constexpr std::array token_names{"none",          "id",
+                                    "integer_lit",   "float_lit",
+                                    "str_lit",       "period",
+                                    "comma",         "colon",
+                                    "double_colon",  "semi_colon",
+                                    "add",           "sub",
+                                    "mult",          "div",
+                                    "equal",         "or",
+                                    "and",           "not",
+                                    "qmark",         "double_equal",
+                                    "less_than",     "less_equal_than",
+                                    "greater_than",  "greater_equal_than",
+                                    "not_equal",     "open_curly",
+                                    "close_curly",   "open_square",
+                                    "close_square",  "open_parenth",
+                                    "close_parenth", "line_cmt",
+                                    "block_cmt",     "invalid_char",
+                                    "invalid_id",    "invalid_num",
+                                    "invalid_str",   "invalid_cmt"};
 
-   constexpr auto to_string(token_type type) -> std::string_view
+   constexpr auto to_string_view(token_type type) -> std::string_view
    {
       return token_names.at(static_cast<std::uint32_t>(type));
    }
@@ -77,9 +99,9 @@ namespace lex
 
    struct token
    {
-      std::string_view tok{}; // NOLINT
-      std::string lexeme{};   // NOLINT
-      std::uint32_t line{};   // NOLINT
+      std::string_view type{}; // NOLINT
+      std::string lexeme{};    // NOLINT
+      std::uint32_t line{};    // NOLINT
 
       auto operator<=>(const token& other) const -> std::strong_ordering = default;
    };
@@ -107,7 +129,7 @@ struct fmt::formatter<lex::token_type> : fmt::formatter<std::string_view>
    template <typename FormatContext>
    auto format(lex::token_type t, FormatContext& ctx)
    {
-      return fmt::formatter<std::string_view>::format(to_string(t), ctx);
+      return fmt::formatter<std::string_view>::format(to_string_view(t), ctx);
    }
 };
 
@@ -123,6 +145,6 @@ struct fmt::formatter<lex::token>
    template <typename FormatContext>
    auto format(const lex::token& tok, FormatContext& ctx)
    {
-      return fmt::format_to(ctx.out(), "[{0}, {1}, {2}]", tok.tok, tok.lexeme, tok.line);
+      return fmt::format_to(ctx.out(), "[{0}, {1}, {2}]", tok.type, tok.lexeme, tok.line);
    }
 };
