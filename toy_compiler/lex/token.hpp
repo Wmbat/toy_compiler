@@ -92,10 +92,10 @@ namespace lex
       return token_names.at(static_cast<std::uint32_t>(type));
    }
 
-   constexpr std::array keywords{"if",     "then",  "else",     "integer", "float",
-                                 "string", "void",  "public",   "private", "func",
-                                 "var",    "class", "while",    "read",    "write",
-                                 "return", "main",  "inherits", "break",   "continue"};
+   [[maybe_unused]] constexpr std::array keywords{
+      "if",     "then",    "else", "integer",  "float", "string",  "void",
+      "public", "private", "func", "var",      "class", "while",   "read",
+      "write",  "return",  "main", "inherits", "break", "continue"};
 
    struct token
    {
@@ -105,6 +105,15 @@ namespace lex
 
       auto operator<=>(const token& other) const -> std::strong_ordering = default;
    };
+
+   constexpr auto is_invalid(std::string_view type_name)
+   {
+      return (type_name == to_string_view(token_type::invalid_char)) ||
+         (type_name == to_string_view(token_type::invalid_id)) ||
+         (type_name == to_string_view(token_type::invalid_num)) ||
+         (type_name == to_string_view(token_type::invalid_cmt)) ||
+         (type_name == to_string_view(token_type::invalid_str));
+   }
 } // namespace lex
 
 template <>

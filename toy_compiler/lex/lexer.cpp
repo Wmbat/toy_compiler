@@ -3,7 +3,7 @@
 #include <toy_compiler/lex/utility.hpp>
 
 #include <range/v3/algorithm/count.hpp>
-#include <range/v3/algorithm/replace.hpp>
+#include <range/v3/algorithm/find.hpp>
 #include <range/v3/range/conversion.hpp>
 #include <range/v3/view/take_while.hpp>
 
@@ -27,7 +27,7 @@ namespace lex
 
       return 0;
    }
-   auto fix_comment_strings(const lex::token& tok) -> std::string
+   auto cleanup_lexeme(const lex::token& tok) -> std::string
    {
       if (tok.type == to_string_view(token_type::block_cmt))
       {
@@ -37,6 +37,11 @@ namespace lex
       if (tok.type == to_string_view(token_type::line_cmt))
       {
          return to_literal(tok.lexeme);
+      }
+
+      if (tok.type == to_string_view(token_type::str_lit))
+      {
+         return tok.lexeme.substr(1, std::size(tok.lexeme) - 2);
       }
 
       return tok.lexeme;
@@ -52,7 +57,7 @@ namespace lex
          return monad::none;
       }
 
-      log.info("tokenizing file: {}", path.c_str());
+      log.info("tokenizing file: \"{}\"", path.c_str());
 
       crl::dynamic_array<token> tokens;
 
@@ -71,7 +76,7 @@ namespace lex
          const auto [data, inc] = trim_leading_whitespaces(char_view.substr(std::size(tok.lexeme)));
          const auto extra = check_for_newlines(tok);
 
-         tok.lexeme = fix_comment_strings(tok);
+         tok.lexeme = cleanup_lexeme(tok);
 
          char_view = data;
          line_counter += inc + extra;
@@ -79,7 +84,7 @@ namespace lex
          tokens.append(tok);
       }
 
-      log.info("tokenization of file {} completed", path.c_str());
+      log.info("tokenization of file \"{}\" completed", path.c_str());
 
       return tokens;
    }
@@ -147,6 +152,47 @@ namespace lex
       return {data.substr(std::min(first, std::size(data))),
               newline_counter(data.substr(0, first))};
    }
+
+   /////////////// ALPHANUMERIC /////////////////
+
+   auto handle_leading_alphabet(const std::string_view data, std::uint32_t line) -> token
+   {
+      const auto lexeme = data | vi::take_while(is_alphanum) | ranges::to<std::string>;
+
+      if (const auto* it = ranges::find(keywords, lexeme); it != std::end(keywords))
+      {
+         return {.type = *it, .lexeme = lexeme, .line = line};
+      }
+
+      return {.type = to_string_view(token_type::id), .lexeme = lexeme, .line = line};
+   }
+   auto handle_leading_underscore(const std::string_view data, std::uint32_t line) -> token
+   {
+      const auto lexeme = data | vi::take_while(is_alphanum) | ranges::to<std::string>;
+
+      if (std::size(lexeme) == 1)
+      {
+         return {.type = to_string_view(token_type::invalid_char), .lexeme = lexeme, .line = line};
+      }
+
+      return {.type = to_string_view(token_type::invalid_id), .lexeme = lexeme, .line = line};
+   }
+
+   auto tokenize_alphanum(const std::string_view data, std::uint32_t line) -> token
+   {
+      // NOLINTNEXTLINE
+      assert((std::isalpha(data.at(0)) || data.at(0) == '_') &&
+             "first character must be an alphabet letter or underscore");
+
+      if (std::isalpha(data.at(0)))
+      {
+         return handle_leading_alphabet(data, line);
+      }
+
+      return handle_leading_underscore(data, line);
+   }
+
+   //////////////////////////////////////////////
 
    // PUNCTUATION
 
@@ -284,7 +330,7 @@ namespace lex
    auto tokenize_comments(const std::string_view data, std::uint32_t line) -> token
    {
       // NOLINTNEXTLINE
-      assert(std::size(data) >= 0 && "Cannot pass empty data");
+      assert(std::size(data) > 0u && "Cannot pass empty data");
       // NOLINTNEXTLINE
       assert(is_comment(data.substr(0, 2)));
 

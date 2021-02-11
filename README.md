@@ -21,3 +21,6 @@ C++ executable
 ## TODO
 
 * [ ] Instead of loading the whole file, load file into chunks
+* [X] Implement Scientific notation
+* [ ] Properly handle nested block comments
+* [ ] Document public API

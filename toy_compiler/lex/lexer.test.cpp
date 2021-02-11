@@ -203,17 +203,9 @@ TEST_SUITE("Lexer test suite")
 
          for (std::uint32_t index = 1; auto& tok : data)
          {
-            if (index < 5) // NOLINT
-            {
-               CHECK(tok.type == to_string_view(lex::token_type::float_lit));
-               CHECK(tok.line == index++);
-            }
+            CHECK(tok.type == to_string_view(lex::token_type::float_lit));
+            CHECK(tok.line == index++);
          }
-
-         CHECK((std::end(data) - 2)->type == to_string_view(lex::token_type::float_lit));
-         CHECK((std::end(data) - 2)->line == 5);
-         CHECK((std::end(data) - 1)->type == to_string_view(lex::token_type::invalid_id));
-         CHECK((std::end(data) - 1)->line == 5);
       }
       SUBCASE("invalid")
       {
@@ -271,19 +263,61 @@ TEST_SUITE("Lexer test suite")
 
       CHECK(*(std::begin(data) + 0) ==
             lex::token{.type = to_string_view(lex::token_type::period), .lexeme = ".", .line = 1});
-      CHECK(*(std::begin(data) + 1) ==
-            lex::token{.type = to_string_view(lex::token_type::semi_colon), .lexeme = ";", .line = 1});
+      CHECK(
+         *(std::begin(data) + 1) ==
+         lex::token{.type = to_string_view(lex::token_type::semi_colon), .lexeme = ";", .line = 1});
       CHECK(*(std::begin(data) + 2) ==
             lex::token{.type = to_string_view(lex::token_type::comma), .lexeme = ",", .line = 1});
-      CHECK(
-         *(std::begin(data) + 3) ==
-         lex::token{.type = to_string_view(lex::token_type::double_colon), .lexeme = "::", .line = 1});
+      CHECK(*(std::begin(data) + 3) ==
+            lex::token{
+               .type = to_string_view(lex::token_type::double_colon), .lexeme = "::", .line = 1});
       CHECK(*(std::begin(data) + 4) ==
             lex::token{.type = to_string_view(lex::token_type::colon), .lexeme = ":", .line = 1});
    }
    TEST_CASE("operator test")
    {
-      SUBCASE("valid") {}
+      SUBCASE("valid")
+      {
+         using namespace lex;
+
+         auto maybe = tokenize_file("test_files/operators_valid.txt");
+         REQUIRE(maybe);
+         const auto data = maybe.value();
+
+         CHECK(data.lookup(0) ==
+               token{.type = to_string_view(token_type::double_equal), .lexeme = "==", .line = 1});
+         CHECK(
+            data.lookup(1) ==
+            token{.type = to_string_view(token_type::less_equal_than), .lexeme = "<=", .line = 1});
+         CHECK(
+            data.lookup(2) ==
+            token{
+               .type = to_string_view(token_type::greater_equal_than), .lexeme = ">=", .line = 1});
+         CHECK(data.lookup(3) ==
+               token{.type = to_string_view(token_type::not_equal), .lexeme = "<>", .line = 1});
+         CHECK(data.lookup(4) ==
+               token{.type = to_string_view(token_type::greater_than), .lexeme = ">", .line = 1});
+         CHECK(data.lookup(5) ==
+               token{.type = to_string_view(token_type::less_than), .lexeme = "<", .line = 1});
+         CHECK(data.lookup(6) ==
+               token{.type = to_string_view(token_type::add), .lexeme = "+", .line = 3});
+         CHECK(data.lookup(7) ==
+               token{.type = to_string_view(token_type::sub), .lexeme = "-", .line = 3});
+         CHECK(data.lookup(8) ==
+               token{.type = to_string_view(token_type::mult), .lexeme = "*", .line = 4});
+         CHECK(data.lookup(9) ==
+               token{.type = to_string_view(token_type::div), .lexeme = "/", .line = 4});
+         CHECK(data.lookup(10) ==
+               token{.type = to_string_view(token_type::equal), .lexeme = "=", .line = 6});
+         CHECK(data.lookup(11) ==
+               token{.type = to_string_view(token_type::or_op), .lexeme = "|", .line = 8});
+         CHECK(data.lookup(12) ==
+               token{.type = to_string_view(token_type::and_op), .lexeme = "&", .line = 8});
+         CHECK(data.lookup(13) ==
+               token{.type = to_string_view(token_type::not_op), .lexeme = "!", .line = 8});
+         CHECK(data.lookup(14) ==
+               token{.type = to_string_view(token_type::qmark), .lexeme = "?", .line = 8});
+      }
    }
    TEST_CASE("braces test")
    {
@@ -293,18 +327,23 @@ TEST_SUITE("Lexer test suite")
       const auto data = maybe.value();
 
       CHECK(*(std::begin(data) + 0) ==
-            lex::token{.type = to_string_view(lex::token_type::open_parenth), .lexeme = "(", .line = 1});
+            lex::token{
+               .type = to_string_view(lex::token_type::open_parenth), .lexeme = "(", .line = 1});
+      CHECK(*(std::begin(data) + 1) ==
+            lex::token{
+               .type = to_string_view(lex::token_type::close_parenth), .lexeme = ")", .line = 1});
       CHECK(
-         *(std::begin(data) + 1) ==
-         lex::token{.type = to_string_view(lex::token_type::close_parenth), .lexeme = ")", .line = 1});
-      CHECK(*(std::begin(data) + 2) ==
-            lex::token{.type = to_string_view(lex::token_type::open_curly), .lexeme = "{", .line = 1});
+         *(std::begin(data) + 2) ==
+         lex::token{.type = to_string_view(lex::token_type::open_curly), .lexeme = "{", .line = 1});
       CHECK(*(std::begin(data) + 3) ==
-            lex::token{.type = to_string_view(lex::token_type::close_curly), .lexeme = "}", .line = 1});
+            lex::token{
+               .type = to_string_view(lex::token_type::close_curly), .lexeme = "}", .line = 1});
       CHECK(*(std::begin(data) + 4) ==
-            lex::token{.type = to_string_view(lex::token_type::open_square), .lexeme = "[", .line = 1});
+            lex::token{
+               .type = to_string_view(lex::token_type::open_square), .lexeme = "[", .line = 1});
       CHECK(*(std::begin(data) + 5) ==
-            lex::token{.type = to_string_view(lex::token_type::close_square), .lexeme = "]", .line = 1});
+            lex::token{
+               .type = to_string_view(lex::token_type::close_square), .lexeme = "]", .line = 1});
    }
    TEST_CASE("comment test")
    {
@@ -340,17 +379,22 @@ TEST_SUITE("Lexer test suite")
       const auto data = maybe.value();
 
       CHECK(*(std::begin(data) + 0) ==
-            lex::token{.type = to_string_view(lex::token_type::invalid_char), .lexeme = "@", .line = 1});
+            lex::token{
+               .type = to_string_view(lex::token_type::invalid_char), .lexeme = "@", .line = 1});
       CHECK(*(std::begin(data) + 1) ==
-            lex::token{.type = to_string_view(lex::token_type::invalid_char), .lexeme = "#", .line = 1});
+            lex::token{
+               .type = to_string_view(lex::token_type::invalid_char), .lexeme = "#", .line = 1});
       CHECK(*(std::begin(data) + 2) ==
-            lex::token{.type = to_string_view(lex::token_type::invalid_char), .lexeme = "$", .line = 1});
+            lex::token{
+               .type = to_string_view(lex::token_type::invalid_char), .lexeme = "$", .line = 1});
       CHECK(*(std::begin(data) + 3) ==
-            lex::token{.type = to_string_view(lex::token_type::invalid_char), .lexeme = "'", .line = 1});
-      CHECK(
-         *(std::begin(data) + 4) ==
-         lex::token{.type = to_string_view(lex::token_type::invalid_char), .lexeme = "\\", .line = 1});
+            lex::token{
+               .type = to_string_view(lex::token_type::invalid_char), .lexeme = "'", .line = 1});
+      CHECK(*(std::begin(data) + 4) ==
+            lex::token{
+               .type = to_string_view(lex::token_type::invalid_char), .lexeme = "\\", .line = 1});
       CHECK(*(std::begin(data) + 5) ==
-            lex::token{.type = to_string_view(lex::token_type::invalid_char), .lexeme = "~", .line = 1});
+            lex::token{
+               .type = to_string_view(lex::token_type::invalid_char), .lexeme = "~", .line = 1});
    }
 }

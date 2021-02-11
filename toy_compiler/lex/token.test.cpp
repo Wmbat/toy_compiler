@@ -92,7 +92,7 @@ TEST_SUITE("Token test suite")
       CHECK(fmt::format("{}", token_type::less_equal_than) == "less_equal_than");
       CHECK(fmt::format("{}", token_type::greater_than) == "greater_than");
       CHECK(fmt::format("{}", token_type::greater_equal_than) == "greater_equal_than");
-      CHECK(fmt::format("{}", token_type::not_equal) == "no_equal");
+      CHECK(fmt::format("{}", token_type::not_equal) == "not_equal");
       CHECK(fmt::format("{}", token_type::open_curly) == "open_curly");
       CHECK(fmt::format("{}", token_type::close_curly) == "close_curly");
       CHECK(fmt::format("{}", token_type::open_square) == "open_square");

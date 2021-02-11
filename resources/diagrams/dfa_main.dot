@@ -11,7 +11,10 @@ digraph dfa {
   "7" [shape=circle]
   "8" [shape=circle]
   "9" [shape=circle]
+  "10" [shape=circle]
+  "11" [shape=circle]
   "12" [shape=circle]
+  "99" [shape=circle]
   "100" [shape=circle]
   "101" [shape=circle]
 
@@ -28,6 +31,7 @@ digraph dfa {
   "41" [shape=doublecircle, label="ERR", color=red, style=filled]
   "42" [shape=doublecircle, label="ERR", color=red, style=filled]
   "43" [shape=doublecircle, label="ERR", color=red, style=filled]
+  "44" [shape=doublecircle, label="ERR", color=red, style=filled]
 
   "" -> "1"
   "1" -> "1" [label="space"]
@@ -53,26 +57,38 @@ digraph dfa {
   "5" -> "6" [label="[1-9]"]
   "5" -> "43"
   "6" -> "6" [label="[0-9]"]
-  "6" -> "101" [label="[1-9]"]
-  "101" -> "33"
-  "101" -> "41" [label="[a-zA-Z]"]
-  "6" -> "41" [label="[a-zA-Z]"]
-  "5" -> "100" [label="0"]
-  "100" -> "6" [label="[0-9]"]
-  "100" -> "34"
-  "100" -> "41" [label="[a-zA-Z]"]
+  "6" -> "7" [label="[1-9]"]
+  "7" -> "34"
+  "7" -> "44" [label="[a-zA-Z]"]
+  "6" -> "43" [label="[a-zA-Z]"]
+  "5" -> "8" [label="0"]
+  "8" -> "6" [label="[0-9]"]
+  "8" -> "7"
+  "8" -> "44" [label="[a-zA-Z]"]
+
+  "7" -> "100" [label="e"]
+  "100" -> "101" [label="[1-9]"]
+  "100" -> "34" [label="0"]
+
+   "100" -> "99" [label="+|-"]
+   "99" -> "34" [label="0"]
+   "99" -> "101" [label="[1-9]"]
+  
+  "101" -> "101" [label="[0-9]"]
+  "101" -> "34"
+  "101" -> "41" [label="[a-z][A-Z]"]
 
   // String literal
-  "1" -> "7" [label="quote"]
-  "7" -> "7" [label="[a-zA-Z0-9_]|space"]
-  "7" -> "35" [label="quote"]
+  "1" -> "9" [label="quote"]
+  "9" -> "9" [label="[a-zA-Z0-9_]|space"]
+  "9" -> "35" [label="quote"]
 
-  "1" -> "8" [label="\\"]
-  "8" -> "9" [label="\\"]
-  "9" -> "9" [label="Any"]
-  "9" -> "32" [label="\\n"]
+  "1" -> "10" [label="\\"]
+  "10" -> "11" [label="\\"]
+  "11" -> "11" [label="Any"]
+  "11" -> "32" [label="\\n"]
 
-  "8" -> "12" [label="*"]
+  "10" -> "12" [label="*"]
   "12" -> "12" [label="Any"]
   "12" -> "32" [label="*/"]
 }
