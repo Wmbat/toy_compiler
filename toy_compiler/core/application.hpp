@@ -9,7 +9,7 @@
 class application
 {
 public:
-   application(std::span<const std::string_view> args);
+   application(std::span<const std::string_view> args, util::logger_wrapper log = nullptr);
 
 private:
    void write_tokens_to_file(const std::filesystem::path& path, std::span<const lex::token> tokens,
@@ -17,8 +17,8 @@ private:
    void write_errors_to_file(const std::filesystem::path& path, std::span<const lex::token> tokens,
                              util::logger_wrapper log) const;
 
-   auto fancy_lexical_error_type(const std::string_view type) const -> std::string;
+   [[nodiscard]] auto fancy_lexical_error_type(const std::string_view type) const -> std::string;
 
 private:
-   util::logger m_logger;
+   util::logger_wrapper m_logger;
 };

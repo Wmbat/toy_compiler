@@ -22,7 +22,6 @@ digraph dfa {
   "30" [shape=doublecircle, label="ID", color=red]
   "31" [shape=doublecircle, label="INT", color=red]
   "32" [shape=doublecircle, label="CMT", color=red]
-  "33" [shape=doublecircle, label="FLOAT", color=red]
   "34" [shape=doublecircle, label="FLOAT", color=red]
   "35" [shape=doublecircle, label="STR", color=red]
 

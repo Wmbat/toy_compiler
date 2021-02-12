@@ -1,4 +1,6 @@
 : Tests
 : Runs unit tests for the application.hpp interface
 
+ln -s $src_base/core/test_files $~/ ;
+
 $* 1>| == 0

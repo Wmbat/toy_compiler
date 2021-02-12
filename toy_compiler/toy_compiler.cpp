@@ -1,4 +1,5 @@
 #include <toy_compiler/core/application.hpp>
+#include <toy_compiler/util/logger.hpp>
 
 #include <range/v3/range/conversion.hpp>
 #include <range/v3/view/drop.hpp>
@@ -27,5 +28,7 @@ auto main(int argc, char** argv) -> int
       | ranges::to<args_array>;
    // clang-format on 
 
-   application app{arguments};
+   util::logger logger{"toy compiler"};
+
+   application app{arguments, &logger};
 }

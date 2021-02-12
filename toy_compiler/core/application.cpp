@@ -11,17 +11,18 @@
 
 namespace fs = std::filesystem;
 
-application::application(std::span<const std::string_view> args) : m_logger{"toy compiler"}
+application::application(std::span<const std::string_view> args, util::logger_wrapper log) :
+   m_logger{log}
 {
    for (const auto filename : args)
    {
       const auto filepath = fs::path{filename};
       if (filepath.extension() == ".src")
       {
-         if (auto maybe = lex::tokenize_file(filepath, &m_logger))
+         if (auto maybe = lex::tokenize_file(filepath, m_logger))
          {
-            write_tokens_to_file(filepath, maybe.value(), &m_logger);
-            write_errors_to_file(filepath, maybe.value(), &m_logger);
+            write_tokens_to_file(filepath, maybe.value(), m_logger);
+            write_errors_to_file(filepath, maybe.value(), m_logger);
          }
          else
          {

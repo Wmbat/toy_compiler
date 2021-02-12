@@ -1,0 +1,20 @@
+[invalid_char, @, 1] [invalid_char, #, 1] [invalid_char, $, 1] [invalid_char, ', 1] [invalid_char, \, 1] [invalid_char, ~, 1] 
+
+[invalid_num, 00, 3] 
+[invalid_num, 01, 4] 
+[invalid_num, 010, 5] 
+[invalid_num, 0120, 6] 
+[invalid_num, 01230, 7] 
+[invalid_num, 0123450, 8] 
+
+[invalid_num, 01.23, 10] 
+[invalid_num, 012.34, 11] 
+[invalid_num, 12.340, 12] 
+[invalid_num, 012.340, 13] 
+
+[invalid_num, 012.34e10, 15] 
+[invalid_num, 12.34e010, 16] 
+
+[invalid_id, _abc, 18] 
+[invalid_num, 1abc, 19] 
+[invalid_id, _1abc, 20] 

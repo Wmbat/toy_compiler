@@ -1,4 +1,4 @@
-#define DOCTEST_CONFIG_IMPLEMENT
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
 #include <toy_compiler/lex/lexer.hpp>
@@ -10,6 +10,7 @@
 
 namespace vi = ranges::views;
 
+/*
 auto main(int argc, char** argv) -> int
 {
    doctest::Context context;
@@ -23,6 +24,7 @@ auto main(int argc, char** argv) -> int
 
    return res;
 }
+*/
 
 TEST_SUITE("Lexer test suite")
 {

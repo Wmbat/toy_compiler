@@ -87,6 +87,9 @@ namespace lex
                                     "invalid_id",    "invalid_num",
                                     "invalid_str",   "invalid_cmt"};
 
+   /**
+    * @brief convert a token_type value to it's string representation
+    */
    constexpr auto to_string_view(token_type type) -> std::string_view
    {
       return token_names.at(static_cast<std::uint32_t>(type));

@@ -11,6 +11,14 @@
 
 namespace lex
 {
+   /**
+    * @brief Opens a file and tokenize it.
+    *
+    * @param path, The path to the file.
+    * @param log, A logger used for status information
+    *
+    * @return The list of tokens.
+    */
    auto tokenize_file(const std::filesystem::path& path, util::logger_wrapper log = nullptr)
       -> monad::maybe<crl::dynamic_array<token>>;
 
