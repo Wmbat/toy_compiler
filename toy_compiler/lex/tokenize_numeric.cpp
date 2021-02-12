@@ -34,39 +34,16 @@ namespace lex
    auto handle_leading_zero(const std::string_view data, std::uint32_t line) -> token
    {
       const char first = data.at(0);
-      if (std::size(data) == 1)
+      if (std::size(data) > 1)
       {
-         return {.type = to_string_view(token_type::integer_lit), .lexeme = {first}, .line = line};
-      }
-
-      const char second = data.at(1);
-      if (is_alphanum(second))
-      {
-         const auto lexeme = data | vi::take_while(is_alphanum) | ranges::to<std::string>;
-         const auto* const last = std::begin(data) + std::size(lexeme);
-
-         if (last != std::end(data) && *last == grammar::period)
+         const char second = data.at(1);
+         if (second == grammar::period)
          {
-            const auto float_token = handle_fraction({last, std::end(data)}, line);
-
-            return {.type = to_string_view(token_type::invalid_num),
-                    .lexeme = lexeme + float_token.lexeme,
+            const auto float_token = handle_fraction(data.substr(1), line);
+            return {.type = float_token.type,
+                    .lexeme = first + float_token.lexeme,
                     .line = float_token.line};
          }
-
-         return {.type = to_string_view(token_type::invalid_num), .lexeme = lexeme, .line = line};
-      }
-
-      if (second == grammar::period)
-      {
-         const auto float_token = handle_fraction(data.substr(1), line);
-         // clang-format off
-         return {
-            .type = float_token.type, 
-            .lexeme = first + float_token.lexeme, 
-            .line = float_token.line
-         };
-         // clang-format on
       }
 
       return {.type = to_string_view(token_type::integer_lit), .lexeme = {first}, .line = line};
@@ -76,27 +53,9 @@ namespace lex
       const auto lexeme = data | vi::take_while(is_digit) | ranges::to<std::string>;
       const auto* const last = std::begin(data) + std::size(lexeme);
 
-      if (last == std::end(data))
+      if (last != std::end(data) && *last == grammar::period)
       {
-         return {.type = to_string_view(token_type::integer_lit), .lexeme = lexeme, .line = line};
-      }
-
-      if (is_alphanum(*last))
-      {
-         // clang-format off
-         const auto error_lex = data 
-            | vi::take_while([](char c) { return is_digit(c) || is_alphanum(c); }) 
-            | ranges::to<std::string>;
-         // clang-format on
-
-         return {
-            .type = to_string_view(token_type::invalid_num), .lexeme = error_lex, .line = line};
-      }
-
-      if (*last == grammar::period)
-      {
-         auto float_token = handle_fraction(data.substr(std::size(lexeme)), line);
-
+         const auto float_token = handle_fraction(data.substr(std::size(lexeme)), line);
          return {.type = float_token.type,
                  .lexeme = lexeme + float_token.lexeme,
                  .line = float_token.line};
@@ -125,8 +84,13 @@ namespace lex
             return {.type = convert(integer), .lexeme = first + integer.lexeme, .line = line};
          }
 
-         const auto integer = handle_leading_nonzero(data.substr(1), line);
-         return {.type = convert(integer), .lexeme = first + integer.lexeme, .line = line};
+         if (is_digit(second))
+         {
+            const auto integer = handle_leading_nonzero(data.substr(1), line);
+            return {.type = convert(integer), .lexeme = first + integer.lexeme, .line = line};
+         }
+
+         return {.type = to_string_view(token_type::invalid_num), .lexeme = {first}, .line = line};
       }
 
       if (first == '0')
@@ -135,58 +99,54 @@ namespace lex
          return {.type = convert(integer), .lexeme = integer.lexeme, .line = line};
       }
 
-      const auto integer = handle_leading_nonzero(data, line);
-      return {.type = convert(integer), .lexeme = integer.lexeme, .line = line};
+      if (is_digit(first))
+      {
+         const auto integer = handle_leading_nonzero(data, line);
+         return {.type = convert(integer), .lexeme = integer.lexeme, .line = line};
+      }
+
+      return {.type = to_string_view(token_type::invalid_num), .lexeme = {first}, .line = line};
    }
    auto handle_fraction(const std::string_view data, std::uint32_t line) -> token
    {
       const char period = *std::begin(data);
       const auto* const first = std::begin(data) + 1;
 
-      if (std::size(data) == 1) // if nothing after period
+      if (std::size(data) > 1) // if nothing after period
       {
-         return {.type = to_string_view(token_type::invalid_num), .lexeme = {period}, .line = line};
-      }
+         if (*first == '0')
+         {
+            return handle_fraction_leading_zero(data.substr(1), line);
+         }
 
-      if (*first == '0')
-      {
-         return handle_fraction_leading_zero(data.substr(1), line);
-      }
-
-      if (is_digit(*first))
-      {
-         return handle_fraction_nonzero(data.substr(1), line);
+         if (is_digit(*first))
+         {
+            return handle_fraction_nonzero(data.substr(1), line);
+         }
       }
 
       return {.type = to_string_view(token_type::invalid_num), .lexeme = {period}, .line = line};
    }
    auto handle_fraction_leading_zero(const std::string_view data, std::uint32_t line) -> token
    {
-      if (std::size(data) == 1) // only 0
+      if (std::size(data) > 1) // only 0
       {
-         return {.type = to_string_view(token_type::float_lit), .lexeme = ".0", .line = line};
-      }
+         const char second = data.at(1);
+         if (second != '0')
+         {
+            if (is_digit(second))
+            {
+               return handle_fraction_nonzero(data, line);
+            }
 
-      const char second = data.at(1);
-      if (is_digit(second))
-      {
-         return handle_fraction_nonzero(data, line);
-      }
+            if (second == 'e')
+            {
+               auto scientific = handle_scientific_notation(data.substr(2), line);
+               scientific.lexeme = ".0e" + scientific.lexeme;
 
-      if (second == 'e')
-      {
-         auto scientific = handle_scientific_notation(data.substr(2), line);
-         scientific.lexeme = ".0e" + scientific.lexeme;
-
-         return scientific;
-      }
-
-      if (std::isalpha(second))
-      {
-         const auto lexeme = data | vi::take_while(is_alphanum) | ranges::to<std::string>;
-
-         return {
-            .type = to_string_view(token_type::invalid_num), .lexeme = "." + lexeme, .line = line};
+               return scientific;
+            }
+         }
       }
 
       return {.type = to_string_view(token_type::float_lit), .lexeme = ".0", .line = line};
@@ -196,29 +156,20 @@ namespace lex
       const auto lexeme = data | vi::take_while(is_digit) | ranges::to<std::string>;
 
       const auto* lexeme_end = std::begin(data) + std::size(lexeme);
-      if (lexeme_end != std::end(data) && std::isalpha(*lexeme_end))
+      if ((lexeme_end != std::end(data)) && (*lexeme_end == 'e'))
       {
-         if (*lexeme_end == 'e')
-         {
-            auto scientific = handle_scientific_notation(data.substr(std::size(lexeme) + 1), line);
-            scientific.lexeme = '.' + lexeme + *lexeme_end + scientific.lexeme;
+         auto scientific = handle_scientific_notation(data.substr(std::size(lexeme) + 1), line);
+         scientific.lexeme = '.' + lexeme + *lexeme_end + scientific.lexeme;
 
-            return scientific;
-         }
-
-         const std::string_view leftovers = {lexeme_end, std::end(data)};
-         const auto extra = leftovers | vi::take_while(is_alphanum) | ranges::to<std::string>;
-
-         return {.type = to_string_view(token_type::invalid_num),
-                 .lexeme = "." + lexeme + extra,
-                 .line = line};
+         return scientific;
       }
 
       const auto last = std::end(lexeme) - 1;
       if (*last == '0')
       {
-         return {
-            .type = to_string_view(token_type::invalid_num), .lexeme = "." + lexeme, .line = line};
+         return {.type = to_string_view(token_type::float_lit),
+                 .lexeme = "." + std::string{std::begin(lexeme), last},
+                 .line = line};
       }
 
       return {.type = to_string_view(token_type::float_lit), .lexeme = "." + lexeme, .line = line};
