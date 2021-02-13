@@ -1,10 +1,11 @@
-#include "range/v3/view/drop.hpp"
+#include "toy_compiler/lex/token.hpp"
 #include <toy_compiler/lex/lexer.hpp>
 
 #include <toy_compiler/lex/utility.hpp>
 
 #include <range/v3/algorithm/find.hpp>
 #include <range/v3/range/conversion.hpp>
+#include <range/v3/view/drop.hpp>
 #include <range/v3/view/tail.hpp>
 #include <range/v3/view/take_while.hpp>
 
@@ -65,13 +66,10 @@ namespace lex
    }
    auto handle_scientific_notation(const std::string_view data, std::uint32_t line) -> token
    {
-      auto convert = [](const token& tok) {
-         if (tok.type != to_string_view(token_type::invalid_num))
-         {
-            return to_string_view(token_type::float_lit);
-         }
-
-         return tok.type;
+      const auto convert = [](const token& tok) {
+         return tok.type != to_string_view(token_type::invalid_num)
+            ? to_string_view(token_type::float_lit)
+            : tok.type;
       };
 
       const auto first = data.at(0);

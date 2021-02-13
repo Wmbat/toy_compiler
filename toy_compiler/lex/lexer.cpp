@@ -91,13 +91,12 @@ namespace lex
 
    auto next_token(const std::string_view data, std::uint32_t line) -> token
    {
-      const char first = data.at(0);
-
       if (std::size(data) >= 2 && is_comment(data.substr(0, 2)))
       {
          return tokenize_comments(data, line);
       }
 
+      const char first = data.at(0);
       if (std::isalpha(first))
       {
          return tokenize_alphanum(data, line);
@@ -171,9 +170,7 @@ namespace lex
       return {.type = to_string_view(token_type::id), .lexeme = lexeme, .line = line};
    }
 
-   //////////////////////////////////////////////
-
-   // PUNCTUATION
+   /////////////// PUNCTUATION //////////////////
 
    auto handle_colon(std::string_view data, std::uint32_t line) -> token
    {
@@ -224,7 +221,7 @@ namespace lex
       return {.type = to_string_view(token_type::invalid_char), .lexeme{first}, .line = line};
    }
 
-   // STRING TOKENIZATION
+   /////////// STRING TOKENIZATION //////////////
 
    auto handle_terminated_string(const std::string_view data, std::uint32_t line) -> token
    {
@@ -264,7 +261,7 @@ namespace lex
               .line = line};
    }
 
-   // BRACES
+   ///////////////// BRACES /////////////////////
 
    auto tokenize_braces(const std::string_view data, std::uint32_t line) -> token
    {
@@ -304,7 +301,7 @@ namespace lex
       return {.type = to_string_view(token_type::invalid_char), .lexeme = {lexeme}, .line = line};
    }
 
-   // COMMENTS
+   //////////////// COMMENTS ////////////////////
 
    auto tokenize_comments(const std::string_view data, std::uint32_t line) -> token
    {
@@ -334,7 +331,7 @@ namespace lex
               .line = line};
    }
 
-   // OPERATORS
+   /////////////// OPERATORS ////////////////////
 
    auto handle_leading_less_than(const std::string_view data, std::uint32_t line) -> token
    {
