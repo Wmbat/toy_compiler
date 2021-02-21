@@ -1,5 +1,5 @@
-#include "toy_compiler/lex/token.hpp"
 #include <toy_compiler/lex/lexer.hpp>
+#include <toy_compiler/lex/token.hpp>
 
 #include <toy_compiler/lex/utility.hpp>
 

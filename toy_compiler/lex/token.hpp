@@ -1,3 +1,5 @@
+/// @file token.hpp
+
 #pragma once
 
 #include <libcaramel/containers/dynamic_array.hpp>
@@ -67,6 +69,9 @@ namespace lex
       invalid_cmt
    };
 
+   /**
+    * List of all possible taken names.
+    */
    constexpr std::array token_names{"none",          "id",
                                     "integer_lit",   "float_lit",
                                     "str_lit",       "period",
@@ -100,6 +105,9 @@ namespace lex
       "public", "private", "func", "var",      "class", "while",   "read",
       "write",  "return",  "main", "inherits", "break", "continue"};
 
+   /**
+    * @brief Holds a the information of a parsed token.
+    */
    struct token
    {
       std::string_view type{}; // NOLINT
@@ -109,6 +117,10 @@ namespace lex
       auto operator<=>(const token& other) const -> std::strong_ordering = default;
    };
 
+   /**
+    * @fn is_invalid
+    * @brief Check is a token is invalid using the `invalid_` prefix in `token_type`
+    */
    constexpr auto is_invalid(std::string_view type_name)
    {
       return (type_name == to_string_view(token_type::invalid_char)) ||

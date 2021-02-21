@@ -1,13 +1,10 @@
-#include <cassert>
 #include <toy_compiler/core/application.hpp>
 
 #include <fmt/ranges.h>
-
 #include <range/v3/algorithm/count_if.hpp>
 
-#include <filesystem>
+#include <cassert>
 #include <fstream>
-#include <iostream>
 
 namespace fs = std::filesystem;
 

@@ -4,7 +4,9 @@
 
 #include <range/v3/algorithm/count.hpp>
 #include <range/v3/algorithm/find.hpp>
+#include <range/v3/algorithm/replace.hpp>
 #include <range/v3/range/conversion.hpp>
+#include <range/v3/view/replace.hpp>
 #include <range/v3/view/take_while.hpp>
 
 #include <fstream>
@@ -39,6 +41,11 @@ namespace lex
          return to_literal(tok.lexeme);
       }
 
+      if (tok.type == to_string_view(token_type::invalid_cmt))
+      {
+         return to_literal(tok.lexeme);
+      }
+
       if (tok.type == to_string_view(token_type::str_lit))
       {
          return tok.lexeme.substr(1, std::size(tok.lexeme) - 2);
@@ -64,11 +71,8 @@ namespace lex
       // TODO: look into reading file 1 kb at a time
       std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
-      std::uint32_t line_counter = 1;
-
-      const auto [data, inc] = trim_leading_whitespaces(content);
-      std::string_view char_view = data;
-      line_counter += inc;
+      auto [char_view, line_counter] = trim_leading_whitespaces(content);
+      line_counter += 1;
 
       while (std::size(char_view) != 0)
       {
@@ -88,6 +92,14 @@ namespace lex
 
       return tokens;
    }
+
+   auto tokenize_alphanum(const std::string_view data, std::uint32_t line) -> token;
+   auto tokenize_braces(const std::string_view data, std::uint32_t line) -> token;
+   auto tokenize_comments(const std::string_view data, std::uint32_t line) -> token;
+   auto tokenize_numeric(const std::string_view data, std::uint32_t line) -> token;
+   auto tokenize_punctuation(const std::string_view data, std::uint32_t line) -> token;
+   auto tokenize_string(const std::string_view data, std::uint32_t line) -> token;
+   auto tokenize_operator(const std::string_view data, std::uint32_t line) -> token;
 
    auto next_token(const std::string_view data, std::uint32_t line) -> token
    {

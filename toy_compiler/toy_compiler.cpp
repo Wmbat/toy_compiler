@@ -1,8 +1,16 @@
+/**
+ * @mainpage
+ *
+ * Test mainpage
+ */
+
 #include <toy_compiler/core/application.hpp>
 #include <toy_compiler/util/logger.hpp>
 
 #include <range/v3/range/conversion.hpp>
 #include <range/v3/view/drop.hpp>
+
+#include <easy/profiler.h>
 
 namespace views = ranges::views;
 

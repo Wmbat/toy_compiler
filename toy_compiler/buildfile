@@ -7,7 +7,6 @@ import libs += monads%lib{monads}
 import doctest = doctest%lib{doctest}
 
 ./: exe{toy_compiler}: libue{toy_compiler}: {hxx ixx txx cxx}{** -**.test...} $spdlog $libs
-# exe{toy_compiler}: testscript
 
 # Unit tests.
 #

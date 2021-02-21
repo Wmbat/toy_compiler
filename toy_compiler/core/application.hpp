@@ -1,9 +1,9 @@
 #pragma once
 
-#include <filesystem>
 #include <toy_compiler/lex/lexer.hpp>
 #include <toy_compiler/util/logger.hpp>
 
+#include <filesystem>
 #include <span>
 
 class application
