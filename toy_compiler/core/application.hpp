@@ -1,3 +1,8 @@
+/**
+ * @file application.hpp
+ * @brief Contains the primary entry point for the compiler and all the compiling facilities
+ */
+
 #pragma once
 
 #include <toy_compiler/lex/lexer.hpp>
@@ -12,9 +17,9 @@ public:
    application(std::span<const std::string_view> args, util::logger_wrapper log = nullptr);
 
 private:
-   void write_tokens_to_file(const std::filesystem::path& path, std::span<const lex::token> tokens,
+   void write_tokens_to_file(const std::filesystem::path& path, std::span<const lex::item> tokens,
                              util::logger_wrapper log) const;
-   void write_errors_to_file(const std::filesystem::path& path, std::span<const lex::token> tokens,
+   void write_errors_to_file(const std::filesystem::path& path, std::span<const lex::item> tokens,
                              util::logger_wrapper log) const;
 
    [[nodiscard]] auto fancy_lexical_error_type(const std::string_view type) const -> std::string;

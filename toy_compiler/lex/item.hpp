@@ -1,4 +1,7 @@
-/// @file token.hpp
+/**
+ * @file item.hpp
+ * @brief Contains all element relating to the `lex::item` struct
+ */
 
 #pragma once
 
@@ -27,7 +30,10 @@ namespace lex
       constexpr char close_curly = '}';
    } // namespace grammar
 
-   enum struct token_type : std::uint32_t
+   /**
+    * @brief All the possible item type that may be lexed from a source file
+    */
+   enum struct item_type : std::uint32_t
    {
       none,
       id,
@@ -70,7 +76,7 @@ namespace lex
    };
 
    /**
-    * List of all possible taken names.
+    * List of string representation of the `lex::item_type` enumeration values
     */
    constexpr std::array token_names{"none",          "id",
                                     "integer_lit",   "float_lit",
@@ -93,13 +99,16 @@ namespace lex
                                     "invalid_str",   "invalid_cmt"};
 
    /**
-    * @brief convert a token_type value to it's string representation
+    * @brief convert a `lex::item_type` value to it's string representation
     */
-   constexpr auto to_string_view(token_type type) -> std::string_view
+   constexpr auto to_string_view(item_type type) -> std::string_view
    {
       return token_names.at(static_cast<std::uint32_t>(type));
    }
 
+   /**
+    * @brief All possible keywords of the language
+    */
    [[maybe_unused]] constexpr std::array keywords{
       "if",     "then",    "else", "integer",  "float", "string",  "void",
       "public", "private", "func", "var",      "class", "while",   "read",
@@ -108,29 +117,31 @@ namespace lex
    /**
     * @brief Holds a the information of a parsed token.
     */
-   struct token
+   struct item
    {
       std::string_view type{}; // NOLINT
       std::string lexeme{};    // NOLINT
       std::uint32_t line{};    // NOLINT
 
-      auto operator<=>(const token& other) const -> std::strong_ordering = default;
+      auto operator<=>(const item& other) const -> std::strong_ordering = default;
    };
 
    /**
-    * @fn is_invalid
-    * @brief Check is a token is invalid using the `invalid_` prefix in `token_type`
+    * @brief Check if a `lex::item` is invalid using the `invalid_` prefix in `lex::item_type`
     */
-   constexpr auto is_invalid(std::string_view type_name)
+   constexpr auto is_invalid(std::string_view type_name) -> bool
    {
-      return (type_name == to_string_view(token_type::invalid_char)) ||
-         (type_name == to_string_view(token_type::invalid_id)) ||
-         (type_name == to_string_view(token_type::invalid_num)) ||
-         (type_name == to_string_view(token_type::invalid_cmt)) ||
-         (type_name == to_string_view(token_type::invalid_str));
+      return (type_name == to_string_view(item_type::invalid_char)) ||
+         (type_name == to_string_view(item_type::invalid_id)) ||
+         (type_name == to_string_view(item_type::invalid_num)) ||
+         (type_name == to_string_view(item_type::invalid_cmt)) ||
+         (type_name == to_string_view(item_type::invalid_str));
    }
 } // namespace lex
 
+/**
+ * @brief A specialization for using `std::string_view` in the **fmt** & **spdlog** libraries
+ */
 template <>
 struct fmt::formatter<std::string_view>
 {
@@ -147,18 +158,25 @@ struct fmt::formatter<std::string_view>
    }
 };
 
+/**
+ * @brief A specialization for using the `lex::item_type` enum in the **fmt** & **spdlog**
+ * libraries
+ */
 template <>
-struct fmt::formatter<lex::token_type> : fmt::formatter<std::string_view>
+struct fmt::formatter<lex::item_type> : fmt::formatter<std::string_view>
 {
    template <typename FormatContext>
-   auto format(lex::token_type t, FormatContext& ctx)
+   auto format(lex::item_type t, FormatContext& ctx)
    {
       return fmt::formatter<std::string_view>::format(to_string_view(t), ctx);
    }
 };
 
+/**
+ * @brief A specialization for using the `lex::item` struct in the **fmt** & **spdlog** libraries
+ */
 template <>
-struct fmt::formatter<lex::token>
+struct fmt::formatter<lex::item>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -167,7 +185,7 @@ struct fmt::formatter<lex::token>
    }
 
    template <typename FormatContext>
-   auto format(const lex::token& tok, FormatContext& ctx)
+   auto format(const lex::item& tok, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "[{0}, {1}, {2}]", tok.type, tok.lexeme, tok.line);
    }

@@ -1,6 +1,8 @@
 .bdep/
 .cache/
 
+docs/
+
 compile_commands.json
 
 # Local default options files.

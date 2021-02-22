@@ -1,6 +1,11 @@
+/**
+ * @file lexer.hpp
+ * @brief Contains all the lexing functions for the compiler
+ */
+
 #pragma once
 
-#include <toy_compiler/lex/token.hpp>
+#include <toy_compiler/lex/item.hpp>
 #include <toy_compiler/util/logger.hpp>
 
 #include <libcaramel/containers/dynamic_array.hpp>
@@ -12,13 +17,13 @@
 namespace lex
 {
    /**
-    * @brief Opens a file and tokenize it.
+    * @brief Opens a file and lexes it
     *
-    * @param path, The path to the file.
-    * @param log, A logger used for status information
+    * @param path The path to the file
+    * @param log A logger used for status information
     *
-    * @return The list of tokens.
+    * @return The list of `lex::item` from the file
     */
-   auto tokenize_file(const std::filesystem::path& path, util::logger_wrapper log = nullptr)
-      -> monad::maybe<crl::dynamic_array<token>>;
+   auto lex_file(const std::filesystem::path& path, util::logger_wrapper log = nullptr)
+      -> monad::maybe<crl::dynamic_array<lex::item>>;
 } // namespace lex

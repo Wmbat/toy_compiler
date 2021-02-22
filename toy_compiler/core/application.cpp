@@ -16,7 +16,7 @@ application::application(std::span<const std::string_view> args, util::logger_wr
       const auto filepath = fs::path{filename};
       if (filepath.extension() == ".src")
       {
-         if (auto maybe = lex::tokenize_file(filepath, m_logger))
+         if (auto maybe = lex::lex_file(filepath, m_logger))
          {
             write_tokens_to_file(filepath, maybe.value(), m_logger);
             write_errors_to_file(filepath, maybe.value(), m_logger);
@@ -37,7 +37,7 @@ application::application(std::span<const std::string_view> args, util::logger_wr
 }
 
 void application::write_tokens_to_file(const std::filesystem::path& path,
-                                       std::span<const lex::token> tokens,
+                                       std::span<const lex::item> tokens,
                                        util::logger_wrapper log) const
 {
    auto output_path = path.parent_path();
@@ -64,7 +64,7 @@ void application::write_tokens_to_file(const std::filesystem::path& path,
 }
 
 void application::write_errors_to_file(const std::filesystem::path& path,
-                                       [[maybe_unused]] std::span<const lex::token> tokens,
+                                       [[maybe_unused]] std::span<const lex::item> tokens,
                                        [[maybe_unused]] util::logger_wrapper log) const
 {
    auto output_path = path.parent_path();
@@ -101,22 +101,22 @@ auto application::fancy_lexical_error_type(const std::string_view type) const ->
 
    using namespace lex;
 
-   if (type == to_string_view(token_type::invalid_char))
+   if (type == to_string_view(item_type::invalid_char))
    {
       return "invalid character";
    }
 
-   if (type == to_string_view(token_type::invalid_id))
+   if (type == to_string_view(item_type::invalid_id))
    {
       return "invalid identifier";
    }
 
-   if (type == to_string_view(token_type::invalid_num))
+   if (type == to_string_view(item_type::invalid_num))
    {
       return "invalid number literal";
    }
 
-   if (type == to_string_view(token_type::invalid_str))
+   if (type == to_string_view(item_type::invalid_str))
    {
       return "invalid string literal";
    }

@@ -5,31 +5,94 @@
 
 #pragma once
 
+#include <toy_compiler/lex/item.hpp>
+
 #include <string_view>
+
+#include <range/v3/algorithm/find.hpp>
 
 namespace lex
 {
-   /**
-    * @brief Check if a character is is a letter from [a-zA-Z]
-    */
-   auto is_alphabet(char c) noexcept -> bool;
-   /**
-    * @brief Check if a character is is a letter from [a-zA-Z] or a number between [0, 9]
-    */
-   auto is_alphanum(char c) noexcept -> bool;
-   /**
-    * @brief Check if a character is is a number between [0, 9]
-    */
-   auto is_digit(char c) noexcept -> bool;
-   auto is_quote(char c) noexcept -> bool;
-   auto is_punctuation(char c) noexcept -> bool;
-   auto is_operator(char c) noexcept -> bool;
-   auto is_braces(char c) noexcept -> bool;
-   auto is_newline(char c) noexcept -> bool;
-   auto is_comment(std::string_view str) -> bool;
+   namespace detail
+   {
+      constexpr std::array alphabet{
+         std::to_array("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")};
+      constexpr std::array digits{std::to_array("0123456789")};
+      constexpr std::array operators{std::to_array("=+-*/<>|&!?")};
+      constexpr std::array punctuations{grammar::period, grammar::comma, grammar::colon,
+                                        grammar::semi_colon};
+      constexpr std::array comments{"/*", "//"};
+      constexpr std::array braces{grammar::open_parenth, grammar::close_parenth,
+                                  grammar::open_square,  grammar::close_square,
+                                  grammar::open_curly,   grammar::close_curly};
+   } // namespace detail
 
+   /**
+    * @brief Check if a character is a letter from [a-zA-Z]
+    */
+   constexpr auto is_alphabet(char c) noexcept -> bool
+   {
+      return ranges::find(detail::alphabet, c) != std::end(detail::alphabet);
+   }
+   /**
+    * @brief Check if a character is a number between [0, 9]
+    */
+   constexpr auto is_digit(char c) noexcept -> bool
+   {
+      return ranges::find(detail::digits, c) != std::end(detail::digits);
+   }
+   /**
+    * @brief Check if a character is a letter from [a-zA-Z] or a number between [0, 9]
+    */
+   constexpr auto is_alphanum(char c) noexcept -> bool
+   {
+      return is_digit(c) || is_alphabet(c) || c == '_';
+   }
+   /**
+    * @brief Check if a character is used for punctuation (.,:;)
+    */
+   constexpr auto is_punctuation(char c) noexcept -> bool
+   {
+      return ranges::find(detail::punctuations, c) != std::end(detail::punctuations);
+   }
+   /**
+    * @brief Check if a character is an operator (=+-*<>/|&!?)
+    */
+   constexpr auto is_operator(char c) noexcept -> bool
+   {
+      return ranges::find(detail::operators, c) != std::end(detail::operators);
+   }
+   /**
+    * @brief Check if a character is brace character ([](){})
+    */
+   constexpr auto is_braces(char c) noexcept -> bool
+   {
+      return ranges::find(detail::braces, c) != std::end(detail::braces);
+   }
+   /**
+    * @brief Check if a character is a quotation (")
+    */
+   constexpr auto is_quote(char c) noexcept -> bool { return c == '\"'; }
+   /**
+    * @brief Check if a character is a newline character
+    */
+   constexpr auto is_newline(char c) noexcept -> bool { return c == '\n'; }
+   /**
+    * @brief Check if a character is a line or block comment character
+    */
+   constexpr auto is_comment(std::string_view str) -> bool
+   {
+      return ranges::find(detail::comments, str) != std::end(detail::comments);
+   }
+
+   /**
+    * @brief Escapes all newline and cariage return characters in the string
+    */
    auto to_literal(const std::string_view data) -> std::string;
 
    constexpr std::size_t kilobyte = 1024;
+   /**
+    * @brief Turn an unsigned integer literal into it's kilobyte representation.
+    */
    constexpr auto operator""_kb(unsigned long long val) -> std::size_t { return val * kilobyte; }
 } // namespace lex
