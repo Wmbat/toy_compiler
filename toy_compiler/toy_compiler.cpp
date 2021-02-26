@@ -1,14 +1,14 @@
 /**
  * @mainpage
  *
- * Test mainpage
+ * This is the main page of the doxygen documentation for the **toy_compiler** project
  */
 
 #include <toy_compiler/core/application.hpp>
 #include <toy_compiler/util/logger.hpp>
 
 #include <range/v3/range/conversion.hpp>
-#include <range/v3/view/drop.hpp>
+#include <range/v3/view/tail.hpp>
 
 #include <easy/profiler.h>
 
@@ -22,11 +22,14 @@ auto main(int argc, char** argv) -> int
 
    // clang-format off
    args_array arguments = std::span<char*>{argv, static_cast<std::size_t>(argc)} 
-      | views::drop(1) // first argument is program name.
+      | views::tail // first argument is program name.
       | ranges::to<args_array>;
    // clang-format on 
 
-   util::logger logger{"toy compiler"};
+   std::string logger_name = "toy_compiler";
+   util::logger logger{logger_name};
 
    application app{arguments, &logger};
+
+   return 0;
 }

@@ -1,9 +1,9 @@
 : 1
 summary: toy_compiler project repository
 
-#:
-#role: prerequisite
-#location: https://pkg.cppget.org/1/stable
+:
+role: prerequisite
+location: https://pkg.cppget.org/1/stable
 
 :
 role: prerequisite
@@ -16,3 +16,7 @@ location: https://github.com/Wmbat/libcaramel.git
 :
 role: prerequisite
 location: https://github.com/Wmbat/monads.git
+
+:
+role: prerequisite
+location: https://github.com/Wmbat/spdlog.git#main

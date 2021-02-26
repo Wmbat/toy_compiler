@@ -13,6 +13,20 @@
 
 namespace lex
 {
+   namespace grammar
+   {
+      constexpr char period = '.';
+      constexpr char comma = ',';
+      constexpr char colon = ':';
+      constexpr char semi_colon = ';';
+      constexpr char open_parenth = '(';
+      constexpr char close_parenth = ')';
+      constexpr char open_square = '[';
+      constexpr char close_square = ']';
+      constexpr char open_curly = '{';
+      constexpr char close_curly = '}';
+   } // namespace grammar
+
    namespace detail
    {
       constexpr std::array alphabet{

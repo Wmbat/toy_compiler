@@ -16,19 +16,17 @@
 
 namespace lex
 {
-   namespace grammar
+   /**
+    * @brief Holds a the information of a parsed token.
+    */
+   struct item
    {
-      constexpr char period = '.';
-      constexpr char comma = ',';
-      constexpr char colon = ':';
-      constexpr char semi_colon = ';';
-      constexpr char open_parenth = '(';
-      constexpr char close_parenth = ')';
-      constexpr char open_square = '[';
-      constexpr char close_square = ']';
-      constexpr char open_curly = '{';
-      constexpr char close_curly = '}';
-   } // namespace grammar
+      std::string_view type{}; // NOLINT
+      std::string lexeme{};    // NOLINT
+      std::uint32_t line{};    // NOLINT
+
+      auto operator<=>(const item& other) const -> std::strong_ordering = default;
+   };
 
    /**
     * @brief All the possible item type that may be lexed from a source file
@@ -45,11 +43,11 @@ namespace lex
       colon,
       double_colon,
       semi_colon,
-      add,
-      sub,
-      mult,
-      div,
-      equal,
+      add_op,
+      sub_op,
+      mult_op,
+      div_op,
+      equal_op,
       or_op,
       and_op,
       not_op,
@@ -100,6 +98,11 @@ namespace lex
 
    /**
     * @brief convert a `lex::item_type` value to it's string representation
+    *
+    * @param [in] type The `lex::item_type` value to represent as a string
+    *
+    * @return A `std::string_view` into the corresponding `lex::item_type` string representation
+    * from the `lex::token_names` array
     */
    constexpr auto to_string_view(item_type type) -> std::string_view
    {
@@ -107,27 +110,11 @@ namespace lex
    }
 
    /**
-    * @brief All possible keywords of the language
-    */
-   [[maybe_unused]] constexpr std::array keywords{
-      "if",     "then",    "else", "integer",  "float", "string",  "void",
-      "public", "private", "func", "var",      "class", "while",   "read",
-      "write",  "return",  "main", "inherits", "break", "continue"};
-
-   /**
-    * @brief Holds a the information of a parsed token.
-    */
-   struct item
-   {
-      std::string_view type{}; // NOLINT
-      std::string lexeme{};    // NOLINT
-      std::uint32_t line{};    // NOLINT
-
-      auto operator<=>(const item& other) const -> std::strong_ordering = default;
-   };
-
-   /**
     * @brief Check if a `lex::item` is invalid using the `invalid_` prefix in `lex::item_type`
+    *
+    * @param [in] type_name The string representation of the `lex::item_type` to check
+    *
+    * @return true if `type_name` represents an invalid `lex::item_type`
     */
    constexpr auto is_invalid(std::string_view type_name) -> bool
    {
@@ -137,6 +124,14 @@ namespace lex
          (type_name == to_string_view(item_type::invalid_cmt)) ||
          (type_name == to_string_view(item_type::invalid_str));
    }
+
+   /**
+    * @brief All possible keywords of the language
+    */
+   [[maybe_unused]] constexpr std::array keywords{
+      "if",     "then",    "else", "integer",  "float", "string",  "void",
+      "public", "private", "func", "var",      "class", "while",   "read",
+      "write",  "return",  "main", "inherits", "break", "continue"};
 } // namespace lex
 
 /**

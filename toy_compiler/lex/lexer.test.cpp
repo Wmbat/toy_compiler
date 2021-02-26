@@ -328,13 +328,11 @@ TEST_SUITE("Lexer test suite")
 
          CHECK(data.lookup(0) ==
                item{.type = to_string_view(item_type::double_equal), .lexeme = "==", .line = 1});
-         CHECK(
-            data.lookup(1) ==
-            item{.type = to_string_view(item_type::less_equal_than), .lexeme = "<=", .line = 1});
+         CHECK(data.lookup(1) ==
+               item{.type = to_string_view(item_type::less_equal_than), .lexeme = "<=", .line = 1});
          CHECK(
             data.lookup(2) ==
-            item{
-               .type = to_string_view(item_type::greater_equal_than), .lexeme = ">=", .line = 1});
+            item{.type = to_string_view(item_type::greater_equal_than), .lexeme = ">=", .line = 1});
          CHECK(data.lookup(3) ==
                item{.type = to_string_view(item_type::not_equal), .lexeme = "<>", .line = 1});
          CHECK(data.lookup(4) ==
@@ -342,15 +340,15 @@ TEST_SUITE("Lexer test suite")
          CHECK(data.lookup(5) ==
                item{.type = to_string_view(item_type::less_than), .lexeme = "<", .line = 1});
          CHECK(data.lookup(6) ==
-               item{.type = to_string_view(item_type::add), .lexeme = "+", .line = 3});
+               item{.type = to_string_view(item_type::add_op), .lexeme = "+", .line = 3});
          CHECK(data.lookup(7) ==
-               item{.type = to_string_view(item_type::sub), .lexeme = "-", .line = 3});
+               item{.type = to_string_view(item_type::sub_op), .lexeme = "-", .line = 3});
          CHECK(data.lookup(8) ==
-               item{.type = to_string_view(item_type::mult), .lexeme = "*", .line = 4});
+               item{.type = to_string_view(item_type::mult_op), .lexeme = "*", .line = 4});
          CHECK(data.lookup(9) ==
-               item{.type = to_string_view(item_type::div), .lexeme = "/", .line = 4});
+               item{.type = to_string_view(item_type::div_op), .lexeme = "/", .line = 4});
          CHECK(data.lookup(10) ==
-               item{.type = to_string_view(item_type::equal), .lexeme = "=", .line = 6});
+               item{.type = to_string_view(item_type::equal_op), .lexeme = "=", .line = 6});
          CHECK(data.lookup(11) ==
                item{.type = to_string_view(item_type::or_op), .lexeme = "|", .line = 8});
          CHECK(data.lookup(12) ==
@@ -368,24 +366,24 @@ TEST_SUITE("Lexer test suite")
 
       const auto data = maybe.value();
 
-      CHECK(*(std::begin(data) + 0) ==
-            lex::item{
-               .type = to_string_view(lex::item_type::open_parenth), .lexeme = "(", .line = 1});
+      CHECK(
+         *(std::begin(data) + 0) ==
+         lex::item{.type = to_string_view(lex::item_type::open_parenth), .lexeme = "(", .line = 1});
       CHECK(*(std::begin(data) + 1) ==
             lex::item{
                .type = to_string_view(lex::item_type::close_parenth), .lexeme = ")", .line = 1});
       CHECK(
          *(std::begin(data) + 2) ==
          lex::item{.type = to_string_view(lex::item_type::open_curly), .lexeme = "{", .line = 1});
-      CHECK(*(std::begin(data) + 3) ==
-            lex::item{
-               .type = to_string_view(lex::item_type::close_curly), .lexeme = "}", .line = 1});
-      CHECK(*(std::begin(data) + 4) ==
-            lex::item{
-               .type = to_string_view(lex::item_type::open_square), .lexeme = "[", .line = 1});
-      CHECK(*(std::begin(data) + 5) ==
-            lex::item{
-               .type = to_string_view(lex::item_type::close_square), .lexeme = "]", .line = 1});
+      CHECK(
+         *(std::begin(data) + 3) ==
+         lex::item{.type = to_string_view(lex::item_type::close_curly), .lexeme = "}", .line = 1});
+      CHECK(
+         *(std::begin(data) + 4) ==
+         lex::item{.type = to_string_view(lex::item_type::open_square), .lexeme = "[", .line = 1});
+      CHECK(
+         *(std::begin(data) + 5) ==
+         lex::item{.type = to_string_view(lex::item_type::close_square), .lexeme = "]", .line = 1});
    }
    TEST_CASE("comment test")
    {
@@ -420,23 +418,23 @@ TEST_SUITE("Lexer test suite")
 
       const auto data = maybe.value();
 
-      CHECK(*(std::begin(data) + 0) ==
-            lex::item{
-               .type = to_string_view(lex::item_type::invalid_char), .lexeme = "@", .line = 1});
-      CHECK(*(std::begin(data) + 1) ==
-            lex::item{
-               .type = to_string_view(lex::item_type::invalid_char), .lexeme = "#", .line = 1});
-      CHECK(*(std::begin(data) + 2) ==
-            lex::item{
-               .type = to_string_view(lex::item_type::invalid_char), .lexeme = "$", .line = 1});
-      CHECK(*(std::begin(data) + 3) ==
-            lex::item{
-               .type = to_string_view(lex::item_type::invalid_char), .lexeme = "'", .line = 1});
+      CHECK(
+         *(std::begin(data) + 0) ==
+         lex::item{.type = to_string_view(lex::item_type::invalid_char), .lexeme = "@", .line = 1});
+      CHECK(
+         *(std::begin(data) + 1) ==
+         lex::item{.type = to_string_view(lex::item_type::invalid_char), .lexeme = "#", .line = 1});
+      CHECK(
+         *(std::begin(data) + 2) ==
+         lex::item{.type = to_string_view(lex::item_type::invalid_char), .lexeme = "$", .line = 1});
+      CHECK(
+         *(std::begin(data) + 3) ==
+         lex::item{.type = to_string_view(lex::item_type::invalid_char), .lexeme = "'", .line = 1});
       CHECK(*(std::begin(data) + 4) ==
             lex::item{
                .type = to_string_view(lex::item_type::invalid_char), .lexeme = "\\", .line = 1});
-      CHECK(*(std::begin(data) + 5) ==
-            lex::item{
-               .type = to_string_view(lex::item_type::invalid_char), .lexeme = "~", .line = 1});
+      CHECK(
+         *(std::begin(data) + 5) ==
+         lex::item{.type = to_string_view(lex::item_type::invalid_char), .lexeme = "~", .line = 1});
    }
 }

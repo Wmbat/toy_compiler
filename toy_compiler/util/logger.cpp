@@ -24,12 +24,12 @@ namespace util
    logger::logger(std::string_view name) : log("")
    {
       auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-      console_sink->set_pattern("[%n] [%^%l%$] %v");
+      console_sink->set_pattern(std::string{"[%n] [%^%l%$] %v"});
       console_sink->set_level(spdlog::level::trace);
 
       auto file_sink =
          std::make_shared<spdlog::sinks::basic_file_sink_mt>(std::string{name} + ".logs", true);
-      file_sink->set_pattern("[%n] [%^%l%$] %v");
+      file_sink->set_pattern(std::string{"[%n] [%^%l%$] %v"});
       file_sink->set_level(spdlog::level::trace);
 
       log = spdlog::logger(std::string{name}, {console_sink, file_sink});

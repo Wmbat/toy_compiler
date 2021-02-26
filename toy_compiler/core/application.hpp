@@ -11,6 +11,9 @@
 #include <filesystem>
 #include <span>
 
+/**
+ * @brief The main entry point for the compiler
+ */
 class application
 {
 public:

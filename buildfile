@@ -1,5 +1,1 @@
-./: {*/ -build/ -resources/ -docs/} doc{README.md docs/**} manifest
-doc{*}:
-{
-   install.subdirs = true
-}
+./: {*/ -build/ -resources/} doc{README.md} manifest

@@ -524,7 +524,7 @@ namespace lex
                  .line = line};
       }
 
-      return {.type = to_string_view(item_type::equal), .lexeme = {data.at(0)}, .line = line};
+      return {.type = to_string_view(item_type::equal_op), .lexeme = {data.at(0)}, .line = line};
    }
 
    auto lex_operator(const std::string_view data, std::uint32_t line) -> item
@@ -532,22 +532,22 @@ namespace lex
       const auto first = data.at(0);
       if (first == '+')
       {
-         return {.type = to_string_view(item_type::add), .lexeme = {first}, .line = line};
+         return {.type = to_string_view(item_type::add_op), .lexeme = {first}, .line = line};
       }
 
       if (first == '-')
       {
-         return {.type = to_string_view(item_type::sub), .lexeme = {first}, .line = line};
+         return {.type = to_string_view(item_type::sub_op), .lexeme = {first}, .line = line};
       }
 
       if (first == '*')
       {
-         return {.type = to_string_view(item_type::mult), .lexeme = {first}, .line = line};
+         return {.type = to_string_view(item_type::mult_op), .lexeme = {first}, .line = line};
       }
 
       if (first == '/')
       {
-         return {.type = to_string_view(item_type::div), .lexeme = {first}, .line = line};
+         return {.type = to_string_view(item_type::div_op), .lexeme = {first}, .line = line};
       }
 
       if (first == '|')

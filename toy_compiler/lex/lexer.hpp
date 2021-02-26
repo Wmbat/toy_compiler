@@ -19,8 +19,8 @@ namespace lex
    /**
     * @brief Opens a file and lexes it
     *
-    * @param path The path to the file
-    * @param log A logger used for status information
+    * @param [in] path The path to the file
+    * @param [in] log A logger used for status information
     *
     * @return The list of `lex::item` from the file
     */

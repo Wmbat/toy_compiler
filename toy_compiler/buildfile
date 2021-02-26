@@ -1,12 +1,12 @@
-spdlog = spdlog%lib{spdlog}
-
 import libs = range-v3%lib{range-v3}
 import libs += libcaramel%lib{caramel}
 import libs += monads%lib{monads}
+import libs += spdlog%lib{spdlog}
+import libs += fmt%lib{fmt}
 
 import doctest = doctest%lib{doctest}
 
-./: exe{toy_compiler}: libue{toy_compiler}: {hxx ixx txx cxx}{** -**.test...} $spdlog $libs
+./: exe{toy_compiler}: libue{toy_compiler}: {hxx ixx txx cxx}{** -**.test...} $libs
 
 # Unit tests.
 #
