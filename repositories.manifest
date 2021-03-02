@@ -19,4 +19,4 @@ location: https://github.com/Wmbat/monads.git
 
 :
 role: prerequisite
-location: https://github.com/Wmbat/spdlog.git#main
+location: https://github.com/Wmbat/build2-spdlog.git#main
