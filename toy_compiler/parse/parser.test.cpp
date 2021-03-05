@@ -1,6 +1,6 @@
 /**
- * @file parser.hpp
- * @brief Defines everthing related to the parsing
+ * @file parser.test.cpp
+ * @brief Runs tests on functions defined in parser/parser.hpp
  * @copyright Copyright (C) 2021 wmbat.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,17 +17,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include <doctest/doctest.h>
 
-#include <toy_compiler/core/lexer.hpp>
-
-#include <span>
-#include <unordered_map>
-
-namespace parse
+TEST_SUITE("Parser test suite")
 {
-   /**
-    * @param items The lexed items to use for parsing
-    */
-   void parse_items(std::span<lex::item> items);
-} // namespace parse
+   TEST_CASE("TEST") { REQUIRE(true); }
+}

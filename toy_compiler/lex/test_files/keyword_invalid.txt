@@ -1,4 +1,0 @@
-if then while ifthen megatest integer
-float string void 
-my_void 
-public private

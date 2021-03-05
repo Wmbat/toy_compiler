@@ -1,0 +1,6 @@
+: Test
+: Runs unit tests for the parser.hpp interface
+
+ln -s $src_base/parse/test_files $~/ ;
+
+$* 1>| == 0

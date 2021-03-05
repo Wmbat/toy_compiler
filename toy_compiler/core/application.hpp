@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <toy_compiler/lex/lexer.hpp>
+#include <toy_compiler/core/lexer.hpp>
 #include <toy_compiler/util/logger.hpp>
 
 #include <filesystem>
@@ -39,7 +39,7 @@ private:
    void write_errors_to_file(const std::filesystem::path& path, std::span<const lex::item> tokens,
                              util::logger_wrapper log) const;
 
-   [[nodiscard]] auto fancy_lexical_error_type(const std::string_view type) const -> std::string;
+   [[nodiscard]] auto fancy_lexical_error_type(grammar::token_type value) const -> std::string;
 
 private:
    util::logger_wrapper m_logger;

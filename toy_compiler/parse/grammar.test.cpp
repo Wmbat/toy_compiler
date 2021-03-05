@@ -1,6 +1,6 @@
 /**
- * @file lexer.hpp
- * @brief Contains all the lexing functions for the compiler
+ * @file grammar.test.cpp
+ * @brief Runs tests on functions defined in parser/parser.hpp
  * @copyright Copyright (C) 2021 wmbat.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,27 +17,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include <doctest/doctest.h>
 
-#include <toy_compiler/lex/item.hpp>
-#include <toy_compiler/util/logger.hpp>
+#include <toy_compiler/parse/grammar.hpp>
 
-#include <libcaramel/containers/dynamic_array.hpp>
-
-#include <monads/maybe.hpp>
-
-#include <filesystem>
-
-namespace lex
+TEST_SUITE("Grammar test suite")
 {
-   /**
-    * @brief Opens a file and lexes it
-    *
-    * @param [in] path The path to the file
-    * @param [in] log A logger used for status information
-    *
-    * @return The list of `lex::item` from the file
-    */
-   auto lex_file(const std::filesystem::path& path, util::logger_wrapper log = nullptr)
-      -> monad::maybe<crl::dynamic_array<lex::item>>;
-} // namespace lex
+   TEST_CASE("grammar::symbol to_string") {}
+}

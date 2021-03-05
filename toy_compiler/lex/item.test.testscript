@@ -1,4 +1,0 @@
-: Test
-: Runs unit tests for the token.hpp interface
-
-$* 1>| == 0
