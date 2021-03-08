@@ -1,8 +1,8 @@
-[double_equal, ==, 1] [add, +, 1] [or, |, 1] [left_paren, (, 1] [semi_colon, ;, 1] [if, if, 1] [public, public, 1] [read, read, 1] 
+[equal, ==, 1] [add, +, 1] [or, |, 1] [left_paren, (, 1] [semi_colon, ;, 1] [if, if, 1] [public, public, 1] [read, read, 1] 
 [not_equal, <>, 2] [sub, -, 2] [and, &, 2] [right_paren, ), 2] [comma, ,, 2] [then, then, 2] [private, private, 2] [write, write, 2] 
 [less_than, <, 3] [mult, *, 3] [not, !, 3] [left_brace, {, 3] [period, ., 3] [else, else, 3] [func, func, 3] [return, return, 3] 
 [greater_than, >, 4] [div, /, 4] [qmark, ?, 4] [right_brace, }, 4] [colon, :, 4] [integer, integer, 4] [var, var, 4] [main, main, 4] 
-[less_equal_than, <=, 5] [equal, =, 5] [left_square, [, 5] [double_colon, ::, 5] [float, float, 5] [class, class, 5] [inherits, inherits, 5] 
+[less_equal_than, <=, 5] [assign, =, 5] [left_square, [, 5] [double_colon, ::, 5] [float, float, 5] [class, class, 5] [inherits, inherits, 5] 
 [greater_equal_than, >=, 6] [right_square, ], 6] [string, string, 6] [while, while, 6] [break, break, 6] 
 [void, void, 7] [continue, continue, 7] 
 

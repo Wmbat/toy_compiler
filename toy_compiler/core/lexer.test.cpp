@@ -1,5 +1,4 @@
 /**
- * @file lexer.test.cpp
  * @brief Runs tests on functions defined in lexer.hpp
  * @copyright Copyright (C) 2021 wmbat.
  *
@@ -247,7 +246,7 @@ TEST_SUITE("Lexer test suite")
          const auto data = maybe.value();
 
          CHECK(data.lookup(0) ==
-               item{.type = grammar::token_type::double_equal, .lexeme = "==", .line = 1});
+               item{.type = grammar::token_type::equal, .lexeme = "==", .line = 1});
          CHECK(data.lookup(1) ==
                item{.type = grammar::token_type::less_equal_than, .lexeme = "<=", .line = 1});
          CHECK(data.lookup(2) ==
@@ -267,7 +266,7 @@ TEST_SUITE("Lexer test suite")
          CHECK(data.lookup(9) ==
                item{.type = grammar::token_type::div_op, .lexeme = "/", .line = 4});
          CHECK(data.lookup(10) ==
-               item{.type = grammar::token_type::equal_op, .lexeme = "=", .line = 6});
+               item{.type = grammar::token_type::assign, .lexeme = "=", .line = 6});
          CHECK(data.lookup(11) ==
                item{.type = grammar::token_type::or_op, .lexeme = "|", .line = 8});
          CHECK(data.lookup(12) ==

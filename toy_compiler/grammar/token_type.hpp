@@ -33,7 +33,7 @@ namespace grammar
       /**
        * List of string representation of the `lex::token_type` enumeration values
        */
-      constexpr std::array token_names{"none",         "id",
+      constexpr std::array token_names{"epsilon",      "id",
                                        "if",           "then",
                                        "else",         "integer",
                                        "float",        "string",
@@ -50,9 +50,9 @@ namespace grammar
                                        "double_colon", "semi_colon",
                                        "add",          "sub",
                                        "mult",         "div",
-                                       "equal",        "or",
+                                       "assign",       "or",
                                        "and",          "not",
-                                       "qmark",        "double_equal",
+                                       "qmark",        "equal",
                                        "less_than",    "less_equal_than",
                                        "greater_than", "greater_equal_than",
                                        "not_equal",    "left_brace",
@@ -77,7 +77,7 @@ namespace grammar
     */
    enum struct token_type : std::uint32_t
    {
-      none,
+      epsilon,
       id,
       id_if,
       id_then,
@@ -111,12 +111,12 @@ namespace grammar
       sub_op,
       mult_op,
       div_op,
-      equal_op,
+      assign,
       or_op,
       and_op,
       not_op,
       qmark,
-      double_equal,
+      equal,
       less_than,
       less_equal_than,
       greater_than,
@@ -152,11 +152,11 @@ namespace grammar
    }
 
    /**
-    * @brief test
+    * @brief Find the enum representation of the keyword string
     *
-    * @param [in] keyword_name
+    * @param [in] keyword_name The keyword string value
     *
-    * @return
+    * @return The corresponding enum value to the keyword string
     */
    constexpr auto keyword_to_token_type(std::string_view keyword_name) -> token_type
    {
@@ -244,7 +244,7 @@ namespace grammar
       {
          assert("should never be reached"); // NOLINT
 
-         return token_type::none;
+         return token_type::epsilon;
       }
    }
 
@@ -295,7 +295,7 @@ struct fmt::formatter<std::string_view>
 };
 
 /**
- * @brief A specialization for using the `lex::item_type` enum in the **fmt** & **spdlog**
+ * @brief A specialization for using the `grammar::token_type` enum in the **fmt** & **spdlog**
  * libraries
  */
 template <>

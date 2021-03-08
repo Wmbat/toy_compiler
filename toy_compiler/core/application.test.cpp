@@ -1,5 +1,4 @@
 /**
- * @file application.test.cpp
  * @brief Runs tests on functions defined in application.hpp
  * @copyright Copyright (C) 2021 wmbat.
  *

@@ -1,6 +1,6 @@
 /**
- * @file parser.test.cpp
- * @brief Runs tests on functions defined in parser/parser.hpp
+ * @file rule.cpp
+ * @brief Implement the functions defined at rule.hpp
  * @copyright Copyright (C) 2021 wmbat.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include <doctest/doctest.h>
+#include <toy_compiler/grammar/rule.hpp>
+#include <utility>
 
-TEST_SUITE("Parser test suite")
+namespace grammar
 {
-   TEST_CASE("TEST") { REQUIRE(true); }
-}
+   rule::rule(grammar_type start, symbol_array tail) : m_start{start}, m_symbols{std::move(tail)} {}
+
+   auto rule::start() const -> grammar_type { return m_start; }
+
+   auto rule::tail() const -> const symbol_array& { return m_symbols; }
+   auto rule::tail() -> symbol_array& { return m_symbols; }
+} // namespace grammar

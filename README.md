@@ -25,6 +25,7 @@ C++ executable
 * [doctest](https://github.com/onqtam/doctest)
 * [libcaramel](https://github.com/Wmbat/libcaramel)
 * [monads](https://github.com/Wmbat/monads)
+* [doctest (for unit tests)](https://github.com/onqtam/doctest)
 
 ## TODO
 
@@ -33,3 +34,12 @@ C++ executable
 * [ ] Properly handle nested block comments
 * [X] Implement testing for the Application class
 * [X] Document public API
+* [o] Implement unit test:
+   * [O] grammar/:
+      * [ ] grammar_type.hpp
+      * [X] rule.hpp
+      * [X] symbol.hpp
+      * [X] symbol_table.hpp
+      * [X] token_type.hpp
+   * [ ] core/:
+      * [ ] parser.hpp

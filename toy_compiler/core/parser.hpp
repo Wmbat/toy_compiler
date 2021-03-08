@@ -1,6 +1,6 @@
 /**
  * @file parser.hpp
- * @brief Defines everthing related to the parsing
+ * @brief Contains all the parsing functions for the compiler
  * @copyright Copyright (C) 2021 wmbat.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,13 +21,39 @@
 
 #include <toy_compiler/core/lexer.hpp>
 
+#include <libcaramel/containers/dynamic_array.hpp>
+
+#include <monads/maybe.hpp>
+
 #include <span>
 #include <unordered_map>
 
 namespace parse
 {
    /**
+    * @brief
+    */
+   enum struct code : std::uint32_t
+   {
+      success,
+      error
+   };
+
+   struct error
+   {
+   };
+
+   /**
+    * @brief
+    */
+   struct result
+   {
+      code value{code::success};
+      monad::maybe<crl::dynamic_array<error>> errors;
+   };
+
+   /**
     * @param items The lexed items to use for parsing
     */
-   void parse_items(std::span<lex::item> items);
+   auto parse_items(std::span<lex::item> items) -> result;
 } // namespace parse

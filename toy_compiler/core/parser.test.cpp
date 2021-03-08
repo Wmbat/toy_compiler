@@ -1,5 +1,4 @@
 /**
- * @file grammar.test.cpp
  * @brief Runs tests on functions defined in parser/parser.hpp
  * @copyright Copyright (C) 2021 wmbat.
  *
@@ -20,9 +19,9 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <toy_compiler/parse/grammar.hpp>
+#include <toy_compiler/core/parser.hpp>
 
-TEST_SUITE("Grammar test suite")
+TEST_SUITE("Parser test suite")
 {
-   TEST_CASE("grammar::symbol to_string") {}
+   TEST_CASE("TEST") { REQUIRE(true); }
 }

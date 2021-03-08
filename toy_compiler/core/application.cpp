@@ -19,6 +19,8 @@
 
 #include <toy_compiler/core/application.hpp>
 
+#include <toy_compiler/core/parser.hpp>
+
 #include <fmt/ranges.h>
 
 #include <range/v3/algorithm/count_if.hpp>

@@ -1,5 +1,4 @@
 /**
- * @file token_type.test.cpp
  * @brief Runs tests on functions defined in token_type.hpp
  * @copyright Copyright (C) 2021 wmbat.
  *
@@ -22,92 +21,79 @@
 
 #include <toy_compiler/grammar/token_type.hpp>
 
+#include <range/v3/view/iota.hpp>
+
+template <typename T>
+constexpr auto to(std::uint32_t i) -> T
+{
+   return static_cast<T>(i);
+}
+
 TEST_SUITE("grammar/token_type.hpp test suite")
 {
-   TEST_CASE("to_string")
+   TEST_CASE("to_string_view()")
    {
       using namespace grammar;
 
-      CHECK(to_string_view(token_type::none) == "none");
-      CHECK(to_string_view(token_type::id) == "id");
-      CHECK(to_string_view(token_type::integer_lit) == "integer_lit");
-      CHECK(to_string_view(token_type::float_lit) == "float_lit");
-      CHECK(to_string_view(token_type::str_lit) == "str_lit");
-      CHECK(to_string_view(token_type::period) == "period");
-      CHECK(to_string_view(token_type::comma) == "comma");
-      CHECK(to_string_view(token_type::colon) == "colon");
-      CHECK(to_string_view(token_type::double_colon) == "double_colon");
-      CHECK(to_string_view(token_type::semi_colon) == "semi_colon");
-      CHECK(to_string_view(token_type::add_op) == "add");
-      CHECK(to_string_view(token_type::sub_op) == "sub");
-      CHECK(to_string_view(token_type::mult_op) == "mult");
-      CHECK(to_string_view(token_type::div_op) == "div");
-      CHECK(to_string_view(token_type::equal_op) == "equal");
-      CHECK(to_string_view(token_type::or_op) == "or");
-      CHECK(to_string_view(token_type::and_op) == "and");
-      CHECK(to_string_view(token_type::not_op) == "not");
-      CHECK(to_string_view(token_type::qmark) == "qmark");
-      CHECK(to_string_view(token_type::double_equal) == "double_equal");
-      CHECK(to_string_view(token_type::less_than) == "less_than");
-      CHECK(to_string_view(token_type::less_equal_than) == "less_equal_than");
-      CHECK(to_string_view(token_type::greater_than) == "greater_than");
-      CHECK(to_string_view(token_type::greater_equal_than) == "greater_equal_than");
-      CHECK(to_string_view(token_type::not_equal) == "not_equal");
-      CHECK(to_string_view(token_type::left_brace) == "left_brace");
-      CHECK(to_string_view(token_type::right_brace) == "right_brace");
-      CHECK(to_string_view(token_type::left_square) == "left_square");
-      CHECK(to_string_view(token_type::right_square) == "right_square");
-      CHECK(to_string_view(token_type::left_paren) == "left_paren");
-      CHECK(to_string_view(token_type::right_paren) == "right_paren");
-      CHECK(to_string_view(token_type::line_cmt) == "line_cmt");
-      CHECK(to_string_view(token_type::block_cmt) == "block_cmt");
-      CHECK(to_string_view(token_type::invalid_char) == "invalid_char");
-      CHECK(to_string_view(token_type::invalid_id) == "invalid_id");
-      CHECK(to_string_view(token_type::invalid_num) == "invalid_num");
-      CHECK(to_string_view(token_type::invalid_str) == "invalid_str");
-      CHECK(to_string_view(token_type::invalid_cmt) == "invalid_cmt");
+      namespace vi = ranges::views;
+
+      for (auto i : vi::iota(0u, static_cast<std::uint32_t>(token_type::max_size)))
+      {
+         CHECK(to_string_view(to<token_type>(i)) == detail::token_names[i]);
+      }
+   }
+   TEST_CASE("keyword_to_token_type")
+   {
+      using namespace grammar;
+
+      REQUIRE(keyword_to_token_type(detail::keywords[0]) == token_type::id_if);
+      REQUIRE(keyword_to_token_type(detail::keywords[1]) == token_type::id_then);
+      REQUIRE(keyword_to_token_type(detail::keywords[2]) == token_type::id_else);
+      REQUIRE(keyword_to_token_type(detail::keywords[3]) == token_type::id_integer);
+      REQUIRE(keyword_to_token_type(detail::keywords[4]) == token_type::id_float);
+      REQUIRE(keyword_to_token_type(detail::keywords[5]) == token_type::id_string);
+      REQUIRE(keyword_to_token_type(detail::keywords[6]) == token_type::id_void);
+      REQUIRE(keyword_to_token_type(detail::keywords[7]) == token_type::id_public);
+      REQUIRE(keyword_to_token_type(detail::keywords[8]) == token_type::id_private);
+      REQUIRE(keyword_to_token_type(detail::keywords[9]) == token_type::id_func);
+      REQUIRE(keyword_to_token_type(detail::keywords[10]) == token_type::id_var);
+      REQUIRE(keyword_to_token_type(detail::keywords[11]) == token_type::id_class);
+      REQUIRE(keyword_to_token_type(detail::keywords[12]) == token_type::id_while);
+      REQUIRE(keyword_to_token_type(detail::keywords[13]) == token_type::id_read);
+      REQUIRE(keyword_to_token_type(detail::keywords[14]) == token_type::id_write);
+      REQUIRE(keyword_to_token_type(detail::keywords[15]) == token_type::id_return);
+      REQUIRE(keyword_to_token_type(detail::keywords[16]) == token_type::id_main);
+      REQUIRE(keyword_to_token_type(detail::keywords[17]) == token_type::id_inherits);
+      REQUIRE(keyword_to_token_type(detail::keywords[18]) == token_type::id_break);
+      REQUIRE(keyword_to_token_type(detail::keywords[19]) == token_type::id_continue);
+   }
+   TEST_CASE("is_token_invalid()")
+   {
+      using namespace grammar;
+
+      namespace vi = ranges::views;
+
+      for (auto i : vi::iota(0u, static_cast<std::uint32_t>(token_type::max_size)))
+      {
+         if (i >= 53 && i <= 57)
+         {
+            CHECK(is_token_invalid(to<token_type>(i)));
+         }
+         else
+         {
+            CHECK_FALSE(is_token_invalid(to<token_type>(i)));
+         }
+      }
    }
    TEST_CASE("fmt::formatter - token_type")
    {
       using namespace grammar;
 
-      CHECK(fmt::format("{}", token_type::none) == "none");
-      CHECK(fmt::format("{}", token_type::id) == "id");
-      CHECK(fmt::format("{}", token_type::integer_lit) == "integer_lit");
-      CHECK(fmt::format("{}", token_type::float_lit) == "float_lit");
-      CHECK(fmt::format("{}", token_type::str_lit) == "str_lit");
-      CHECK(fmt::format("{}", token_type::period) == "period");
-      CHECK(fmt::format("{}", token_type::comma) == "comma");
-      CHECK(fmt::format("{}", token_type::colon) == "colon");
-      CHECK(fmt::format("{}", token_type::double_colon) == "double_colon");
-      CHECK(fmt::format("{}", token_type::semi_colon) == "semi_colon");
-      CHECK(fmt::format("{}", token_type::add_op) == "add");
-      CHECK(fmt::format("{}", token_type::sub_op) == "sub");
-      CHECK(fmt::format("{}", token_type::mult_op) == "mult");
-      CHECK(fmt::format("{}", token_type::div_op) == "div");
-      CHECK(fmt::format("{}", token_type::equal_op) == "equal");
-      CHECK(fmt::format("{}", token_type::or_op) == "or");
-      CHECK(fmt::format("{}", token_type::and_op) == "and");
-      CHECK(fmt::format("{}", token_type::not_op) == "not");
-      CHECK(fmt::format("{}", token_type::qmark) == "qmark");
-      CHECK(fmt::format("{}", token_type::double_equal) == "double_equal");
-      CHECK(fmt::format("{}", token_type::less_than) == "less_than");
-      CHECK(fmt::format("{}", token_type::less_equal_than) == "less_equal_than");
-      CHECK(fmt::format("{}", token_type::greater_than) == "greater_than");
-      CHECK(fmt::format("{}", token_type::greater_equal_than) == "greater_equal_than");
-      CHECK(fmt::format("{}", token_type::not_equal) == "not_equal");
-      CHECK(fmt::format("{}", token_type::left_brace) == "left_brace");
-      CHECK(fmt::format("{}", token_type::right_brace) == "right_brace");
-      CHECK(fmt::format("{}", token_type::left_square) == "left_square");
-      CHECK(fmt::format("{}", token_type::right_square) == "right_square");
-      CHECK(fmt::format("{}", token_type::left_paren) == "left_paren");
-      CHECK(fmt::format("{}", token_type::right_paren) == "right_paren");
-      CHECK(fmt::format("{}", token_type::line_cmt) == "line_cmt");
-      CHECK(fmt::format("{}", token_type::block_cmt) == "block_cmt");
-      CHECK(fmt::format("{}", token_type::invalid_char) == "invalid_char");
-      CHECK(fmt::format("{}", token_type::invalid_id) == "invalid_id");
-      CHECK(fmt::format("{}", token_type::invalid_num) == "invalid_num");
-      CHECK(fmt::format("{}", token_type::invalid_str) == "invalid_str");
-      CHECK(fmt::format("{}", token_type::invalid_cmt) == "invalid_cmt");
+      namespace vi = ranges::views;
+
+      for (auto i : vi::iota(0u, static_cast<std::uint32_t>(token_type::max_size)))
+      {
+         CHECK(fmt::format("{}", to<token_type>(i)) == detail::token_names[i]);
+      }
    }
 }

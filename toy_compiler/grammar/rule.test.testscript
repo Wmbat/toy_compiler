@@ -1,0 +1,4 @@
+: Tests
+: Runs unit tests for the rule.hpp interface
+
+$* 1>| == 0

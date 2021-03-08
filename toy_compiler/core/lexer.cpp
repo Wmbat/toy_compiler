@@ -535,12 +535,12 @@ namespace lex
    {
       if (std::size(data) > 1 && data.at(1) == '=')
       {
-         return {.type = grammar::token_type::double_equal,
+         return {.type = grammar::token_type::equal,
                  .lexeme = std::string{data.substr(0, 2)},
                  .line = line};
       }
 
-      return {.type = grammar::token_type::equal_op, .lexeme = {data.at(0)}, .line = line};
+      return {.type = grammar::token_type::assign, .lexeme = {data.at(0)}, .line = line};
    }
 
    auto lex_operator(const std::string_view data, std::uint32_t line) -> item
