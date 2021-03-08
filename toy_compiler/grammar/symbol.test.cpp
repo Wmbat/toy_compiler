@@ -135,7 +135,7 @@ TEST_SUITE("grammar/symbol.hpp test suite")
          symbol s{type};
 
          CHECK(s.type() == symbol_type::terminal);
-         CHECK(get<symbol_type::terminal>(s) == type);
+         CHECK(get_token_type(s) == type);
          CHECK_THROWS(get<symbol_type::non_terminal>(s));
          CHECK_THROWS(get<symbol_type::stop>(s));
       }
@@ -145,7 +145,7 @@ TEST_SUITE("grammar/symbol.hpp test suite")
          symbol s{type};
 
          CHECK(s.type() == symbol_type::non_terminal);
-         CHECK(get<symbol_type::non_terminal>(s) == type);
+         CHECK(get_grammar_type(s) == type);
          CHECK_THROWS(get<symbol_type::terminal>(s));
          CHECK_THROWS(get<symbol_type::stop>(s));
       }

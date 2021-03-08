@@ -20,9 +20,12 @@
 #include <toy_compiler/core/parser.hpp>
 
 #include <toy_compiler/grammar/rule.hpp>
+#include <toy_compiler/grammar/symbol.hpp>
 #include <toy_compiler/grammar/symbol_table.hpp>
 
 #include <libcaramel/containers/dynamic_array.hpp>
+
+#include <range/v3/view/reverse.hpp>
 
 namespace parse
 {
@@ -34,7 +37,7 @@ namespace parse
 
    auto parse_items(std::span<lex::item> items) -> result
    {
-      static grammar::symbol_table table = construct_symbol_table();
+      static const grammar::symbol_table table = construct_symbol_table();
 
       crl::dynamic_array<error> errors;
       crl::dynamic_array<grammar::symbol> stack;
@@ -59,15 +62,21 @@ namespace parse
          }
          else
          {
-            /**
-            if (const auto it = table.find({x, {item_it->type}}); it != std::end(table))
+            const auto& rule =
+               table.lookup({get<grammar::symbol_type::non_terminal>(x), item_it->type});
+            if (std::size(rule.tail()) != 0)
             {
+               stack.pop_back();
+
+               for (auto& symbol : rule.tail() | ranges::views::reverse)
+               {
+                  stack.append(symbol);
+               }
             }
             else
             {
                // handle error
             }
-            */
          }
       }
 

@@ -1,6 +1,6 @@
 /**
  * @file symbol.hpp
- * @brief Contains all element relating to the `grammar::symbol` class
+ * @brief Contains all element relating to the grammar::symbol class
  * @copyright Copyright (C) 2021 wmbat.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -63,18 +63,51 @@ namespace grammar
       };
    } // namespace detail
 
+   /**
+    * @brief A class used for holding an enum type value (`grammar::grammar_type` or
+    * `grammar::token_type`) by using a agnostic layer using the `grammar::symbol_type` enum
+    *
+    * `grammar::token_type` values will be stored with the `grammar::symbol_type::terminal` enum
+    * value & `grammar::grammar_type` values will be stored with the
+    * `grammar::symbol_type::non_terminal` enum value. The `grammar::symbol_type::stop` is
+    * placeholder used to designate the end of parsing
+    */
    class symbol
    {
    public:
       using storage = std::variant<bool, token_type, grammar_type>;
 
+      /**
+       * @brief Construct a default **terminal** `grammar::symbol`
+       */
       static constexpr auto terminal() -> symbol { return {token_type::max_size}; }
+      /**
+       * @brief Construct a default **non_terminal** `grammar::symbol`
+       */
       static constexpr auto non_terminal() -> symbol { return {grammar_type::max_size}; }
+      /**
+       * @brief Construct a default **start** `grammar::symbol`
+       */
       static constexpr auto start() -> symbol { return {grammar_type::start}; }
+      /**
+       * @brief Construct a default **stop** `grammar::symbol`
+       */
       static constexpr auto stop() -> symbol { return {}; }
 
    public:
+      /**
+       * @brief Construct a `grammar::symbol` of type `grammar::symbol_type::terminal` from a
+       * `grammar::token_type` value
+       *
+       * @param[in] value The `grammar::token_type` value to store
+       */
       constexpr symbol(token_type value) : m_type{symbol_type::terminal}, m_data{value} {}
+      /**
+       * @brief Construct a `grammar::symbol` of type `grammar::symbol_type::non_terminal` from a
+       * `grammar::grammar_type` value
+       *
+       * @param[in] value The `grammar::grammar_type` value to store
+       */
       constexpr symbol(grammar_type value) : m_type{symbol_type::non_terminal}, m_data{value} {}
 
       constexpr auto operator==(const symbol& symbol) const -> bool = default;
@@ -97,6 +130,9 @@ namespace grammar
          return false;
       }
 
+      /**
+       * @brief Get the type of the `grammar::symbol`
+       */
       [[nodiscard]] constexpr auto type() const -> symbol_type { return m_type; }
 
       template <symbol_type T>
@@ -114,10 +150,60 @@ namespace grammar
       storage m_data{true};
    };
 
+   /**
+    * @brief Check if a `grammar::symbol` is of type `symbol_type::stop`
+    *
+    * @param[in] s The input `grammar::symbol`
+    *
+    * @return True if the input `grammar::symbol` is of type `symbol_type::stop`
+    */
    constexpr auto is_stop(const symbol& s) -> bool { return s.type() == symbol_type::stop; }
+   /**
+    * @brief Check if a `grammar::symbol` is of type `symbol_type::terminal`
+    *
+    * @param[in] s The input `grammar::symbol`
+    *
+    * @return True if the input `grammar::symbol` is of type `symbol_type::terminal`
+    */
    constexpr auto is_terminal(const symbol& s) -> bool { return s.type() == symbol_type::terminal; }
+   /**
+    * @brief Check if a `grammar::symbol` is of type `symbol_type::non_terminal`
+    *
+    * @param[in] s The input `grammar::symbol`
+    *
+    * @return True if the input `grammar::symbol` is of type `symbol_type::non_terminal`
+    */
    constexpr auto is_non_terminal(const symbol& s) -> bool
    {
       return s.type() == symbol_type::non_terminal;
+   }
+
+   /**
+    * @brief Access the underlying `grammar::token_type` value stored in `grammar::symbol`.
+    *
+    * @param[in] s The `grammar::symbol` to access
+    *
+    * @throws std::bad_variant_access Thrown if the input `grammar::symbol` is not of type
+    * `symbol_type::terminal`
+    *
+    * @return The `grammar::token_type` value stored in `grammar::symbol`
+    */
+   constexpr auto get_token_type(const symbol& s) -> token_type
+   {
+      return get<symbol_type::terminal>(s);
+   }
+   /**
+    * @brief Access the underlying `grammar::grammar_type` value stored in `grammar::symbol`.
+    *
+    * @param[in] s The `grammar::symbol` to access
+    *
+    * @throws std::bad_variant_access Thrown if the input `grammar::symbol` is not of type
+    * `symbol_type::non_terminal`
+    *
+    * @return The `grammar::grammar_type` value stored in `grammar::symbol`
+    */
+   constexpr auto get_grammar_type(const symbol& s) -> grammar_type
+   {
+      return get<symbol_type::non_terminal>(s);
    }
 } // namespace grammar
