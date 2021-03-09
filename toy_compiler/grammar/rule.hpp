@@ -25,6 +25,8 @@
 
 #include <libcaramel/containers/dynamic_array.hpp>
 
+#include <fmt/ranges.h>
+
 #include <memory>
 #include <utility>
 
@@ -34,7 +36,7 @@ namespace grammar
     * @brief shorthand to designate a dynamic array containing `grammar::symbol`s with a small
     * buffer of 5 elements
     */
-   using symbol_array = crl::small_dynamic_array<symbol, 5>;
+   using symbol_array = crl::small_dynamic_array<symbol, 5>; // NOLINT
 
    /**
     * @brief A simple class to hold the information of a grammar rule.
@@ -55,6 +57,8 @@ namespace grammar
        */
       rule(grammar_type start, symbol_array tail);
 
+      auto operator==(const rule& other) const -> bool = default;
+
       /**
        * @brief Access the start of the `grammar::rule`
        */
@@ -74,3 +78,23 @@ namespace grammar
       symbol_array m_symbols{};
    };
 } // namespace grammar
+
+/**
+ * @brief A specialization for using the `grammar::rule` class in the **fmt** & **spdlog**
+ * libraries
+ */
+template <>
+struct fmt::formatter<grammar::rule>
+{
+   template <typename ParseContex>
+   constexpr auto parse(ParseContex& ctx)
+   {
+      return ctx.begin();
+   }
+
+   template <typename FormatContext>
+   auto format(const grammar::rule& r, FormatContext& ctx)
+   {
+      return fmt::format_to(ctx.out(), "({}, {})", r.start(), r.tail());
+   }
+};

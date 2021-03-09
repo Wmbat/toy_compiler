@@ -61,7 +61,25 @@ namespace grammar
       {
          using type = bool;
       };
+
+      /**
+       * List of string representation of the `grammar::symbol_type` enumeration values
+       */
+      constexpr std::array symbol_names{"terminal", "non_terminal", "stop"};
    } // namespace detail
+
+   /**
+    * @brief convert a `grammar::symbol_type` value to it's string representation
+    *
+    * @param [in] type The `grammar::symbol_type` value to represent as a string
+    *
+    * @return A `std::string_view` into the corresponding `grammar::symbol_type` string
+    * representation.
+    */
+   constexpr auto to_string_view(grammar::symbol_type type) -> std::string_view
+   {
+      return detail::symbol_names.at(static_cast<std::uint32_t>(type));
+   }
 
    /**
     * @brief A class used for holding an enum type value (`grammar::grammar_type` or
@@ -207,3 +225,53 @@ namespace grammar
       return get<symbol_type::non_terminal>(s);
    }
 } // namespace grammar
+
+/**
+ * @brief A specialization for using the `grammar::grammar_type` enum in the **fmt** & **spdlog**
+ * libraries
+ */
+template <>
+struct fmt::formatter<grammar::symbol_type>
+{
+   template <typename ParseContex>
+   constexpr auto parse(ParseContex& ctx)
+   {
+      return ctx.begin();
+   }
+
+   template <typename FormatContext>
+   auto format(grammar::symbol_type type, FormatContext& ctx)
+   {
+      return fmt::format_to(ctx.out(), "{}", grammar::to_string_view(type));
+   }
+};
+
+/**
+ * @brief A specialization for using the `grammar::symbol` class in the **fmt** & **spdlog**
+ * libraries
+ */
+template <>
+struct fmt::formatter<grammar::symbol>
+{
+   template <typename ParseContex>
+   constexpr auto parse(ParseContex& ctx)
+   {
+      return ctx.begin();
+   }
+
+   template <typename FormatContext>
+   auto format(const grammar::symbol& s, FormatContext& ctx)
+   {
+      if (grammar::is_terminal(s))
+      {
+         return fmt::format_to(ctx.out(), "({}, {})", s.type(), grammar::get_token_type(s));
+      }
+
+      if (grammar::is_non_terminal(s))
+      {
+         return fmt::format_to(ctx.out(), "({}, {})", s.type(), grammar::get_grammar_type(s));
+      }
+
+      return fmt::format_to(ctx.out(), "({})", s.type());
+   }
+};

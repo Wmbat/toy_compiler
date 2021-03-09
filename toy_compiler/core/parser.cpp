@@ -35,7 +35,7 @@ namespace parse
       return *(std::end(symbols) - 1);
    }
 
-   auto parse_items(std::span<lex::item> items) -> result
+   auto parse_items(std::span<lex::item> items, [[maybe_unused]] util::logger_wrapper log) -> result
    {
       static const grammar::symbol_table table = construct_symbol_table();
 
@@ -47,7 +47,7 @@ namespace parse
       auto item_it = std::begin(items);
       while (top(stack) != grammar::symbol::stop())
       {
-         auto x = top(stack);
+         const auto& x = top(stack);
          if (x == grammar::symbol::terminal())
          {
             if (x == item_it->type)
@@ -62,9 +62,9 @@ namespace parse
          }
          else
          {
-            const auto& rule =
-               table.lookup({get<grammar::symbol_type::non_terminal>(x), item_it->type});
-            if (std::size(rule.tail()) != 0)
+            const auto head = get<grammar::symbol_type::non_terminal>(x);
+            const auto& rule = table.lookup({head, item_it->type});
+            if (rule == grammar::rule{})
             {
                stack.pop_back();
 

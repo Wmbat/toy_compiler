@@ -31,7 +31,7 @@ namespace grammar
    namespace detail
    {
       /**
-       * List of string representation of the `lex::token_type` enumeration values
+       * List of string representation of the `grammar::token_type` enumeration values
        */
       constexpr std::array token_names{"epsilon",      "id",
                                        "if",           "then",
@@ -139,12 +139,12 @@ namespace grammar
    };
 
    /**
-    * @brief convert a `lex::token_type` value to it's string representation
+    * @brief convert a `grammar::token_type` value to it's string representation
     *
-    * @param [in] type The `lex::token_type` value to represent as a string
+    * @param [in] type The `grammar::token_type` value to represent as a string
     *
-    * @return A `std::string_view` into the corresponding `lex::token_type` string representation
-    * from the `lex::token_names` array
+    * @return A `std::string_view` into the corresponding `grammar::token_type` string
+    * representation from the `grammar::token_names` array
     */
    constexpr auto to_string_view(grammar::token_type type) -> std::string_view
    {
@@ -276,10 +276,11 @@ namespace grammar
 } // namespace grammar
 
 /**
- * @brief A specialization for using `std::string_view` in the **fmt** & **spdlog** libraries
+ * @brief A specialization for using the `grammar::token_type` enum in the **fmt** & **spdlog**
+ * libraries
  */
 template <>
-struct fmt::formatter<std::string_view>
+struct fmt::formatter<grammar::token_type>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -288,22 +289,8 @@ struct fmt::formatter<std::string_view>
    }
 
    template <typename FormatContext>
-   auto format(const std::string_view view, FormatContext& ctx)
-   {
-      return fmt::format_to(ctx.out(), "{}", view);
-   }
-};
-
-/**
- * @brief A specialization for using the `grammar::token_type` enum in the **fmt** & **spdlog**
- * libraries
- */
-template <>
-struct fmt::formatter<grammar::token_type> : fmt::formatter<std::string_view>
-{
-   template <typename FormatContext>
    auto format(grammar::token_type t, FormatContext& ctx)
    {
-      return fmt::formatter<std::string_view>::format(to_string_view(t), ctx);
+      return fmt::format_to(ctx.out(), "{}", to_string_view(t));
    }
 };

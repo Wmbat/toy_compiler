@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "fmt/core.h"
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
@@ -220,5 +221,55 @@ TEST_SUITE("grammar/symbol.hpp test suite")
          CHECK_FALSE(is_stop(symbol::non_terminal()));
          CHECK_FALSE(is_stop(symbol::terminal()));
       }
+   }
+
+   TEST_CASE("to_string_view()")
+   {
+      using namespace grammar;
+
+      namespace vi = ranges::views;
+
+      for (auto i : vi::iota(0u, static_cast<std::uint32_t>(symbol_type::stop) + 1))
+      {
+         CHECK(to_string_view(to<symbol_type>(i)) == detail::symbol_names[i]);
+      }
+   }
+   TEST_CASE("fmt::formatter - symbol_type")
+   {
+      using namespace grammar;
+
+      namespace vi = ranges::views;
+
+      for (auto i : vi::iota(0u, static_cast<std::uint32_t>(symbol_type::stop) + 1))
+      {
+         CHECK(fmt::format("{}", to<symbol_type>(i)) == detail::symbol_names[i]);
+      }
+   }
+   TEST_CASE("fmt::formatter - symbol")
+   {
+      using namespace grammar;
+
+      namespace vi = ranges::views;
+
+      const auto token_size = static_cast<std::uint32_t>(token_type::max_size);
+      const auto grammar_size = static_cast<std::uint32_t>(grammar_type::max_size);
+
+      for (token_type type : vi::iota(0u, token_size) | vi::transform(to<token_type>))
+      {
+         symbol s{type};
+
+         std::string expected = fmt::format("({}, {})", symbol_type::terminal, type);
+         CHECK(fmt::format("{}", s) == expected);
+      }
+
+      for (grammar_type type : vi::iota(0u, grammar_size) | vi::transform(to<grammar_type>))
+      {
+         symbol s{type};
+
+         std::string expected = fmt::format("({}, {})", symbol_type::non_terminal, type);
+         CHECK(fmt::format("{}", s) == expected);
+      }
+
+      CHECK(fmt::format("{}", symbol::stop()) == fmt::format("({})", symbol_type::stop));
    }
 }

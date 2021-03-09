@@ -20,6 +20,7 @@
 #pragma once
 
 #include <toy_compiler/core/lexer.hpp>
+#include <toy_compiler/util/logger.hpp>
 
 #include <libcaramel/containers/dynamic_array.hpp>
 
@@ -55,5 +56,5 @@ namespace parse
    /**
     * @param items The lexed items to use for parsing
     */
-   auto parse_items(std::span<lex::item> items) -> result;
+   auto parse_items(std::span<lex::item> items, util::logger_wrapper log = nullptr) -> result;
 } // namespace parse

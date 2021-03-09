@@ -1,0 +1,4 @@
+: Tests
+: Runs unit tests for the grammar_type.hpp interface
+
+$* 1>| == 0

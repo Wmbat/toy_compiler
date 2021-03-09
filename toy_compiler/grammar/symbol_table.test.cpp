@@ -21,16 +21,25 @@
 
 #include <toy_compiler/grammar/symbol_table.hpp>
 
+#include <range/v3/range/conversion.hpp>
+#include <range/v3/view/cartesian_product.hpp>
+#include <range/v3/view/for_each.hpp>
 #include <range/v3/view/iota.hpp>
 #include <range/v3/view/transform.hpp>
-#include <range/v3/view/zip.hpp>
 
 #include <random>
+
+using udist = std::uniform_int_distribution<std::uint32_t>;
 
 template <typename T>
 constexpr auto to(std::uint32_t i) -> T
 {
    return static_cast<T>(i);
+}
+
+constexpr auto to_key(std::tuple<std::uint32_t, std::uint32_t> t) -> grammar::symbol_table::key
+{
+   return {to<grammar::grammar_type>(std::get<0>(t)), to<grammar::token_type>(std::get<1>(t))};
 }
 
 grammar::symbol_table create_table()
@@ -47,30 +56,48 @@ grammar::symbol_table create_table()
    std::uniform_int_distribution<std::uint32_t> token_size_dist{0, grammar_size};
 
    symbol_table table;
-   for (auto x : vi::iota(0u, grammar_size) | vi::transform(to<grammar_type>))
+
+   const auto all_keys =
+      vi::cartesian_product(vi::iota(0u, grammar_size), vi::iota(0u, token_size)) |
+      vi::transform(to_key);
+
+   for (const auto k : all_keys)
    {
-      for (auto y : vi::iota(0u, token_size) | vi::transform(to<token_type>))
+      symbol_array tail{};
+      for (auto i : vi::iota(0u, 5u))
       {
-         symbol_table::key k{x, y};
-
-         symbol_array tail{};
-         for (auto i : vi::iota(0u, 5u))
+         if (i % 2 == 0)
          {
-            if (i % 2 == 0)
-            {
-               tail.append(to<grammar_type>(grammar_size_dist(rng)));
-            }
-            else
-            {
-               tail.append(to<token_type>(token_size_dist(rng)));
-            }
+            tail.append(to<grammar_type>(grammar_size_dist(rng)));
          }
-
-         table.set_rule(k, tail);
+         else
+         {
+            tail.append(to<token_type>(token_size_dist(rng)));
+         }
       }
+
+      table.set_rule(k, tail);
    }
 
    return table;
+}
+
+grammar::symbol_array generate_tail(std::mt19937& rng, udist& arr_size_dist,
+                                    udist& grammar_size_dist, udist& token_size_dist)
+{
+   grammar::symbol_array tail{};
+   for (auto i : ranges::views::iota(0u, arr_size_dist(rng)))
+   {
+      if (i % 2 == 0)
+      {
+         tail.append(to<grammar::grammar_type>(grammar_size_dist(rng)));
+      }
+      else
+      {
+         tail.append(to<grammar::token_type>(token_size_dist(rng)));
+      }
+   }
+   return tail;
 }
 
 TEST_SUITE("grammar/symbol_table.hpp test suite")
@@ -88,53 +115,20 @@ TEST_SUITE("grammar/symbol_table.hpp test suite")
       std::mt19937 rng(std::random_device{}());
       std::uniform_int_distribution<std::uint32_t> arr_size_dist{0, 10};
       std::uniform_int_distribution<std::uint32_t> grammar_size_dist{0, grammar_size};
-      std::uniform_int_distribution<std::uint32_t> token_size_dist{0, grammar_size};
+      std::uniform_int_distribution<std::uint32_t> token_size_dist{0, token_size};
 
-      for (auto x : vi::iota(0u, grammar_size) | vi::transform(to<grammar_type>))
+      const auto all_keys =
+         vi::cartesian_product(vi::iota(0u, grammar_size), vi::iota(0u, token_size)) |
+         vi::transform(to_key);
+
+      for (const auto k : all_keys)
       {
-         for (auto y : vi::iota(0u, token_size) | vi::transform(to<token_type>))
-         {
-            symbol_table::key k{x, y};
+         symbol_array tail = generate_tail(rng, arr_size_dist, grammar_size_dist, token_size_dist);
 
-            symbol_array tail{};
-            for (auto i : vi::iota(0u, arr_size_dist(rng)))
-            {
-               if (i % 2 == 0)
-               {
-                  tail.append(to<grammar_type>(grammar_size_dist(rng)));
-               }
-               else
-               {
-                  tail.append(to<token_type>(token_size_dist(rng)));
-               }
-            }
+         table.set_rule(k, tail);
 
-            table.set_rule(k, tail);
-
-            CHECK(table.lookup(k).start() == x);
-            CHECK(std::size(table.lookup(k).tail()) == std::size(tail));
-         }
-      }
-   }
-   TEST_CASE("lookup() const")
-   {
-      using namespace grammar;
-
-      namespace vi = ranges::views;
-
-      const auto grammar_size = static_cast<std::uint32_t>(grammar_type::max_size);
-      const auto token_size = static_cast<std::uint32_t>(token_type::max_size);
-
-      symbol_table table = create_table();
-      for (auto x : vi::iota(0u, grammar_size) | vi::transform(to<grammar_type>))
-      {
-         for (auto y : vi::iota(0u, token_size) | vi::transform(to<token_type>))
-         {
-            symbol_table::key k{x, y};
-
-            CHECK(table.lookup(k).start() == x);
-            CHECK(std::size(table.lookup(k).tail()) == 5);
-         }
+         CHECK(table.lookup(k).start() == k.first);
+         CHECK(std::size(table.lookup(k).tail()) == std::size(tail));
       }
    }
    TEST_CASE("lookup()")
@@ -146,16 +140,37 @@ TEST_SUITE("grammar/symbol_table.hpp test suite")
       const auto grammar_size = static_cast<std::uint32_t>(grammar_type::max_size);
       const auto token_size = static_cast<std::uint32_t>(token_type::max_size);
 
-      const symbol_table table = create_table();
-      for (auto x : vi::iota(0u, grammar_size) | vi::transform(to<grammar_type>))
-      {
-         for (auto y : vi::iota(0u, token_size) | vi::transform(to<token_type>))
-         {
-            symbol_table::key k{x, y};
+      symbol_table table = create_table();
 
-            CHECK(table.lookup(k).start() == x);
-            CHECK(std::size(table.lookup(k).tail()) == 5);
-         }
+      const auto all_keys =
+         vi::cartesian_product(vi::iota(0u, grammar_size), vi::iota(0u, token_size)) |
+         vi::transform(to_key);
+
+      for (const auto k : all_keys)
+      {
+         CHECK(table.lookup(k).start() == k.first);
+         CHECK(std::size(table.lookup(k).tail()) == 5);
+      }
+   }
+   TEST_CASE("lookup() const")
+   {
+      using namespace grammar;
+
+      namespace vi = ranges::views;
+
+      const auto grammar_size = static_cast<std::uint32_t>(grammar_type::max_size);
+      const auto token_size = static_cast<std::uint32_t>(token_type::max_size);
+
+      const symbol_table table = create_table();
+
+      const auto all_keys =
+         vi::cartesian_product(vi::iota(0u, grammar_size), vi::iota(0u, token_size)) |
+         vi::transform(to_key);
+
+      for (const auto k : all_keys)
+      {
+         CHECK(table.lookup(k).start() == k.first);
+         CHECK(std::size(table.lookup(k).tail()) == 5);
       }
    }
 }

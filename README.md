@@ -35,8 +35,8 @@ C++ executable
 * [X] Implement testing for the Application class
 * [X] Document public API
 * [o] Implement unit test:
-   * [O] grammar/:
-      * [ ] grammar_type.hpp
+   * [X] grammar/:
+      * [X] grammar_type.hpp
       * [X] rule.hpp
       * [X] symbol.hpp
       * [X] symbol_table.hpp

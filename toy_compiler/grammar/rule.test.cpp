@@ -77,4 +77,38 @@ TEST_SUITE("grammar/rule.hpp test suite")
          CHECK(r.tail() == tail);
       }
    }
+   TEST_CASE("fmt::formatter - rule")
+   {
+      using namespace grammar;
+
+      namespace vi = ranges::views;
+
+      const auto grammar_size = static_cast<std::uint32_t>(grammar_type::max_size);
+
+      std::mt19937 rng(std::random_device{}());
+      std::uniform_int_distribution<std::uint32_t> arr_size_dist{0, 10};
+      std::uniform_int_distribution<std::uint32_t> grammar_size_dist{0, grammar_size};
+      std::uniform_int_distribution<std::uint32_t> token_size_dist{0, grammar_size};
+
+      for (auto type : vi::iota(0u, grammar_size) | vi::transform(to<grammar_type>))
+      {
+         symbol_array tail{};
+         for (auto i : vi::iota(0u, arr_size_dist(rng)))
+         {
+            if (i % 2 == 0)
+            {
+               tail.append(to<grammar_type>(grammar_size_dist(rng)));
+            }
+            else
+            {
+               tail.append(to<token_type>(token_size_dist(rng)));
+            }
+         }
+
+         rule r{type, tail};
+
+         std::string expected = fmt::format("({}, {})", type, tail);
+         CHECK(fmt::format("{}", r) == expected);
+      }
+   }
 }

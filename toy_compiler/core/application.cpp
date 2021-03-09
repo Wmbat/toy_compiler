@@ -40,8 +40,6 @@ application::application(std::span<const std::string_view> args, util::logger_wr
       {
          if (auto maybe = lex::lex_file(filepath, m_logger))
          {
-            write_tokens_to_file(filepath, maybe.value(), m_logger);
-            write_errors_to_file(filepath, maybe.value(), m_logger);
          }
          else
          {
