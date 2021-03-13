@@ -19,7 +19,8 @@
 
 #pragma once
 
-#include "fmt/core.h"
+#include <fmt/core.h>
+
 #include <cstdint>
 #include <functional>
 #include <string_view>

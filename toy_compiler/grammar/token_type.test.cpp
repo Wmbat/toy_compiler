@@ -75,7 +75,7 @@ TEST_SUITE("grammar/token_type.hpp test suite")
 
       for (auto i : vi::iota(0u, static_cast<std::uint32_t>(token_type::max_size)))
       {
-         if (i >= 53 && i <= 57)
+         if (i >= 54 && i <= 58)
          {
             CHECK(is_token_invalid(to<token_type>(i)));
          }

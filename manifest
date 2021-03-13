@@ -15,5 +15,4 @@ depends: range-v3 ^0.11.0
 depends: monads ^0.1.1-a.5
 depends: spdlog ^1.8.2
 depends: fmt ^7.1.3
-depends: libcaramel >= 0.1.0-a.6
 depends: doctest ^2.4.0

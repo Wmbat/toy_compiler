@@ -22,11 +22,10 @@
 #include <toy_compiler/grammar/token_type.hpp>
 #include <toy_compiler/util/logger.hpp>
 
-#include <libcaramel/containers/dynamic_array.hpp>
-
 #include <monads/maybe.hpp>
 
 #include <filesystem>
+#include <vector>
 
 namespace lex
 {
@@ -38,6 +37,7 @@ namespace lex
       grammar::token_type type{}; // NOLINT
       std::string lexeme{};       // NOLINT
       std::uint32_t line{};       // NOLINT
+      std::uint32_t column{};     // NOLINT
 
       auto operator<=>(const item& other) const -> std::strong_ordering = default;
    };
@@ -51,7 +51,7 @@ namespace lex
     * @return The list of `lex::item` from the file
     */
    auto lex_file(const std::filesystem::path& path, util::logger_wrapper log = nullptr)
-      -> monad::maybe<crl::dynamic_array<lex::item>>;
+      -> monad::maybe<std::vector<lex::item>>;
 } // namespace lex
 
 /**
@@ -69,6 +69,7 @@ struct fmt::formatter<lex::item>
    template <typename FormatContext>
    auto format(const lex::item& tok, FormatContext& ctx)
    {
-      return fmt::format_to(ctx.out(), "[{0}, {1}, {2}]", tok.type, tok.lexeme, tok.line);
+      return fmt::format_to(ctx.out(), "[.type = {0}, .lexeme = {1}, .line = {2}]",
+                            tok.type, tok.lexeme, tok.line);
    }
 };

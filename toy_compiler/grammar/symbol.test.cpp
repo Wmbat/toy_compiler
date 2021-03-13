@@ -258,7 +258,7 @@ TEST_SUITE("grammar/symbol.hpp test suite")
       {
          symbol s{type};
 
-         std::string expected = fmt::format("({}, {})", symbol_type::terminal, type);
+         std::string expected = fmt::format("{}({})", symbol_type::terminal, type);
          CHECK(fmt::format("{}", s) == expected);
       }
 
@@ -266,10 +266,10 @@ TEST_SUITE("grammar/symbol.hpp test suite")
       {
          symbol s{type};
 
-         std::string expected = fmt::format("({}, {})", symbol_type::non_terminal, type);
+         std::string expected = fmt::format("{}({})", symbol_type::non_terminal, type);
          CHECK(fmt::format("{}", s) == expected);
       }
 
-      CHECK(fmt::format("{}", symbol::stop()) == fmt::format("({})", symbol_type::stop));
+      CHECK(fmt::format("{}", symbol::stop()) == fmt::format("{}", symbol_type::stop));
    }
 }

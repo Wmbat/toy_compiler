@@ -63,11 +63,11 @@ TEST_SUITE("grammar/rule.hpp test suite")
          {
             if (i % 2 == 0)
             {
-               tail.append(to<grammar_type>(grammar_size_dist(rng)));
+               tail.push_back(to<grammar_type>(grammar_size_dist(rng)));
             }
             else
             {
-               tail.append(to<token_type>(token_size_dist(rng)));
+               tail.push_back(to<token_type>(token_size_dist(rng)));
             }
          }
 
@@ -97,17 +97,17 @@ TEST_SUITE("grammar/rule.hpp test suite")
          {
             if (i % 2 == 0)
             {
-               tail.append(to<grammar_type>(grammar_size_dist(rng)));
+               tail.push_back(to<grammar_type>(grammar_size_dist(rng)));
             }
             else
             {
-               tail.append(to<token_type>(token_size_dist(rng)));
+               tail.push_back(to<token_type>(token_size_dist(rng)));
             }
          }
 
          rule r{type, tail};
 
-         std::string expected = fmt::format("({}, {})", type, tail);
+         std::string expected = fmt::format("{} -> {}", type, tail);
          CHECK(fmt::format("{}", r) == expected);
       }
    }

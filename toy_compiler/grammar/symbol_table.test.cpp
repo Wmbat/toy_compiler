@@ -68,11 +68,11 @@ grammar::symbol_table create_table()
       {
          if (i % 2 == 0)
          {
-            tail.append(to<grammar_type>(grammar_size_dist(rng)));
+            tail.push_back(to<grammar_type>(grammar_size_dist(rng)));
          }
          else
          {
-            tail.append(to<token_type>(token_size_dist(rng)));
+            tail.push_back(to<token_type>(token_size_dist(rng)));
          }
       }
 
@@ -90,11 +90,11 @@ grammar::symbol_array generate_tail(std::mt19937& rng, udist& arr_size_dist,
    {
       if (i % 2 == 0)
       {
-         tail.append(to<grammar::grammar_type>(grammar_size_dist(rng)));
+         tail.push_back(to<grammar::grammar_type>(grammar_size_dist(rng)));
       }
       else
       {
-         tail.append(to<grammar::token_type>(token_size_dist(rng)));
+         tail.push_back(to<grammar::token_type>(token_size_dist(rng)));
       }
    }
    return tail;

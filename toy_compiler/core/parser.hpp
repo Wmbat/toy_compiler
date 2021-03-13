@@ -20,9 +20,8 @@
 #pragma once
 
 #include <toy_compiler/core/lexer.hpp>
+#include <toy_compiler/grammar/symbol.hpp>
 #include <toy_compiler/util/logger.hpp>
-
-#include <libcaramel/containers/dynamic_array.hpp>
 
 #include <monads/maybe.hpp>
 
@@ -34,27 +33,37 @@ namespace parse
    /**
     * @brief
     */
-   enum struct code : std::uint32_t
+   enum struct status : std::uint32_t
    {
       success,
       error
    };
 
+   enum struct error_type : std::uint32_t
+   {
+      missing_terminal,
+      max_size
+   };
+
    struct error
    {
+      error_type type{error_type::max_size};
+      grammar::token_type token;
+      std::uint32_t line_number;
+      std::string line;
    };
 
    /**
     * @brief
     */
-   struct result
+   struct [[nodiscard]] result
    {
-      code value{code::success};
-      monad::maybe<crl::dynamic_array<error>> errors;
+      status value{status::success};
+      monad::maybe<std::vector<error>> errors;
    };
 
    /**
     * @param items The lexed items to use for parsing
     */
-   auto parse_items(std::span<lex::item> items, util::logger_wrapper log = nullptr) -> result;
+   auto parse_items(std::span<const lex::item> items, util::logger_wrapper log = nullptr) -> result;
 } // namespace parse

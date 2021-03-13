@@ -21,6 +21,7 @@
 
 #include <toy_compiler/core/parser.hpp>
 
+#include <fmt/color.h>
 #include <fmt/ranges.h>
 
 #include <range/v3/algorithm/count_if.hpp>
@@ -40,9 +41,27 @@ application::application(std::span<const std::string_view> args, util::logger_wr
       {
          if (auto maybe = lex::lex_file(filepath, m_logger))
          {
+            const auto result = parse::parse_items(maybe.value(), m_logger);
+            if (result.value == parse::status::error)
+            {
+               for (auto& err : result.errors.value())
+               {
+                  fmt::print(fmt::emphasis::bold, "{}:{} - ", filepath.c_str(), err.line_number);
+                  fmt::print(fmt::fg(fmt::color::red) | fmt::emphasis::bold, "[error]");
+
+                  if (err.type == parse::error_type::missing_terminal)
+                  {
+                     fmt::print(" Missing {}\n", err.token);
+                  }
+
+                  fmt::print("\n");
+               }
+            }
          }
          else
          {
+            fmt::print("failed to open file \"{}\". Doublecheck filepath\n", filepath.c_str());
+
             m_logger.warning(
                "Failed to open file located at \"{}\". Make sure the filepath is valid",
                filepath.c_str());
@@ -50,6 +69,9 @@ application::application(std::span<const std::string_view> args, util::logger_wr
       }
       else
       {
+         fmt::print("file \"{}\" does not have the correct file extension (.src)\n",
+                    filepath.c_str());
+
          m_logger.warning("File \"{}\" does not have the correct file extension (.src)",
                           filepath.c_str());
       }

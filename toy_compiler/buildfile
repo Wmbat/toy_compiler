@@ -1,5 +1,4 @@
 import libs = range-v3%lib{range-v3}
-import libs += libcaramel%lib{caramel}
 import libs += monads%lib{monads}
 import libs += spdlog%lib{spdlog}
 import libs += fmt%lib{fmt}

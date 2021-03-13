@@ -264,14 +264,14 @@ struct fmt::formatter<grammar::symbol>
    {
       if (grammar::is_terminal(s))
       {
-         return fmt::format_to(ctx.out(), "({}, {})", s.type(), grammar::get_token_type(s));
+         return fmt::format_to(ctx.out(), "{}({})", s.type(), grammar::get_token_type(s));
       }
 
       if (grammar::is_non_terminal(s))
       {
-         return fmt::format_to(ctx.out(), "({}, {})", s.type(), grammar::get_grammar_type(s));
+         return fmt::format_to(ctx.out(), "{}({})", s.type(), grammar::get_grammar_type(s));
       }
 
-      return fmt::format_to(ctx.out(), "({})", s.type());
+      return fmt::format_to(ctx.out(), "{}", s.type());
    }
 };

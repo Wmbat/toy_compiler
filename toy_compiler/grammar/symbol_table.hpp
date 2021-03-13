@@ -65,7 +65,7 @@ namespace grammar
        * @param[in] key The `symbol_table::key` to set the `grammar::rule`
        * @param[in] tail The tail values of the `grammar::rule`
        */
-      void set_rule(const key& key, symbol_array tail);
+      void set_rule(const key& key, symbol_array tail, nullable_t nullable = nullable_t{false});
 
    private:
       std::array<std::array<grammar::rule, height>, width> m_data;

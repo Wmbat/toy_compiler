@@ -22,10 +22,16 @@
 
 namespace grammar
 {
-   rule::rule(grammar_type start, symbol_array tail) : m_start{start}, m_symbols{std::move(tail)} {}
+   rule::rule(grammar_type start, symbol_array tail, nullable_t nullable) :
+      m_start{start},
+      m_symbols{std::move(tail)},
+      m_is_nullable{nullable}
+   {}
 
    auto rule::start() const -> grammar_type { return m_start; }
 
    auto rule::tail() const -> const symbol_array& { return m_symbols; }
    auto rule::tail() -> symbol_array& { return m_symbols; }
+
+   auto rule::nullable() const noexcept -> bool { return m_is_nullable.value(); }
 } // namespace grammar

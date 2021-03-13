@@ -48,7 +48,7 @@ namespace grammar
                                        "str_lit",      "period",
                                        "comma",        "colon",
                                        "double_colon", "semi_colon",
-                                       "add",          "sub",
+                                       "plus",         "minus",
                                        "mult",         "div",
                                        "assign",       "or",
                                        "and",          "not",
@@ -59,9 +59,10 @@ namespace grammar
                                        "right_brace",  "left_square",
                                        "right_square", "left_paren",
                                        "right_paren",  "line_cmt",
-                                       "block_cmt",    "invalid_char",
-                                       "invalid_id",   "invalid_num",
-                                       "invalid_str",  "invalid_cmt"};
+                                       "block_cmt",    "EOF",
+                                       "invalid_char", "invalid_id",
+                                       "invalid_num",  "invalid_str",
+                                       "invalid_cmt"};
 
       /**
        * @brief All possible keywords of the language
@@ -107,10 +108,10 @@ namespace grammar
       colon,
       double_colon,
       semi_colon,
-      add_op,
-      sub_op,
-      mult_op,
-      div_op,
+      plus,
+      minus,
+      mult,
+      div,
       assign,
       or_op,
       and_op,
@@ -130,6 +131,7 @@ namespace grammar
       right_paren,
       line_cmt,
       block_cmt,
+      eof,
       invalid_char,
       invalid_id,
       invalid_num,
@@ -262,6 +264,8 @@ namespace grammar
          (value == token_type::invalid_num) || (value == token_type::invalid_cmt) ||
          (value == token_type::invalid_str);
    }
+
+   constexpr auto is_eof(token_type value) -> bool { return token_type::eof == value; }
 
    constexpr char period = '.';
    constexpr char comma = ',';

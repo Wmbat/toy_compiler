@@ -73,8 +73,7 @@ namespace lex
       return tok.lexeme;
    }
 
-   auto lex_file(const fs::path& path, util::logger_wrapper log)
-      -> monad::maybe<crl::dynamic_array<item>>
+   auto lex_file(const fs::path& path, util::logger_wrapper log) -> monad::maybe<std::vector<item>>
    {
       std::ifstream file{path, std::ios::in};
 
@@ -85,7 +84,7 @@ namespace lex
 
       log.info("tokenizing file: \"{}\"", path.c_str());
 
-      crl::dynamic_array<item> tokens;
+      std::vector<item> tokens;
 
       // TODO: look into reading file 1 kb at a time
       std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -104,10 +103,14 @@ namespace lex
          char_view = data;
          line_counter += inc + extra;
 
-         tokens.append(tok);
+         tokens.push_back(tok);
       }
 
       log.info("tokenization of file \"{}\" completed", path.c_str());
+
+      tokens.push_back(item{.type = grammar::token_type::eof,
+                            .lexeme = "$",
+                            .line = std::numeric_limits<std::uint32_t>::max()});
 
       return tokens;
    }
@@ -548,22 +551,22 @@ namespace lex
       const auto first = data.at(0);
       if (first == '+')
       {
-         return {.type = grammar::token_type::add_op, .lexeme = {first}, .line = line};
+         return {.type = grammar::token_type::plus, .lexeme = {first}, .line = line};
       }
 
       if (first == '-')
       {
-         return {.type = grammar::token_type::sub_op, .lexeme = {first}, .line = line};
+         return {.type = grammar::token_type::minus, .lexeme = {first}, .line = line};
       }
 
       if (first == '*')
       {
-         return {.type = grammar::token_type::mult_op, .lexeme = {first}, .line = line};
+         return {.type = grammar::token_type::mult, .lexeme = {first}, .line = line};
       }
 
       if (first == '/')
       {
-         return {.type = grammar::token_type::div_op, .lexeme = {first}, .line = line};
+         return {.type = grammar::token_type::div, .lexeme = {first}, .line = line};
       }
 
       if (first == '|')

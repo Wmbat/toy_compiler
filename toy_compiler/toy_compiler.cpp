@@ -31,11 +31,9 @@
 
 namespace views = ranges::views;
 
-constexpr std::size_t max_expected_args = 5;
-
 auto main(int argc, char** argv) -> int
 {
-   using args_array = crl::small_dynamic_array<std::string_view, max_expected_args>;
+   using args_array = std::vector<std::string_view>;
 
    // clang-format off
    args_array arguments = std::span<char*>{argv, static_cast<std::size_t>(argc)} 

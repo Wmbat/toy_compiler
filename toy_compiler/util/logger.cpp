@@ -28,35 +28,35 @@ namespace util
 {
    logger::logger() : log("Default logger")
    {
+      /*
       auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
       console_sink->set_pattern("[%n] [%^%l%$] %v");
       console_sink->set_level(spdlog::level::trace);
+      */
 
       auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs.txt", true);
-      file_sink->set_pattern("[%n] [%^%l%$] %v");
+      file_sink->set_pattern("[%^%l%$] %v");
       file_sink->set_level(spdlog::level::trace);
 
-      log = spdlog::logger("Default logger", {console_sink, file_sink});
+      log = spdlog::logger("Default logger", {file_sink});
       log.set_level(spdlog::level::trace);
    }
 
    logger::logger(std::string_view name) : log("")
    {
+      /*
       auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-      console_sink->set_pattern(std::string{"[%n] [%^%l%$] %v"});
+      console_sink->set_pattern("[%n] [%^%l%$] %v");
       console_sink->set_level(spdlog::level::trace);
+      */
 
       auto file_sink =
          std::make_shared<spdlog::sinks::basic_file_sink_mt>(std::string{name} + ".logs", true);
-      file_sink->set_pattern(std::string{"[%n] [%^%l%$] %v"});
+      file_sink->set_pattern(std::string{"[%^%l%$] %v"});
       file_sink->set_level(spdlog::level::trace);
 
-      log = spdlog::logger(std::string{name}, {console_sink, file_sink});
-#if defined(CACAO_DEBUG_LOGGING)
+      log = spdlog::logger(std::string{name}, {file_sink});
       log.set_level(spdlog::level::trace);
-#else
-      log.set_level(spdlog::level::info);
-#endif
    }
 
    void logger::debug(const std::string& msg) { log.debug(msg); }

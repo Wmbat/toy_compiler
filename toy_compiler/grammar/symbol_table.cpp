@@ -18,6 +18,7 @@
  */
 
 #include <toy_compiler/grammar/symbol_table.hpp>
+
 #include <utility>
 
 namespace grammar
@@ -37,11 +38,12 @@ namespace grammar
       return m_data[col][row]; // NOLINT
    }
 
-   void symbol_table::set_rule(const key& key, symbol_array tail)
+   void symbol_table::set_rule(const key& key, symbol_array tail, nullable_t nullable)
    {
       const auto col = static_cast<std::size_t>(key.second);
       const auto row = static_cast<std::size_t>(key.first);
 
-      m_data.at(col).at(row) = rule{key.first, std::move(tail)}; // NOLINT
+      rule temp = rule{key.first, std::move(tail), nullable};
+      m_data.at(col).at(row) = temp; // NOLINT
    }
 } // namespace grammar
