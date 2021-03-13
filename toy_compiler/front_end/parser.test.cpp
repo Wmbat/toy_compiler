@@ -19,7 +19,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <toy_compiler/core/parser.hpp>
+#include <toy_compiler/front_end/parser.hpp>
 
 TEST_SUITE("Parser test suite")
 {

@@ -19,7 +19,7 @@
 
 #include <toy_compiler/core/application.hpp>
 
-#include <toy_compiler/core/parser.hpp>
+#include <toy_compiler/front_end/parser.hpp>
 
 #include <fmt/color.h>
 #include <fmt/ranges.h>
@@ -39,17 +39,18 @@ application::application(std::span<const std::string_view> args, util::logger_wr
       const auto filepath = fs::path{filename};
       if (filepath.extension() == ".src")
       {
-         if (auto maybe = lex::lex_file(filepath, m_logger))
+         if (auto maybe = fr::lex_file(filepath, m_logger))
          {
-            const auto result = parse::parse_items(maybe.value(), m_logger);
-            if (result.value == parse::status::error)
+            const auto result = fr::parse_items(maybe.value(), m_logger);
+            if (result.value == fr::parse_status::error)
             {
                for (auto& err : result.errors.value())
                {
-                  fmt::print(fmt::emphasis::bold, "{}:{} - ", filepath.c_str(), err.line_number);
+                  fmt::print(fmt::emphasis::bold, "{}:{}.{} - ", filepath.c_str(), err.pos.line,
+                             err.pos.column);
                   fmt::print(fmt::fg(fmt::color::red) | fmt::emphasis::bold, "[error]");
 
-                  if (err.type == parse::error_type::missing_terminal)
+                  if (err.type == fr::parse_error_type::missing_terminal)
                   {
                      fmt::print(" Missing {}\n", err.token);
                   }
@@ -79,7 +80,7 @@ application::application(std::span<const std::string_view> args, util::logger_wr
 }
 
 void application::write_tokens_to_file(const std::filesystem::path& path,
-                                       std::span<const lex::item> tokens,
+                                       std::span<const fr::lex_item> tokens,
                                        util::logger_wrapper log) const
 {
    auto output_path = path.parent_path();
@@ -89,14 +90,14 @@ void application::write_tokens_to_file(const std::filesystem::path& path,
    std::string outlextoken;
    for (std::uint32_t line_counter = 1; const auto& tok : tokens)
    {
-      for (std::uint32_t i = line_counter; i < tok.line; ++i)
+      for (std::uint32_t i = line_counter; i < tok.pos.line; ++i)
       {
          outlextoken.append("\n");
       }
 
       outlextoken.append(fmt::format("{} ", tok));
 
-      line_counter = tok.line;
+      line_counter = tok.pos.line;
    }
 
    std::ofstream output_file{output_path};
@@ -106,7 +107,7 @@ void application::write_tokens_to_file(const std::filesystem::path& path,
 }
 
 void application::write_errors_to_file(const std::filesystem::path& path,
-                                       [[maybe_unused]] std::span<const lex::item> tokens,
+                                       [[maybe_unused]] std::span<const fr::lex_item> tokens,
                                        [[maybe_unused]] util::logger_wrapper log) const
 {
    auto output_path = path.parent_path();
@@ -116,10 +117,11 @@ void application::write_errors_to_file(const std::filesystem::path& path,
    std::string outlexerrors;
    for (const auto& tok : tokens)
    {
-      if (grammar::is_token_invalid(tok.type))
+      if (fr::grammar::is_token_invalid(tok.type))
       {
          outlexerrors.append(fmt::format("Lexical error: {}: \"{}\": line {}.\n",
-                                         fancy_lexical_error_type(tok.type), tok.lexeme, tok.line));
+                                         fancy_lexical_error_type(tok.type), tok.lexeme,
+                                         tok.pos.line));
       }
    }
 
@@ -136,12 +138,12 @@ void application::write_errors_to_file(const std::filesystem::path& path,
    }
 }
 
-auto application::fancy_lexical_error_type(grammar::token_type value) const -> std::string
+auto application::fancy_lexical_error_type(fr::grammar::token_type value) const -> std::string
 {
    // NOLINTNEXTLINE
-   assert(grammar::is_token_invalid(value) && "Only invalid types should be passed");
+   assert(fr::grammar::is_token_invalid(value) && "Only invalid types should be passed");
 
-   using namespace grammar;
+   using namespace fr::grammar;
 
    if (value == token_type::invalid_char)
    {

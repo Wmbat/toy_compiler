@@ -19,7 +19,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <toy_compiler/grammar/rule.hpp>
+#include <toy_compiler/front_end/grammar/rule.hpp>
 
 #include <range/v3/view/iota.hpp>
 #include <range/v3/view/transform.hpp>
@@ -36,7 +36,7 @@ TEST_SUITE("grammar/rule.hpp test suite")
 {
    TEST_CASE("empty rule")
    {
-      using namespace grammar;
+      using namespace fr::grammar;
 
       rule r1{};
 
@@ -45,7 +45,7 @@ TEST_SUITE("grammar/rule.hpp test suite")
    }
    TEST_CASE("normal rule")
    {
-      using namespace grammar;
+      using namespace fr::grammar;
 
       namespace vi = ranges::views;
 
@@ -79,7 +79,7 @@ TEST_SUITE("grammar/rule.hpp test suite")
    }
    TEST_CASE("fmt::formatter - rule")
    {
-      using namespace grammar;
+      using namespace fr::grammar;
 
       namespace vi = ranges::views;
 

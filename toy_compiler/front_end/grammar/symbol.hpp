@@ -19,15 +19,15 @@
 
 #pragma once
 
-#include <toy_compiler/grammar/grammar_type.hpp>
-#include <toy_compiler/grammar/token_type.hpp>
+#include <toy_compiler/front_end/grammar/grammar_type.hpp>
+#include <toy_compiler/front_end/grammar/token_type.hpp>
 
 #include <array>
 #include <cstdint>
 #include <string_view>
 #include <variant>
 
-namespace grammar
+namespace fr::grammar
 {
    /**
     * @brief All possible types of symbols that may be present during parsing.
@@ -224,14 +224,14 @@ namespace grammar
    {
       return get<symbol_type::non_terminal>(s);
    }
-} // namespace grammar
+} // namespace fr::grammar
 
 /**
  * @brief A specialization for using the `grammar::grammar_type` enum in the **fmt** & **spdlog**
  * libraries
  */
 template <>
-struct fmt::formatter<grammar::symbol_type>
+struct fmt::formatter<fr::grammar::symbol_type>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -240,9 +240,9 @@ struct fmt::formatter<grammar::symbol_type>
    }
 
    template <typename FormatContext>
-   auto format(grammar::symbol_type type, FormatContext& ctx)
+   auto format(fr::grammar::symbol_type type, FormatContext& ctx)
    {
-      return fmt::format_to(ctx.out(), "{}", grammar::to_string_view(type));
+      return fmt::format_to(ctx.out(), "{}", fr::grammar::to_string_view(type));
    }
 };
 
@@ -251,7 +251,7 @@ struct fmt::formatter<grammar::symbol_type>
  * libraries
  */
 template <>
-struct fmt::formatter<grammar::symbol>
+struct fmt::formatter<fr::grammar::symbol>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -260,16 +260,16 @@ struct fmt::formatter<grammar::symbol>
    }
 
    template <typename FormatContext>
-   auto format(const grammar::symbol& s, FormatContext& ctx)
+   auto format(const fr::grammar::symbol& s, FormatContext& ctx)
    {
-      if (grammar::is_terminal(s))
+      if (fr::grammar::is_terminal(s))
       {
-         return fmt::format_to(ctx.out(), "{}({})", s.type(), grammar::get_token_type(s));
+         return fmt::format_to(ctx.out(), "{}({})", s.type(), fr::grammar::get_token_type(s));
       }
 
-      if (grammar::is_non_terminal(s))
+      if (fr::grammar::is_non_terminal(s))
       {
-         return fmt::format_to(ctx.out(), "{}({})", s.type(), grammar::get_grammar_type(s));
+         return fmt::format_to(ctx.out(), "{}({})", s.type(), fr::grammar::get_grammar_type(s));
       }
 
       return fmt::format_to(ctx.out(), "{}", s.type());

@@ -1,6 +1,6 @@
 : Test
 : Runs unit tests for the lexer.hpp interface
 
-ln -s $src_base/core/test_files/lexer $~/ ;
+ln -s $src_base/front_end/test_files/lexer $~/ ;
 
 $* 1>| == 0

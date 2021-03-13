@@ -20,7 +20,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <toy_compiler/grammar/symbol.hpp>
+#include <toy_compiler/front_end/grammar/symbol.hpp>
 
 #include <range/v3/view/iota.hpp>
 #include <range/v3/view/transform.hpp>
@@ -33,7 +33,7 @@ constexpr auto to(std::uint32_t i) -> T
 
 TEST_SUITE("grammar/symbol.hpp test suite")
 {
-   using namespace grammar;
+   using namespace fr::grammar;
 
    namespace vi = ranges::views;
 
@@ -225,7 +225,7 @@ TEST_SUITE("grammar/symbol.hpp test suite")
 
    TEST_CASE("to_string_view()")
    {
-      using namespace grammar;
+      using namespace fr::grammar;
 
       namespace vi = ranges::views;
 
@@ -236,7 +236,7 @@ TEST_SUITE("grammar/symbol.hpp test suite")
    }
    TEST_CASE("fmt::formatter - symbol_type")
    {
-      using namespace grammar;
+      using namespace fr::grammar;
 
       namespace vi = ranges::views;
 
@@ -247,7 +247,7 @@ TEST_SUITE("grammar/symbol.hpp test suite")
    }
    TEST_CASE("fmt::formatter - symbol")
    {
-      using namespace grammar;
+      using namespace fr::grammar;
 
       namespace vi = ranges::views;
 

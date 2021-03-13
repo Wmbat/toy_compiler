@@ -17,10 +17,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <toy_compiler/grammar/rule.hpp>
+#include <toy_compiler/front_end/grammar/rule.hpp>
 #include <utility>
 
-namespace grammar
+namespace fr::grammar
 {
    rule::rule(grammar_type start, symbol_array tail, nullable_t nullable) :
       m_start{start},

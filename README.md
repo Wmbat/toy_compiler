@@ -34,8 +34,8 @@ C++ executable
 * [ ] Properly handle nested block comments
 * [X] Implement testing for the Application class
 * [X] Document public API
-* [ ] lexer.cpp:
-   * [ ] Add ability to count columns when lexing
+* [X] lexer.cpp:
+   * [X] Add ability to count columns when lexing
 * [ ] parser.cpp:
    * [ ] Better error data
 * [o] Implement unit test:

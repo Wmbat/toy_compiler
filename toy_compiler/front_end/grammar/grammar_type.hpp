@@ -25,7 +25,7 @@
 #include <functional>
 #include <string_view>
 
-namespace grammar
+namespace fr::grammar
 {
    namespace detail
    {
@@ -163,14 +163,14 @@ namespace grammar
    {
       return detail::grammar_names.at(static_cast<std::uint32_t>(type));
    }
-} // namespace grammar
+} // namespace fr::grammar
 
 /**
  * @brief A specialization for using the `grammar::grammar_type` enum in the **fmt** & **spdlog**
  * libraries
  */
 template <>
-struct fmt::formatter<grammar::grammar_type>
+struct fmt::formatter<fr::grammar::grammar_type>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -179,8 +179,8 @@ struct fmt::formatter<grammar::grammar_type>
    }
 
    template <typename FormatContext>
-   auto format(grammar::grammar_type type, FormatContext& ctx)
+   auto format(fr::grammar::grammar_type type, FormatContext& ctx)
    {
-      return fmt::format_to(ctx.out(), "{}", grammar::to_string_view(type));
+      return fmt::format_to(ctx.out(), "{}", fr::grammar::to_string_view(type));
    }
 };

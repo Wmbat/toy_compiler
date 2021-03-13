@@ -17,31 +17,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <toy_compiler/core/utility.hpp>
+#include <toy_compiler/front_end/utility.hpp>
 
 #include <range/v3/algorithm/find.hpp>
 
-auto to_literal(const std::string_view data) -> std::string
+namespace fr
 {
-   std::string res{data};
-
+   auto to_literal(const std::string_view data) -> std::string
    {
-      std::size_t start_pos = 0;
-      while ((start_pos = res.find('\n', start_pos)) != std::string::npos)
-      {
-         res.replace(start_pos, 1, "\\n");
-         start_pos += std::size("\\n");
-      }
-   }
+      std::string res{data};
 
-   {
-      std::size_t start_pos = 0;
-      while ((start_pos = res.find('\r', start_pos)) != std::string::npos)
       {
-         res.replace(start_pos, 1, "\\r");
-         start_pos += std::size("\\r");
+         std::size_t start_pos = 0;
+         while ((start_pos = res.find('\n', start_pos)) != std::string::npos)
+         {
+            res.replace(start_pos, 1, "\\n");
+            start_pos += std::size("\\n");
+         }
       }
-   }
 
-   return res;
-}
+      {
+         std::size_t start_pos = 0;
+         while ((start_pos = res.find('\r', start_pos)) != std::string::npos)
+         {
+            res.replace(start_pos, 1, "\\r");
+            start_pos += std::size("\\r");
+         }
+      }
+
+      return res;
+   }
+} // namespace fr

@@ -17,11 +17,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <toy_compiler/core/parser.hpp>
+#include <toy_compiler/front_end/parser.hpp>
 
-#include <toy_compiler/grammar/rule.hpp>
-#include <toy_compiler/grammar/symbol.hpp>
-#include <toy_compiler/grammar/symbol_table.hpp>
+#include <toy_compiler/front_end/grammar/rule.hpp>
+#include <toy_compiler/front_end/grammar/rule_table.hpp>
+#include <toy_compiler/front_end/grammar/symbol.hpp>
 
 #include <fmt/core.h>
 #include <fmt/format.h>
@@ -36,12 +36,12 @@
 
 #include <iostream>
 
-namespace parse
+namespace fr 
 {
    namespace vi = ranges::views;
 
-   auto construct_symbol_table() -> const grammar::symbol_table;
-   auto is_comment(const lex::item& item) -> bool;
+   auto construct_symbol_table() -> const grammar::rule_table;
+   auto is_comment(const fr::lex_item& item) -> bool;
    auto is_epsilon(const grammar::symbol& s) -> bool { return s == grammar::token_type::epsilon; }
 
    auto check_follow_sets(grammar::token_type type, const grammar::symbol& top) -> bool
@@ -56,11 +56,11 @@ namespace parse
       return ranges::find(tail, type) != std::end(tail);
    }
 
-   auto parse_impl(std::span<const lex::item> items, util::logger_wrapper log) -> result
+   auto parse_impl(std::span<const fr::lex_item> items, util::logger_wrapper log) -> parse_result
    {
-      static const grammar::symbol_table table = construct_symbol_table();
+      static const grammar::rule_table table = construct_symbol_table();
 
-      std::vector<error> errors;
+      std::vector<parse_error> errors;
       std::vector<grammar::symbol> stack;
       stack.push_back(grammar::symbol::stop());
       stack.push_back(grammar::symbol::start());
@@ -95,15 +95,14 @@ namespace parse
 
                   if (token == grammar::token_type::semi_colon)
                   {
-                     errors.push_back(error{.type = error_type::missing_terminal,
+                     errors.push_back(parse_error{.type = parse_error_type::missing_terminal,
                                             .token = token,
-                                            .line_number = (item_it - 1)->line});
+                                            .pos = (item_it - 1)->pos});
                   }
                   else
                   {
-                     errors.push_back(error{.type = error_type::missing_terminal,
-                                            .token = token,
-                                            .line_number = item_it->line});
+                     errors.push_back(parse_error{
+                        .type = parse_error_type::missing_terminal, .token = token, .pos = item_it->pos});
                   }
 
                   while (!grammar::is_eof(item_it->type) && item_it->type != top_symbol)
@@ -176,24 +175,24 @@ namespace parse
 
       if (!grammar::is_eof(item_it->type) || !std::empty(errors))
       {
-         return {.value = status::error, .errors = errors};
+         return {.value = parse_status::error, .errors = errors};
       }
 
-      return {.value = status::success, .errors = monad::none};
+      return {.value = parse_status::success, .errors = monad::none};
    }
 
-   auto parse_items(std::span<const lex::item> items, util::logger_wrapper log) -> result
+   auto parse_items(std::span<const fr::lex_item> items, util::logger_wrapper log) -> parse_result
    {
       const auto cleaned = items | vi::filter(ranges::not_fn(is_comment)) | ranges::to_vector;
 
       return parse_impl(cleaned, log);
    }
 
-   auto construct_symbol_table() -> const grammar::symbol_table
+   auto construct_symbol_table() -> const grammar::rule_table
    {
       using namespace grammar;
 
-      symbol_table table{};
+      rule_table table{};
       symbol_array epsilon = {token_type::epsilon};
 
       // <AddOp>
@@ -826,7 +825,7 @@ namespace parse
       return table;
    }
 
-   auto is_comment(const lex::item& item) -> bool
+   auto is_comment(const fr::lex_item& item) -> bool
    {
       using namespace grammar;
       return (item.type == token_type::block_cmt) || (item.type == token_type::line_cmt);

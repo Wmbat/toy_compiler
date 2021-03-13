@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include <toy_compiler/grammar/grammar_type.hpp>
-#include <toy_compiler/grammar/symbol.hpp>
-#include <toy_compiler/grammar/token_type.hpp>
+#include <toy_compiler/front_end/grammar/grammar_type.hpp>
+#include <toy_compiler/front_end/grammar/symbol.hpp>
+#include <toy_compiler/front_end/grammar/token_type.hpp>
 
 #include <toy_compiler/util/strong_type.hpp>
 
@@ -30,7 +30,7 @@
 #include <memory>
 #include <utility>
 
-namespace grammar
+namespace fr::grammar
 {
    /**
     * @brief shorthand to designate a dynamic array containing `grammar::symbol`s with a small
@@ -353,15 +353,14 @@ namespace grammar
           nullable_t{true}},
       }};
    } // namespace sets
-} // namespace grammar
+} // namespace fr::grammar
 
 /**
  * @brief A specialization for using the `grammar::rule` class in the **fmt** & **spdlog**
  * libraries
  */
-
 template <>
-struct fmt::formatter<grammar::rule>
+struct fmt::formatter<fr::grammar::rule>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -370,7 +369,7 @@ struct fmt::formatter<grammar::rule>
    }
 
    template <typename FormatContext>
-   auto format(const grammar::rule& r, FormatContext& ctx)
+   auto format(const fr::grammar::rule& r, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "{} -> {}", r.start(), r.tail());
    }

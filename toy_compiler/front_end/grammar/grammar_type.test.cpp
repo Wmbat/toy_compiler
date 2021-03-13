@@ -19,7 +19,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <toy_compiler/grammar/grammar_type.hpp>
+#include <toy_compiler/front_end/grammar/grammar_type.hpp>
 
 #include <range/v3/view/iota.hpp>
 #include <range/v3/view/transform.hpp>
@@ -34,7 +34,7 @@ TEST_SUITE("grammar/grammar_type.hpp test suite")
 {
    TEST_CASE("to_string_view()")
    {
-      using namespace grammar;
+      using namespace fr::grammar;
 
       namespace vi = ranges::views;
 
@@ -45,7 +45,7 @@ TEST_SUITE("grammar/grammar_type.hpp test suite")
    }
    TEST_CASE("fmt::formatter - grammar_type")
    {
-      using namespace grammar;
+      using namespace fr::grammar;
 
       namespace vi = ranges::views;
 

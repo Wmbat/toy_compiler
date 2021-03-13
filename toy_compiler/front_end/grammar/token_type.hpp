@@ -26,7 +26,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace grammar
+namespace fr::grammar
 {
    namespace detail
    {
@@ -277,14 +277,14 @@ namespace grammar
    constexpr char close_square = ']';
    constexpr char open_curly = '{';
    constexpr char close_curly = '}';
-} // namespace grammar
+} // namespace fr::grammar
 
 /**
  * @brief A specialization for using the `grammar::token_type` enum in the **fmt** & **spdlog**
  * libraries
  */
 template <>
-struct fmt::formatter<grammar::token_type>
+struct fmt::formatter<fr::grammar::token_type>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -293,7 +293,7 @@ struct fmt::formatter<grammar::token_type>
    }
 
    template <typename FormatContext>
-   auto format(grammar::token_type t, FormatContext& ctx)
+   auto format(fr::grammar::token_type t, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "{}", to_string_view(t));
    }

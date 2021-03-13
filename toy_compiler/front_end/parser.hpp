@@ -19,8 +19,7 @@
 
 #pragma once
 
-#include <toy_compiler/core/lexer.hpp>
-#include <toy_compiler/grammar/symbol.hpp>
+#include <toy_compiler/front_end/lexer.hpp>
 #include <toy_compiler/util/logger.hpp>
 
 #include <monads/maybe.hpp>
@@ -28,42 +27,43 @@
 #include <span>
 #include <unordered_map>
 
-namespace parse
+namespace fr
 {
    /**
     * @brief
     */
-   enum struct status : std::uint32_t
+   enum struct parse_status : std::uint32_t
    {
       success,
       error
    };
 
-   enum struct error_type : std::uint32_t
+   enum struct parse_error_type : std::uint32_t
    {
       missing_terminal,
       max_size
    };
 
-   struct error
+   struct parse_error
    {
-      error_type type{error_type::max_size};
+      parse_error_type type{parse_error_type::max_size};
       grammar::token_type token;
-      std::uint32_t line_number;
+      fr::position pos{};
       std::string line;
    };
 
    /**
     * @brief
     */
-   struct [[nodiscard]] result
+   struct [[nodiscard]] parse_result
    {
-      status value{status::success};
-      monad::maybe<std::vector<error>> errors;
+      parse_status value{parse_status::success};
+      monad::maybe<std::vector<parse_error>> errors;
    };
 
    /**
     * @param items The lexed items to use for parsing
     */
-   auto parse_items(std::span<const lex::item> items, util::logger_wrapper log = nullptr) -> result;
-} // namespace parse
+   auto parse_items(std::span<const fr::lex_item> items, util::logger_wrapper log = nullptr)
+      -> parse_result;
+} // namespace fr

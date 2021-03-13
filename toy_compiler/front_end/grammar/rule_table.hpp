@@ -19,17 +19,17 @@
 
 #pragma once
 
-#include <toy_compiler/grammar/rule.hpp>
-#include <toy_compiler/grammar/symbol.hpp>
+#include <toy_compiler/front_end/grammar/rule.hpp>
+#include <toy_compiler/front_end/grammar/symbol.hpp>
 
 #include <array>
 
-namespace grammar
+namespace fr::grammar
 {
    /**
     * @brief A simple data structure to hold the table of rules needed for the table driven parsing.
     */
-   class symbol_table
+   class rule_table
    {
       static constexpr std::size_t width = static_cast<std::size_t>(token_type::max_size);
       static constexpr std::size_t height = static_cast<std::size_t>(grammar_type::max_size);

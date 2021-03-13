@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <toy_compiler/grammar/token_type.hpp>
+#include <toy_compiler/front_end/grammar/token_type.hpp>
 #include <toy_compiler/util/logger.hpp>
 
 #include <monads/maybe.hpp>
@@ -27,19 +27,26 @@
 #include <filesystem>
 #include <vector>
 
-namespace lex
+namespace fr
 {
+   struct position
+   {
+      std::uint32_t line = std::numeric_limits<std::uint32_t>::max();
+      std::uint32_t column = std::numeric_limits<std::uint32_t>::max();
+
+      constexpr auto operator<=>(const position& other) const -> std::strong_ordering = default;
+   };
+
    /**
     * @brief Holds a the information of a parsed token.
     */
-   struct item
+   struct lex_item
    {
       grammar::token_type type{}; // NOLINT
       std::string lexeme{};       // NOLINT
-      std::uint32_t line{};       // NOLINT
-      std::uint32_t column{};     // NOLINT
+      position pos{};             // NOLINT
 
-      auto operator<=>(const item& other) const -> std::strong_ordering = default;
+      auto operator<=>(const lex_item& other) const -> std::strong_ordering = default;
    };
 
    /**
@@ -48,17 +55,14 @@ namespace lex
     * @param [in] path The path to the file
     * @param [in] log A logger used for status information
     *
-    * @return The list of `lex::item` from the file
+    * @return The list of `fr::lex_item` from the file
     */
    auto lex_file(const std::filesystem::path& path, util::logger_wrapper log = nullptr)
-      -> monad::maybe<std::vector<lex::item>>;
-} // namespace lex
+      -> monad::maybe<std::vector<fr::lex_item>>;
+} // namespace fr
 
-/**
- * @brief A specialization for using the `lex::item` struct in the **fmt** & **spdlog** libraries
- */
 template <>
-struct fmt::formatter<lex::item>
+struct fmt::formatter<fr::position>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -67,9 +71,28 @@ struct fmt::formatter<lex::item>
    }
 
    template <typename FormatContext>
-   auto format(const lex::item& tok, FormatContext& ctx)
+   auto format(const fr::position& pos, FormatContext& ctx)
    {
-      return fmt::format_to(ctx.out(), "[.type = {0}, .lexeme = {1}, .line = {2}]",
-                            tok.type, tok.lexeme, tok.line);
+      return fmt::format_to(ctx.out(), "({}:{})", pos.line, pos.column);
+   }
+};
+
+/**
+ * @brief A specialization for using the `fr::lex_item` struct in the **fmt** & **spdlog** libraries
+ */
+template <>
+struct fmt::formatter<fr::lex_item>
+{
+   template <typename ParseContex>
+   constexpr auto parse(ParseContex& ctx)
+   {
+      return ctx.begin();
+   }
+
+   template <typename FormatContext>
+   auto format(const fr::lex_item& tok, FormatContext& ctx)
+   {
+      return fmt::format_to(ctx.out(), "[.type = {0}, .lexeme = {1}, .position = {2}]", tok.type,
+                            tok.lexeme, tok.pos);
    }
 };

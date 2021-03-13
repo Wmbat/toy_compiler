@@ -19,7 +19,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <toy_compiler/grammar/token_type.hpp>
+#include <toy_compiler/front_end/grammar/token_type.hpp>
 
 #include <range/v3/view/iota.hpp>
 
@@ -33,7 +33,7 @@ TEST_SUITE("grammar/token_type.hpp test suite")
 {
    TEST_CASE("to_string_view()")
    {
-      using namespace grammar;
+      using namespace fr::grammar;
 
       namespace vi = ranges::views;
 
@@ -44,7 +44,7 @@ TEST_SUITE("grammar/token_type.hpp test suite")
    }
    TEST_CASE("keyword_to_token_type")
    {
-      using namespace grammar;
+      using namespace fr::grammar;
 
       REQUIRE(keyword_to_token_type(detail::keywords[0]) == token_type::id_if);
       REQUIRE(keyword_to_token_type(detail::keywords[1]) == token_type::id_then);
@@ -69,7 +69,7 @@ TEST_SUITE("grammar/token_type.hpp test suite")
    }
    TEST_CASE("is_token_invalid()")
    {
-      using namespace grammar;
+      using namespace fr::grammar;
 
       namespace vi = ranges::views;
 
@@ -87,7 +87,7 @@ TEST_SUITE("grammar/token_type.hpp test suite")
    }
    TEST_CASE("fmt::formatter - token_type")
    {
-      using namespace grammar;
+      using namespace fr::grammar;
 
       namespace vi = ranges::views;
 
