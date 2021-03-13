@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <toy_compiler/front_end/grammar/rule.hpp>
+#include <toy_compiler/front_end/grammar/production.hpp>
 #include <toy_compiler/front_end/grammar/symbol.hpp>
 
 #include <array>
@@ -29,7 +29,7 @@ namespace fr::grammar
    /**
     * @brief A simple data structure to hold the table of rules needed for the table driven parsing.
     */
-   class rule_table
+   class production_table
    {
       static constexpr std::size_t width = static_cast<std::size_t>(token_type::max_size);
       static constexpr std::size_t height = static_cast<std::size_t>(grammar_type::max_size);
@@ -48,7 +48,7 @@ namespace fr::grammar
        *
        * @return The `grammar::rule` associated with the `symbol_table::key` `k`
        */
-      [[nodiscard]] auto lookup(const key& k) const -> const rule&;
+      [[nodiscard]] auto lookup(const key& k) const -> const production&;
       /**
        * @brief Access the `grammar::rule` associated with a certain `symbol_table::key`.
        *
@@ -56,7 +56,7 @@ namespace fr::grammar
        *
        * @return The `grammar::rule` associated with the `symbol_table::key` `k`
        */
-      auto lookup(const key& k) -> rule&;
+      auto lookup(const key& k) -> production&;
 
       /**
        * @brief Set a `grammar::rule` at a specific location in the table using a
@@ -65,9 +65,10 @@ namespace fr::grammar
        * @param[in] key The `symbol_table::key` to set the `grammar::rule`
        * @param[in] tail The tail values of the `grammar::rule`
        */
-      void set_rule(const key& key, symbol_array tail, nullable_t nullable = nullable_t{false});
+      void set_production(const key& key, symbol_array tail,
+                          nullable_t nullable = nullable_t{false});
 
    private:
-      std::array<std::array<grammar::rule, height>, width> m_data;
+      std::array<std::array<grammar::production, height>, width> m_data;
    };
-} // namespace grammar
+} // namespace fr::grammar

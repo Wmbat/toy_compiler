@@ -46,10 +46,10 @@ namespace fr::grammar
     * The purpose of this class is to simplify the created of rules to use in the parsing table. The
     * rules are encoded using the following rule: **E -> aT`F**.
     */
-   class rule
+   class production
    {
    public:
-      rule() = default;
+      production() = default;
       /**
        * @brief Create a rule
        *
@@ -58,9 +58,9 @@ namespace fr::grammar
        * @param[in] tail The resulting `grammar::symbol`s derived from the `start`.
        * @param[in] is_nullable Tell whether the rule may be null. **False** by default.
        */
-      rule(grammar_type start, symbol_array tail, nullable_t is_nullable = nullable_t{false});
+      production(grammar_type start, symbol_array tail, nullable_t is_nullable = nullable_t{false});
 
-      auto operator==(const rule& other) const -> bool = default;
+      auto operator==(const production& other) const -> bool = default;
 
       /**
        * @brief Access the start of the `grammar::rule`
@@ -89,7 +89,7 @@ namespace fr::grammar
 
    namespace sets
    {
-      static const std::array<rule, 54> first{{
+      static const std::array<production, 54> first{{
          {grammar_type::add_op, {token_type::or_op, token_type::plus, token_type::minus}},
          {grammar_type::a_params,
           {token_type::plus, token_type::minus, token_type::id, token_type::integer_lit,
@@ -205,7 +205,7 @@ namespace fr::grammar
           nullable_t{true}},
       }};
 
-      static const std::array<rule, 54> follow{{
+      static const std::array<production, 54> follow{{
          {grammar_type::add_op,
           {token_type::plus, token_type::minus, token_type::id, token_type::integer_lit,
            token_type::float_lit, token_type::str_lit, token_type::left_paren, token_type::not_op,
@@ -360,7 +360,7 @@ namespace fr::grammar
  * libraries
  */
 template <>
-struct fmt::formatter<fr::grammar::rule>
+struct fmt::formatter<fr::grammar::production>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -369,7 +369,7 @@ struct fmt::formatter<fr::grammar::rule>
    }
 
    template <typename FormatContext>
-   auto format(const fr::grammar::rule& r, FormatContext& ctx)
+   auto format(const fr::grammar::production& r, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "{} -> {}", r.start(), r.tail());
    }

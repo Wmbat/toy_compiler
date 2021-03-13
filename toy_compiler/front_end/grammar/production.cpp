@@ -1,6 +1,6 @@
 /**
- * @file rule.cpp
- * @brief Implement the functions defined at rule.hpp
+ * @file production.cpp
+ * @brief Implement the functions defined at production.hpp
  * @copyright Copyright (C) 2021 wmbat.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,21 +17,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <toy_compiler/front_end/grammar/rule.hpp>
+#include <toy_compiler/front_end/grammar/production.hpp>
 #include <utility>
 
 namespace fr::grammar
 {
-   rule::rule(grammar_type start, symbol_array tail, nullable_t nullable) :
+   production::production(grammar_type start, symbol_array tail, nullable_t nullable) :
       m_start{start},
       m_symbols{std::move(tail)},
       m_is_nullable{nullable}
    {}
 
-   auto rule::start() const -> grammar_type { return m_start; }
+   auto production::start() const -> grammar_type { return m_start; }
 
-   auto rule::tail() const -> const symbol_array& { return m_symbols; }
-   auto rule::tail() -> symbol_array& { return m_symbols; }
+   auto production::tail() const -> const symbol_array& { return m_symbols; }
+   auto production::tail() -> symbol_array& { return m_symbols; }
 
-   auto rule::nullable() const noexcept -> bool { return m_is_nullable.value(); }
-} // namespace grammar
+   auto production::nullable() const noexcept -> bool { return m_is_nullable.value(); }
+} // namespace fr::grammar

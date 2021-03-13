@@ -19,7 +19,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <toy_compiler/front_end/grammar/rule_table.hpp>
+#include <toy_compiler/front_end/grammar/production_table.hpp>
 
 #include <range/v3/range/conversion.hpp>
 #include <range/v3/view/cartesian_product.hpp>
@@ -37,13 +37,13 @@ constexpr auto to(std::uint32_t i) -> T
    return static_cast<T>(i);
 }
 
-constexpr auto to_key(std::tuple<std::uint32_t, std::uint32_t> t) -> fr::grammar::rule_table::key
+constexpr auto to_key(std::tuple<std::uint32_t, std::uint32_t> t) -> fr::grammar::production_table::key
 {
    return {to<fr::grammar::grammar_type>(std::get<0>(t)),
            to<fr::grammar::token_type>(std::get<1>(t))};
 }
 
-fr::grammar::rule_table create_table()
+fr::grammar::production_table create_table()
 {
    using namespace fr::grammar;
 
@@ -56,7 +56,7 @@ fr::grammar::rule_table create_table()
    std::uniform_int_distribution<std::uint32_t> grammar_size_dist{0, grammar_size};
    std::uniform_int_distribution<std::uint32_t> token_size_dist{0, grammar_size};
 
-   rule_table table;
+   production_table table;
 
    const auto all_keys =
       vi::cartesian_product(vi::iota(0u, grammar_size), vi::iota(0u, token_size)) |
@@ -77,14 +77,14 @@ fr::grammar::rule_table create_table()
          }
       }
 
-      table.set_rule(k, tail);
+      table.set_production(k, tail);
    }
 
    return table;
 }
 
-fr::grammar::symbol_array generate_tail(std::mt19937& rng, udist& arr_size_dist,
-                                        udist& grammar_size_dist, udist& token_size_dist)
+auto generate_tail(std::mt19937& rng, udist& arr_size_dist, udist& grammar_size_dist,
+                   udist& token_size_dist) -> fr::grammar::symbol_array
 {
    fr::grammar::symbol_array tail{};
    for (auto i : ranges::views::iota(0u, arr_size_dist(rng)))
@@ -106,7 +106,7 @@ TEST_SUITE("grammar/symbol_table.hpp test suite")
    TEST_CASE("set_rule()")
    {
       using namespace fr::grammar;
-      rule_table table;
+      production_table table;
 
       namespace vi = ranges::views;
 
@@ -126,7 +126,7 @@ TEST_SUITE("grammar/symbol_table.hpp test suite")
       {
          symbol_array tail = generate_tail(rng, arr_size_dist, grammar_size_dist, token_size_dist);
 
-         table.set_rule(k, tail);
+         table.set_production(k, tail);
 
          CHECK(table.lookup(k).start() == k.first);
          CHECK(std::size(table.lookup(k).tail()) == std::size(tail));
@@ -141,7 +141,7 @@ TEST_SUITE("grammar/symbol_table.hpp test suite")
       const auto grammar_size = static_cast<std::uint32_t>(grammar_type::max_size);
       const auto token_size = static_cast<std::uint32_t>(token_type::max_size);
 
-      rule_table table = create_table();
+      production_table table = create_table();
 
       const auto all_keys =
          vi::cartesian_product(vi::iota(0u, grammar_size), vi::iota(0u, token_size)) |
@@ -162,7 +162,7 @@ TEST_SUITE("grammar/symbol_table.hpp test suite")
       const auto grammar_size = static_cast<std::uint32_t>(grammar_type::max_size);
       const auto token_size = static_cast<std::uint32_t>(token_type::max_size);
 
-      const rule_table table = create_table();
+      const production_table table = create_table();
 
       const auto all_keys =
          vi::cartesian_product(vi::iota(0u, grammar_size), vi::iota(0u, token_size)) |

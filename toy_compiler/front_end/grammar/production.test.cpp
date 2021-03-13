@@ -1,5 +1,5 @@
 /**
- * @brief Runs tests on functions defined in rule.hpp
+ * @brief Runs tests on functions defined in production.hpp
  * @copyright Copyright (C) 2021 wmbat.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <toy_compiler/front_end/grammar/rule.hpp>
+#include <toy_compiler/front_end/grammar/production.hpp>
 
 #include <range/v3/view/iota.hpp>
 #include <range/v3/view/transform.hpp>
@@ -32,18 +32,18 @@ constexpr auto to(std::uint32_t i) -> T
    return static_cast<T>(i);
 }
 
-TEST_SUITE("grammar/rule.hpp test suite")
+TEST_SUITE("grammar/production.hpp test suite")
 {
-   TEST_CASE("empty rule")
+   TEST_CASE("empty production")
    {
       using namespace fr::grammar;
 
-      rule r1{};
+      production r1{};
 
       CHECK(r1.start() == grammar_type::max_size);
       CHECK(std::empty(r1.tail()));
    }
-   TEST_CASE("normal rule")
+   TEST_CASE("normal production")
    {
       using namespace fr::grammar;
 
@@ -71,13 +71,13 @@ TEST_SUITE("grammar/rule.hpp test suite")
             }
          }
 
-         rule r{type, tail};
+         production r{type, tail};
 
          CHECK(r.start() == type);
          CHECK(r.tail() == tail);
       }
    }
-   TEST_CASE("fmt::formatter - rule")
+   TEST_CASE("fmt::formatter - production")
    {
       using namespace fr::grammar;
 
@@ -105,7 +105,7 @@ TEST_SUITE("grammar/rule.hpp test suite")
             }
          }
 
-         rule r{type, tail};
+         production r{type, tail};
 
          std::string expected = fmt::format("{} -> {}", type, tail);
          CHECK(fmt::format("{}", r) == expected);

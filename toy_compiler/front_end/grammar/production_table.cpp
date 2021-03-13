@@ -17,20 +17,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <toy_compiler/front_end/grammar/rule_table.hpp>
+#include <toy_compiler/front_end/grammar/production_table.hpp>
 
 #include <utility>
 
 namespace fr::grammar
 {
-   auto rule_table::lookup(const key& k) const -> const rule&
+   auto production_table::lookup(const key& k) const -> const production&
    {
       const auto col = static_cast<std::size_t>(k.second);
       const auto row = static_cast<std::size_t>(k.first);
 
       return m_data[col][row]; // NOLINT
    }
-   auto rule_table::lookup(const key& k) -> rule&
+   auto production_table::lookup(const key& k) -> production&
    {
       const auto col = static_cast<std::size_t>(k.second);
       const auto row = static_cast<std::size_t>(k.first);
@@ -38,12 +38,11 @@ namespace fr::grammar
       return m_data[col][row]; // NOLINT
    }
 
-   void rule_table::set_rule(const key& key, symbol_array tail, nullable_t nullable)
+   void production_table::set_production(const key& key, symbol_array tail, nullable_t nullable)
    {
       const auto col = static_cast<std::size_t>(key.second);
       const auto row = static_cast<std::size_t>(key.first);
 
-      rule temp = rule{key.first, std::move(tail), nullable};
-      m_data.at(col).at(row) = temp; // NOLINT
+      m_data.at(col).at(row) = production{key.first, std::move(tail), nullable}; // NOLINT
    }
-} // namespace grammar
+} // namespace fr::grammar
