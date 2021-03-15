@@ -34,6 +34,7 @@ constexpr auto to(std::uint32_t i) -> T
 TEST_SUITE("grammar/symbol.hpp test suite")
 {
    using namespace fr::grammar;
+   using namespace fr::sem;
 
    namespace vi = ranges::views;
 
@@ -231,7 +232,7 @@ TEST_SUITE("grammar/symbol.hpp test suite")
 
       for (auto i : vi::iota(0u, static_cast<std::uint32_t>(symbol_type::stop) + 1))
       {
-         CHECK(to_string_view(to<symbol_type>(i)) == detail::symbol_names[i]);
+         CHECK(to_string_view(to<symbol_type>(i)) == fr::grammar::detail::symbol_names[i]);
       }
    }
    TEST_CASE("fmt::formatter - symbol_type")
@@ -242,7 +243,7 @@ TEST_SUITE("grammar/symbol.hpp test suite")
 
       for (auto i : vi::iota(0u, static_cast<std::uint32_t>(symbol_type::stop) + 1))
       {
-         CHECK(fmt::format("{}", to<symbol_type>(i)) == detail::symbol_names[i]);
+         CHECK(fmt::format("{}", to<symbol_type>(i)) == fr::grammar::detail::symbol_names[i]);
       }
    }
    TEST_CASE("fmt::formatter - symbol")

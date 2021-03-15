@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <toy_compiler/front_end/grammar/action_type.hpp>
 #include <toy_compiler/front_end/grammar/grammar_type.hpp>
 #include <toy_compiler/front_end/grammar/token_type.hpp>
 
@@ -36,6 +37,7 @@ namespace fr::grammar
    {
       terminal,
       non_terminal,
+      action,
       stop
    };
 
@@ -53,7 +55,13 @@ namespace fr::grammar
       template <>
       struct convert_helper<symbol_type::non_terminal>
       {
-         using type = grammar_type;
+         using type = sem::grammar_type;
+      };
+
+      template <>
+      struct convert_helper<symbol_type::action>
+      {
+         using type = sem::action_type;
       };
 
       template <>
@@ -65,7 +73,7 @@ namespace fr::grammar
       /**
        * List of string representation of the `grammar::symbol_type` enumeration values
        */
-      constexpr std::array symbol_names{"terminal", "non_terminal", "stop"};
+      constexpr std::array symbol_names{"terminal", "non_terminal", "action", "stop"};
    } // namespace detail
 
    /**
@@ -93,7 +101,7 @@ namespace fr::grammar
    class symbol
    {
    public:
-      using storage = std::variant<bool, token_type, grammar_type>;
+      using storage = std::variant<bool, token_type, sem::grammar_type, sem::action_type>;
 
       /**
        * @brief Construct a default **terminal** `grammar::symbol`
@@ -102,11 +110,11 @@ namespace fr::grammar
       /**
        * @brief Construct a default **non_terminal** `grammar::symbol`
        */
-      static constexpr auto non_terminal() -> symbol { return {grammar_type::max_size}; }
+      static constexpr auto non_terminal() -> symbol { return {sem::grammar_type::max_size}; }
       /**
        * @brief Construct a default **start** `grammar::symbol`
        */
-      static constexpr auto start() -> symbol { return {grammar_type::start}; }
+      static constexpr auto start() -> symbol { return {sem::grammar_type::start}; }
       /**
        * @brief Construct a default **stop** `grammar::symbol`
        */
@@ -124,9 +132,12 @@ namespace fr::grammar
        * @brief Construct a `grammar::symbol` of type `grammar::symbol_type::non_terminal` from a
        * `grammar::grammar_type` value
        *
-       * @param[in] value The `grammar::grammar_type` value to store
+       * @param[in] value The `sem::grammar_type` value to store
        */
-      constexpr symbol(grammar_type value) : m_type{symbol_type::non_terminal}, m_data{value} {}
+      constexpr symbol(sem::grammar_type value) : m_type{symbol_type::non_terminal}, m_data{value}
+      {}
+
+      constexpr symbol(sem::action_type value) : m_type{symbol_type::action}, m_data{value} {}
 
       constexpr auto operator==(const symbol& symbol) const -> bool = default;
       constexpr auto operator==(token_type tok) const -> bool
@@ -138,11 +149,20 @@ namespace fr::grammar
 
          return false;
       }
-      constexpr auto operator==(grammar_type tok) const -> bool
+      constexpr auto operator==(sem::grammar_type tok) const -> bool
       {
          if (m_type == symbol_type::non_terminal)
          {
-            return std::get<grammar_type>(m_data) == tok;
+            return std::get<sem::grammar_type>(m_data) == tok;
+         }
+
+         return false;
+      }
+      constexpr auto operator==(sem::action_type action) const -> bool
+      {
+         if (m_type == symbol_type::action)
+         {
+            return std::get<sem::action_type>(m_data) == action;
          }
 
          return false;
@@ -196,6 +216,8 @@ namespace fr::grammar
       return s.type() == symbol_type::non_terminal;
    }
 
+   constexpr auto is_action(const symbol& s) -> bool { return s.type() == symbol_type::action; }
+
    /**
     * @brief Access the underlying `grammar::token_type` value stored in `grammar::symbol`.
     *
@@ -211,18 +233,23 @@ namespace fr::grammar
       return get<symbol_type::terminal>(s);
    }
    /**
-    * @brief Access the underlying `grammar::grammar_type` value stored in `grammar::symbol`.
+    * @brief Access the underlying `sem::grammar_type` value stored in `grammar::symbol`.
     *
     * @param[in] s The `grammar::symbol` to access
     *
     * @throws std::bad_variant_access Thrown if the input `grammar::symbol` is not of type
     * `symbol_type::non_terminal`
     *
-    * @return The `grammar::grammar_type` value stored in `grammar::symbol`
+    * @return The `sem::grammar_type` value stored in `grammar::symbol`
     */
-   constexpr auto get_grammar_type(const symbol& s) -> grammar_type
+   constexpr auto get_grammar_type(const symbol& s) -> sem::grammar_type
    {
       return get<symbol_type::non_terminal>(s);
+   }
+
+   constexpr auto get_action_type(const symbol& s) -> sem::action_type
+   {
+      return get<symbol_type::action>(s);
    }
 } // namespace fr::grammar
 
@@ -270,6 +297,11 @@ struct fmt::formatter<fr::grammar::symbol>
       if (fr::grammar::is_non_terminal(s))
       {
          return fmt::format_to(ctx.out(), "{}({})", s.type(), fr::grammar::get_grammar_type(s));
+      }
+
+      if (fr::grammar::is_action(s))
+      {
+         return fmt::format_to(ctx.out(), "{}({})", s.type(), fr::grammar::get_action_type(s));
       }
 
       return fmt::format_to(ctx.out(), "{}", s.type());

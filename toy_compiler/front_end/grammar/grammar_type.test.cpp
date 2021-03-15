@@ -34,7 +34,7 @@ TEST_SUITE("grammar/grammar_type.hpp test suite")
 {
    TEST_CASE("to_string_view()")
    {
-      using namespace fr::grammar;
+      using namespace fr::sem;
 
       namespace vi = ranges::views;
 
@@ -45,7 +45,7 @@ TEST_SUITE("grammar/grammar_type.hpp test suite")
    }
    TEST_CASE("fmt::formatter - grammar_type")
    {
-      using namespace fr::grammar;
+      using namespace fr::sem;
 
       namespace vi = ranges::views;
 

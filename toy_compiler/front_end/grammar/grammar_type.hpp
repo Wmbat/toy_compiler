@@ -25,7 +25,7 @@
 #include <functional>
 #include <string_view>
 
-namespace fr::grammar
+namespace fr::sem
 {
    namespace detail
    {
@@ -152,25 +152,25 @@ namespace fr::grammar
    };
 
    /**
-    * @brief convert a `grammar::grammar_type` value to it's string representation
+    * @brief convert a `sem::grammar_type` value to it's string representation
     *
-    * @param [in] type The `grammar::grammar_type` value to represent as a string
+    * @param [in] type The `sem::grammar_type` value to represent as a string
     *
-    * @return A `std::string_view` into the corresponding `grammar::grammar_type` string
+    * @return A `std::string_view` into the corresponding `sem::grammar_type` string
     * representation.
     */
-   constexpr auto to_string_view(grammar::grammar_type type) -> std::string_view
+   constexpr auto to_string_view(sem::grammar_type type) -> std::string_view
    {
       return detail::grammar_names.at(static_cast<std::uint32_t>(type));
    }
-} // namespace fr::grammar
+} // namespace fr::sem
 
 /**
- * @brief A specialization for using the `grammar::grammar_type` enum in the **fmt** & **spdlog**
+ * @brief A specialization for using the `sem::grammar_type` enum in the **fmt** & **spdlog**
  * libraries
  */
 template <>
-struct fmt::formatter<fr::grammar::grammar_type>
+struct fmt::formatter<fr::sem::grammar_type>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -179,8 +179,8 @@ struct fmt::formatter<fr::grammar::grammar_type>
    }
 
    template <typename FormatContext>
-   auto format(fr::grammar::grammar_type type, FormatContext& ctx)
+   auto format(fr::sem::grammar_type type, FormatContext& ctx)
    {
-      return fmt::format_to(ctx.out(), "{}", fr::grammar::to_string_view(type));
+      return fmt::format_to(ctx.out(), "{}", fr::sem::to_string_view(type));
    }
 };
