@@ -29,12 +29,13 @@
 
 namespace fr
 {
-   struct position
+   struct source_location
    {
       std::uint32_t line = std::numeric_limits<std::uint32_t>::max();
       std::uint32_t column = std::numeric_limits<std::uint32_t>::max();
 
-      constexpr auto operator<=>(const position& other) const -> std::strong_ordering = default;
+      constexpr auto operator<=>(const source_location& other) const
+         -> std::strong_ordering = default;
    };
 
    /**
@@ -44,7 +45,7 @@ namespace fr
    {
       grammar::token_type type{}; // NOLINT
       std::string lexeme{};       // NOLINT
-      position pos{};             // NOLINT
+      source_location pos{};      // NOLINT
 
       auto operator<=>(const lex_item& other) const -> std::strong_ordering = default;
    };
@@ -62,7 +63,7 @@ namespace fr
 } // namespace fr
 
 template <>
-struct fmt::formatter<fr::position>
+struct fmt::formatter<fr::source_location>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -71,7 +72,7 @@ struct fmt::formatter<fr::position>
    }
 
    template <typename FormatContext>
-   auto format(const fr::position& pos, FormatContext& ctx)
+   auto format(const fr::source_location& pos, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "({}:{})", pos.line, pos.column);
    }

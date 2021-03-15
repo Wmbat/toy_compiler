@@ -49,7 +49,7 @@ namespace fr
    {
       parse_error_type type{parse_error_type::max_size};
       grammar::token_type token;
-      fr::position pos{};
+      fr::source_location pos{};
       std::string line;
    };
 

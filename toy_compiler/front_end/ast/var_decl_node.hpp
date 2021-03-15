@@ -10,5 +10,8 @@ namespace fr::ast
       var_decl_node(node_ptr type, node_ptr item, node_ptr array_size_list);
 
       [[nodiscard]] auto to_string() const -> std::string override;
+
+   private:
+      std::uint32_t m_index = 0;
    };
 }; // namespace fr::ast

@@ -11,7 +11,7 @@ namespace fr::sem
       constexpr std::array action_names{
          "program",         "class_decl_list", "func_def_list",   "statement_list", "var_decl_list",
          "array_size_list", "func_body",       "method_body_var", "var_decl",       "array_size",
-         "factor",          "factor_value",    "epsilon"};
+         "value",           "factor",          "factor_value",    "type",           "epsilon"};
    }
 
    enum struct action_type : std::uint32_t
@@ -26,8 +26,10 @@ namespace fr::sem
       method_body_var,
       var_decl,
       array_size,
+      value,
       factor,
       factor_value,
+      type,
       epsilon
    };
 

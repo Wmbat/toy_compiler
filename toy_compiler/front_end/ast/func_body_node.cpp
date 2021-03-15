@@ -10,6 +10,17 @@ namespace fr::ast
 
    auto func_body_node::to_string() const -> std::string
    {
-      return fmt::format("{}", sem::to_string_view(sem::action_type::func_body));
+      std::string name = fmt::format("\"{}\"", sem::to_string_view(sem::action_type::func_body));
+
+      std::string output = name + fmt::format(" -> {}", child());
+
+      const node* temp = child().get();
+      while (temp->sibling())
+      {
+         output += name + fmt::format(" -> {}", temp->sibling());
+         temp = temp->sibling().get();
+      }
+
+      return fmt::format("{};\n{}", name, output);
    }
 } // namespace fr::ast

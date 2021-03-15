@@ -6,7 +6,11 @@ namespace fr::ast
 {
    namespace vi = ranges::views;
 
-   list_node::list_node(list_node_type type, std::vector<node_ptr>&& children) : m_type{type}
+   static inline std::uint32_t counter = 0;
+
+   list::list(list_node_type type, std::vector<node_ptr>&& children) :
+      m_type{type},
+      m_index{counter++}
    {
       node* it = children.front().get();
       for (node_ptr& node : children | vi::tail)
@@ -19,28 +23,50 @@ namespace fr::ast
       make_child(std::move(children.front()));
    }
 
-   auto list_node::to_string() const -> std::string
+   auto list::to_string() const -> std::string
    {
       if (m_type == list_node_type::class_decl)
       {
-         return fmt::format("{}", sem::to_string_view(sem::action_type::class_decl_list));
+         return to_string_impl(sem::action_type::class_decl_list);
       }
 
       if (m_type == list_node_type::func_def)
       {
-         return fmt::format("{}", sem::to_string_view(sem::action_type::func_def_list));
+         return to_string_impl(sem::action_type::func_def_list);
+      }
+
+      if (m_type == list_node_type::var_decl)
+      {
+         return to_string_impl(sem::action_type::var_decl_list);
       }
 
       if (m_type == list_node_type::statement)
       {
-         return fmt::format("{}", sem::to_string_view(sem::action_type::statement_list));
+         return to_string_impl(sem::action_type::statement_list);
       }
 
       if (m_type == list_node_type::array_size)
       {
-         return fmt::format("{}", sem::to_string_view(sem::action_type::array_size_list));
+         return to_string_impl(sem::action_type::array_size_list);
       }
 
       return fmt::format("{}", "bad");
+   }
+
+   auto list::to_string_impl(sem::action_type type) const -> std::string
+   {
+      std::string name = fmt::format("\"{}_{}\"", sem::to_string_view(type), m_index);
+
+      std::string output = name + fmt::format(" -> {}", child());
+      const node* temp = child().get();
+      while (temp->sibling())
+      {
+         output += name + fmt::format(" -> {}", temp->sibling());
+         temp = temp->sibling().get();
+      }
+
+      output += fmt::format("{} [label={}]\n", name, sem::to_string_view(type));
+
+      return fmt::format("{0};\n{1}", name, output);
    }
 } // namespace fr::ast

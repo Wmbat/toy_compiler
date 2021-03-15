@@ -13,14 +13,19 @@ namespace fr::ast
       array_size
    };
 
-   class list_node : public node
+   class list : public node
    {
    public:
-      list_node(list_node_type type, std::vector<node_ptr>&& children);
+      list(list_node_type type, std::vector<node_ptr>&& children);
 
       [[nodiscard]] auto to_string() const -> std::string override;
 
    private:
+      [[nodiscard]] auto to_string_impl(sem::action_type type) const -> std::string;
+
+   private:
       list_node_type m_type;
+
+      std::uint32_t m_index = 0;
    };
 } // namespace fr::ast

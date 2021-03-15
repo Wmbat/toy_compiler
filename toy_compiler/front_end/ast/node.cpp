@@ -6,9 +6,12 @@
 #include <toy_compiler/front_end/ast/list_node.hpp>
 #include <toy_compiler/front_end/ast/method_body_var_node.hpp>
 #include <toy_compiler/front_end/ast/program_node.hpp>
+#include <toy_compiler/front_end/ast/type.hpp>
 #include <toy_compiler/front_end/ast/value_node.hpp>
 #include <toy_compiler/front_end/ast/var_decl_node.hpp>
+#include <toy_compiler/front_end/grammar/token_type.hpp>
 
+#include <fmt/color.h>
 #include <fmt/core.h>
 
 #include <range/v3/view/reverse.hpp>
@@ -21,14 +24,26 @@ namespace fr::ast
 {
    namespace vi = ranges::views;
 
-   node::node(fr::lex_item item) : m_item{std::move(item)} {}
-
-   void node::make_sibling(node_ptr sibling) { m_sibling = std::move(sibling); }
-   void node::make_child(node_ptr child) { m_child = std::move(child); }
+   node::node(std::string lexeme, const source_location& location) :
+      m_lexeme{std::move(lexeme)},
+      m_location{location}
+   {}
 
    auto node::child() const -> const node_ptr& { return m_child; }
    auto node::sibling() const -> const node_ptr& { return m_sibling; }
-   auto node::token() const -> const fr::lex_item& { return m_item; }
+   auto node::lexeme() const -> monad::maybe<std::string_view>
+   {
+      if (!std::empty(m_lexeme))
+      {
+         return std::string_view{m_lexeme};
+      }
+
+      return monad::none;
+   }
+   auto node::location() const -> monad::maybe<fr::source_location> { return m_location; }
+
+   void node::make_sibling(node_ptr sibling) { m_sibling = std::move(sibling); }
+   void node::make_child(node_ptr child) { m_child = std::move(child); }
 
    auto pop(std::vector<node_ptr>& stack) -> std::unique_ptr<node>
    {
@@ -54,7 +69,7 @@ namespace fr::ast
          std::vector<node_ptr> nodes;
          nodes.push_back(pop(recs));
 
-         return std::make_unique<list_node>(list_node_type::class_decl, std::move(nodes));
+         return std::make_unique<list>(list_node_type::class_decl, std::move(nodes));
       }
 
       if (type == sem::action_type::func_def_list)
@@ -62,7 +77,7 @@ namespace fr::ast
          std::vector<node_ptr> nodes;
          nodes.push_back(pop(recs));
 
-         return std::make_unique<list_node>(list_node_type::func_def, std::move(nodes));
+         return std::make_unique<list>(list_node_type::func_def, std::move(nodes));
       }
 
       if (type == sem::action_type::func_body)
@@ -78,10 +93,12 @@ namespace fr::ast
       {
          if (auto first = pop(recs); dynamic_cast<epsilon_node*>(first.get()))
          {
+            fmt::print(fmt::fg(fmt::color::orange), "Empty Statement List");
+
             std::vector<node_ptr> nodes;
             nodes.push_back(std::move(first));
 
-            return std::make_unique<list_node>(list_node_type::statement, std::move(nodes));
+            return std::make_unique<list>(list_node_type::statement, std::move(nodes));
          }
          else
          {
@@ -100,28 +117,26 @@ namespace fr::ast
                pop(recs);
             }
 
-            return std::make_unique<list_node>(list_node_type::statement, std::move(nodes));
+            return std::make_unique<list>(list_node_type::statement, std::move(nodes));
          }
       }
 
       if (type == sem::action_type::method_body_var)
       {
-         return std::make_unique<method_body_var_node>(pop(recs));
+         auto first = pop(recs);
+
+         return std::make_unique<method_body_var_node>(std::move(first));
       }
 
       if (type == sem::action_type::var_decl_list)
       {
-         if (auto first = pop(recs); dynamic_cast<epsilon_node*>(first.get()))
-         {
-            std::vector<node_ptr> nodes;
-            nodes.push_back(std::move(first));
+         std::vector<node_ptr> nodes;
+         auto first = pop(recs);
 
-            return std::make_unique<list_node>(list_node_type::var_decl, std::move(nodes));
-         }
-         else
+         if (dynamic_cast<var_decl_node*>(recs.back().get()))
          {
             std::vector<node_ptr> nodes;
-            nodes.push_back(std::move(first));
+            nodes.push_back(pop(recs));
 
             for (auto& node : recs | vi::reverse | vi::take_while([](node_ptr& node) {
                                  return dynamic_cast<var_decl_node*>(node.get());
@@ -135,15 +150,23 @@ namespace fr::ast
                pop(recs);
             }
 
-            return std::make_unique<list_node>(list_node_type::var_decl, std::move(nodes));
+            return std::make_unique<list>(list_node_type::var_decl, std::move(nodes));
          }
+
+         nodes.push_back(std::move(first));
+
+         return std::make_unique<list>(list_node_type::var_decl, std::move(nodes));
       }
 
       if (type == sem::action_type::var_decl)
       {
          node_ptr array_size_list = pop(recs);
-         node_ptr value = std::make_unique<value_node>(std::move(item));
+         node_ptr value = pop(recs);
          node_ptr type = pop(recs);
+
+         fmt::print(fmt::fg(fmt::color::orange), "ARRAY_SIZE_LIST: {}\n", array_size_list);
+         fmt::print(fmt::fg(fmt::color::orange), "VALUE: {}\n", value);
+         fmt::print(fmt::fg(fmt::color::orange), "TYPE: {}\n", type);
 
          return std::make_unique<var_decl_node>(std::move(type), std::move(value),
                                                 std::move(array_size_list));
@@ -151,22 +174,18 @@ namespace fr::ast
 
       if (type == sem::action_type::array_size)
       {
-         return std::make_unique<array_size_node>(item);
+         return std::make_unique<array_size_node>(pop(recs));
       }
 
       if (type == sem::action_type::array_size_list)
       {
-         if (auto first = pop(recs); dynamic_cast<epsilon_node*>(first.get()))
-         {
-            std::vector<node_ptr> nodes;
-            nodes.push_back(std::move(first));
+         std::vector<node_ptr> nodes;
+         auto first = pop(recs);
 
-            return std::make_unique<list_node>(list_node_type::array_size, std::move(nodes));
-         }
-         else
+         if (dynamic_cast<array_size_node*>(recs.back().get()))
          {
             std::vector<node_ptr> nodes;
-            nodes.push_back(std::move(first));
+            nodes.push_back(pop(recs));
 
             for (auto& node : recs | vi::reverse | vi::take_while([](node_ptr& node) {
                                  return dynamic_cast<array_size_node*>(node.get());
@@ -180,8 +199,40 @@ namespace fr::ast
                pop(recs);
             }
 
-            return std::make_unique<list_node>(list_node_type::array_size, std::move(nodes));
+            return std::make_unique<list>(list_node_type::array_size, std::move(nodes));
          }
+
+         nodes.push_back(std::move(first));
+
+         return std::make_unique<list>(list_node_type::array_size, std::move(nodes));
+      }
+
+      if (type == sem::action_type::type)
+      {
+         if (item.type == grammar::token_type::id_integer)
+         {
+            return std::make_unique<integer_type>(item.pos);
+         }
+         if (item.type == grammar::token_type::id_float)
+         {
+            return std::make_unique<float_type>(item.pos);
+         }
+         if (item.type == grammar::token_type::id_string)
+         {
+            return std::make_unique<string_type>(item.pos);
+         }
+
+         return std::make_unique<user_defined_type>(item.lexeme, item.pos);
+      }
+
+      if (type == sem::action_type::value)
+      {
+         if (item.type == grammar::token_type::integer_lit)
+         {
+            return std::make_unique<integer_lit>(item.lexeme, item.pos);
+         }
+
+         return std::make_unique<value_node>(item.lexeme, item.pos);
       }
 
       if (type == sem::action_type::epsilon)

@@ -81,7 +81,6 @@ namespace fr
       while (stack.back() != grammar::symbol::stop())
       {
          fmt::print(fmt::fg(fmt::color::cyan), "grammar stack: {}\n", stack);
-         fmt::print(fmt::fg(fmt::color::orange), "ast stack: {}\n", nodes);
 
          const auto& top_symbol = stack.back();
 
@@ -212,7 +211,7 @@ namespace fr
       using namespace grammar;
 
       production_table table{};
-      symbol_array epsilon = {token_type::epsilon};
+      symbol_array epsilon = {token_type::epsilon, sem::action_type::epsilon};
 
       // <AddOp>
       {
@@ -287,14 +286,14 @@ namespace fr
 
       // <ArraySizeRept>
       {
-         table.set_production({sem::grammar_type::array_size_rept, token_type::comma}, epsilon);
-         table.set_production({sem::grammar_type::array_size_rept, token_type::left_square},
+         const auto key = sem::grammar_type::array_size_rept;
+         table.set_production({key, token_type::comma}, epsilon);
+         table.set_production({key, token_type::left_square},
                               {token_type::left_square, sem::grammar_type::int_num,
-                               token_type::right_square, sem::grammar_type::array_size_rept});
-         table.set_production({sem::grammar_type::array_size_rept, token_type::semi_colon},
-                              epsilon);
-         table.set_production({sem::grammar_type::array_size_rept, token_type::right_paren},
-                              epsilon);
+                               sem::action_type::array_size, token_type::right_square,
+                               sem::grammar_type::array_size_rept});
+         table.set_production({key, token_type::semi_colon}, epsilon);
+         table.set_production({key, token_type::right_paren}, epsilon);
       }
 
       // <AssignOp>
@@ -665,7 +664,7 @@ namespace fr
       // <IntNum>
       {
          table.set_production({sem::grammar_type::int_num, token_type::integer_lit},
-                              {token_type::integer_lit});
+                              {token_type::integer_lit, sem::action_type::value});
          table.set_production({sem::grammar_type::int_num, token_type::right_square}, epsilon);
       }
 
@@ -687,22 +686,21 @@ namespace fr
 
       // <MethodBodyVar>
       {
-         symbol_array common{token_type::epsilon, sem::action_type::epsilon};
-         table.set_production({sem::grammar_type::method_body_var, token_type::id}, common);
+         table.set_production({sem::grammar_type::method_body_var, token_type::id}, epsilon);
          table.set_production({sem::grammar_type::method_body_var, token_type::id_continue},
-                              common);
-         table.set_production({sem::grammar_type::method_body_var, token_type::id_break}, common);
-         table.set_production({sem::grammar_type::method_body_var, token_type::id_return}, common);
-         table.set_production({sem::grammar_type::method_body_var, token_type::id_write}, common);
-         table.set_production({sem::grammar_type::method_body_var, token_type::id_read}, common);
-         table.set_production({sem::grammar_type::method_body_var, token_type::id_while}, common);
-         table.set_production({sem::grammar_type::method_body_var, token_type::id_if}, common);
+                              epsilon);
+         table.set_production({sem::grammar_type::method_body_var, token_type::id_break}, epsilon);
+         table.set_production({sem::grammar_type::method_body_var, token_type::id_return}, epsilon);
+         table.set_production({sem::grammar_type::method_body_var, token_type::id_write}, epsilon);
+         table.set_production({sem::grammar_type::method_body_var, token_type::id_read}, epsilon);
+         table.set_production({sem::grammar_type::method_body_var, token_type::id_while}, epsilon);
+         table.set_production({sem::grammar_type::method_body_var, token_type::id_if}, epsilon);
          table.set_production({sem::grammar_type::method_body_var, token_type::id_var},
                               {token_type::id_var, token_type::left_brace,
                                sem::grammar_type::var_decl_rep, sem::action_type::var_decl_list,
                                token_type::right_brace});
          table.set_production({sem::grammar_type::method_body_var, token_type::right_brace},
-                              common);
+                              epsilon);
       }
 
       // <MultOp>
@@ -877,8 +875,13 @@ namespace fr
 
       // <VarDecl>
       {
-         symbol_array common{sem::grammar_type::type, token_type::id,
-                             sem::grammar_type::array_size_rept, token_type::semi_colon};
+         symbol_array common{sem::grammar_type::type,
+                             sem::action_type::type,
+                             token_type::id,
+                             sem::action_type::value,
+                             sem::grammar_type::array_size_rept,
+                             sem::action_type::array_size_list,
+                             token_type::semi_colon};
          table.set_production({sem::grammar_type::var_decl, token_type::id}, common);
          table.set_production({sem::grammar_type::var_decl, token_type::id_integer}, common);
          table.set_production({sem::grammar_type::var_decl, token_type::id_float}, common);
@@ -889,12 +892,12 @@ namespace fr
       {
          symbol_array common{sem::grammar_type::var_decl, sem::action_type::var_decl,
                              sem::grammar_type::var_decl_rep};
-         table.set_production({sem::grammar_type::var_decl_rep, token_type::id}, common);
-         table.set_production({sem::grammar_type::var_decl_rep, token_type::right_brace},
-                              {token_type::epsilon, sem::action_type::epsilon});
-         table.set_production({sem::grammar_type::var_decl_rep, token_type::id_integer}, common);
-         table.set_production({sem::grammar_type::var_decl_rep, token_type::id_float}, common);
-         table.set_production({sem::grammar_type::var_decl_rep, token_type::id_string}, common);
+         const auto key = sem::grammar_type::var_decl_rep;
+         table.set_production({key, token_type::id}, common);
+         table.set_production({key, token_type::right_brace}, epsilon);
+         table.set_production({key, token_type::id_integer}, common);
+         table.set_production({key, token_type::id_float}, common);
+         table.set_production({key, token_type::id_string}, common);
       }
 
       // <Variable>

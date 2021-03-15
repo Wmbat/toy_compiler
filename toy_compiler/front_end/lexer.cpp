@@ -36,7 +36,7 @@ namespace fs = std::filesystem;
 
 namespace fr
 {
-   auto lexer(const std::string_view data, fr::position pos) -> lex_item;
+   auto lexer(const std::string_view data, fr::source_location pos) -> lex_item;
    auto trim_leading_whitespaces(const std::string_view data)
       -> std::tuple<std::string_view, std::uint32_t, std::uint32_t>;
    auto check_for_newlines(const lex_item& tok) -> std::uint32_t
@@ -130,7 +130,7 @@ namespace fr
       return tokens;
    }
 
-   auto lex_alphanum(const std::string_view data, fr::position pos) -> lex_item
+   auto lex_alphanum(const std::string_view data, fr::source_location pos) -> lex_item
    {
       using namespace grammar::detail;
 
@@ -144,7 +144,7 @@ namespace fr
       return {.type = grammar::token_type::id, .lexeme = lexeme, .pos = pos};
    }
 
-   auto lex_braces(const std::string_view data, fr::position pos) -> lex_item
+   auto lex_braces(const std::string_view data, fr::source_location pos) -> lex_item
    {
       const char lexeme = data.at(0);
 
@@ -176,13 +176,13 @@ namespace fr
       return {.type = grammar::token_type::invalid_char, .lexeme = {lexeme}, .pos = pos};
    }
 
-   auto lex_comments(const std::string_view data, fr::position pos) -> lex_item;
-   auto lex_numeric(const std::string_view data, fr::position pos) -> lex_item;
-   auto lex_punctuation(const std::string_view data, fr::position pos) -> lex_item;
-   auto lex_string(const std::string_view data, fr::position pos) -> lex_item;
-   auto lex_operator(const std::string_view data, fr::position pos) -> lex_item;
+   auto lex_comments(const std::string_view data, fr::source_location pos) -> lex_item;
+   auto lex_numeric(const std::string_view data, fr::source_location pos) -> lex_item;
+   auto lex_punctuation(const std::string_view data, fr::source_location pos) -> lex_item;
+   auto lex_string(const std::string_view data, fr::source_location pos) -> lex_item;
+   auto lex_operator(const std::string_view data, fr::source_location pos) -> lex_item;
 
-   auto lexer(const std::string_view data, fr::position pos) -> lex_item
+   auto lexer(const std::string_view data, fr::source_location pos) -> lex_item
    {
       if (std::size(data) >= 2 && is_comment(data.substr(0, 2)))
       {
@@ -264,11 +264,11 @@ namespace fr
 
    /////////////// NUMBERS //////////////////
 
-   auto handle_leading_zero(const std::string_view, fr::position) -> lex_item;
-   auto handle_leading_nonzero(const std::string_view, fr::position) -> lex_item;
-   auto handle_fraction(const std::string_view, fr::position) -> lex_item;
+   auto handle_leading_zero(const std::string_view, fr::source_location) -> lex_item;
+   auto handle_leading_nonzero(const std::string_view, fr::source_location) -> lex_item;
+   auto handle_fraction(const std::string_view, fr::source_location) -> lex_item;
 
-   auto lex_numeric(const std::string_view data, fr::position pos) -> lex_item
+   auto lex_numeric(const std::string_view data, fr::source_location pos) -> lex_item
    {
       if (data.at(0) == '0')
       {
@@ -278,7 +278,7 @@ namespace fr
       return handle_leading_nonzero(data, pos);
    }
 
-   auto handle_leading_zero(const std::string_view data, fr::position pos) -> lex_item
+   auto handle_leading_zero(const std::string_view data, fr::source_location pos) -> lex_item
    {
       const char first = data.at(0);
       if (std::size(data) > 1)
@@ -295,7 +295,7 @@ namespace fr
 
       return {.type = grammar::token_type::integer_lit, .lexeme = {first}, .pos = pos};
    }
-   auto handle_leading_nonzero(const std::string_view data, fr::position pos) -> lex_item
+   auto handle_leading_nonzero(const std::string_view data, fr::source_location pos) -> lex_item
    {
       const auto lexeme = data | vi::take_while(is_digit) | ranges::to<std::string>;
       const auto* const last = std::begin(data) + std::size(lexeme);
@@ -310,7 +310,7 @@ namespace fr
 
       return {.type = grammar::token_type::integer_lit, .lexeme = lexeme, .pos = pos};
    }
-   auto handle_scientific_notation(const std::string_view data, fr::position pos) -> lex_item
+   auto handle_scientific_notation(const std::string_view data, fr::source_location pos) -> lex_item
    {
       const auto convert = [](const lex_item& tok) {
          return tok.type != grammar::token_type::invalid_num ? grammar::token_type::float_lit
@@ -350,7 +350,7 @@ namespace fr
 
       return {.type = grammar::token_type::invalid_num, .lexeme = {first}, .pos = pos};
    }
-   auto handle_fraction_nonzero(const std::string_view data, fr::position pos) -> lex_item
+   auto handle_fraction_nonzero(const std::string_view data, fr::source_location pos) -> lex_item
    {
       const auto lexeme = data | vi::take_while(is_digit) | ranges::to<std::string>;
 
@@ -373,7 +373,7 @@ namespace fr
 
       return {.type = grammar::token_type::float_lit, .lexeme = "." + lexeme, .pos = pos};
    }
-   auto handle_fraction_leading_zero(const std::string_view data, fr::position pos) -> lex_item
+   auto handle_fraction_leading_zero(const std::string_view data, fr::source_location pos) -> lex_item
    {
       if (std::size(data) > 1) // only 0
       {
@@ -397,7 +397,7 @@ namespace fr
 
       return {.type = grammar::token_type::float_lit, .lexeme = ".0", .pos = pos};
    }
-   auto handle_fraction(const std::string_view data, fr::position pos) -> lex_item
+   auto handle_fraction(const std::string_view data, fr::source_location pos) -> lex_item
    {
       const char period = *std::begin(data);
       const auto* const first = std::begin(data) + 1;
@@ -420,7 +420,7 @@ namespace fr
 
    /////////////// COMMENTS //////////////////
 
-   auto lex_comments(const std::string_view data, fr::position pos) -> lex_item
+   auto lex_comments(const std::string_view data, fr::source_location pos) -> lex_item
    {
       const auto start = data.substr(0, 2);
       if (start == "/*")
@@ -443,7 +443,7 @@ namespace fr
 
    /////////////// PUNCTUATION //////////////////
 
-   auto handle_colon(std::string_view data, fr::position pos) -> lex_item
+   auto handle_colon(std::string_view data, fr::source_location pos) -> lex_item
    {
       const auto lexeme = data.substr(0, std::min(data.find_first_not_of(':'), std::size(data)));
 
@@ -457,7 +457,7 @@ namespace fr
       return {.type = grammar::token_type::colon, .lexeme = std::string{lexeme}, .pos = pos};
    }
 
-   auto lex_punctuation(const std::string_view data, fr::position pos) -> lex_item
+   auto lex_punctuation(const std::string_view data, fr::source_location pos) -> lex_item
    {
       // NOLINTNEXTLINE
       assert(is_punctuation(data.at(0)) && "first character must be a punctuation symbol");
@@ -489,7 +489,7 @@ namespace fr
 
    /////////// STRING TOKENIZATION //////////////
 
-   auto handle_terminated_string(const std::string_view data, fr::position pos) -> lex_item
+   auto handle_terminated_string(const std::string_view data, fr::source_location pos) -> lex_item
    {
       // clang-format off
       const auto lexeme = data 
@@ -509,7 +509,7 @@ namespace fr
               .pos = pos};
    }
 
-   auto lex_string(const std::string_view data, fr::position pos) -> lex_item
+   auto lex_string(const std::string_view data, fr::source_location pos) -> lex_item
    {
       // NOLINTNEXTLINE
       assert(data.at(0) == '\"' && "first character must be a quotation mark (\")");
@@ -529,7 +529,7 @@ namespace fr
 
    /////////// OPERATORS //////////////
 
-   auto handle_leading_less_than(const std::string_view data, fr::position pos) -> lex_item
+   auto handle_leading_less_than(const std::string_view data, fr::source_location pos) -> lex_item
    {
       if (std::size(data) > 1)
       {
@@ -550,7 +550,7 @@ namespace fr
 
       return {.type = grammar::token_type::less_than, .lexeme = {data.at(0)}, .pos = pos};
    }
-   auto handle_leading_greater_than(const std::string_view data, fr::position pos) -> lex_item
+   auto handle_leading_greater_than(const std::string_view data, fr::source_location pos) -> lex_item
    {
       if (std::size(data) > 1 && data.at(1) == '=')
       {
@@ -561,7 +561,7 @@ namespace fr
 
       return {.type = grammar::token_type::greater_than, .lexeme = {data.at(0)}, .pos = pos};
    }
-   auto handle_leading_equal(const std::string_view data, fr::position pos) -> lex_item
+   auto handle_leading_equal(const std::string_view data, fr::source_location pos) -> lex_item
    {
       if (std::size(data) > 1 && data.at(1) == '=')
       {
@@ -573,7 +573,7 @@ namespace fr
       return {.type = grammar::token_type::assign, .lexeme = {data.at(0)}, .pos = pos};
    }
 
-   auto lex_operator(const std::string_view data, fr::position pos) -> lex_item
+   auto lex_operator(const std::string_view data, fr::source_location pos) -> lex_item
    {
       const auto first = data.at(0);
       if (first == '+')
