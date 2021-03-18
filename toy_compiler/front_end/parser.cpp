@@ -17,7 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fmt/color.h"
 #include <toy_compiler/front_end/parser.hpp>
 
 #include <toy_compiler/front_end/ast/node.hpp>
@@ -25,6 +24,7 @@
 #include <toy_compiler/front_end/grammar/production_table.hpp>
 #include <toy_compiler/front_end/grammar/symbol.hpp>
 
+#include <fmt/color.h>
 #include <fmt/core.h>
 #include <fmt/format.h>
 #include <fmt/ranges.h>
@@ -77,10 +77,19 @@ namespace fr
       stack.push_back(grammar::symbol::stop());
       stack.push_back(grammar::symbol::start());
 
+      std::string derivation;
+      std::string parsed_tokens;
+      std::string final_derivations;
+
+      const auto action_filter = [](grammar::symbol& s) {
+         return !grammar::is_action(s);
+      };
+
       auto item_it = std::begin(items);
       while (stack.back() != grammar::symbol::stop())
       {
-         fmt::print(fmt::fg(fmt::color::cyan), "grammar stack: {}\n", stack);
+         derivation =
+            fmt::format("{}", stack | vi::reverse | vi::filter(action_filter) | ranges::to_vector);
 
          const auto& top_symbol = stack.back();
 
@@ -89,6 +98,8 @@ namespace fr
             if (!grammar::is_eof(item_it->type) && top_symbol == item_it->type)
             {
                log.info("Parsed token: {}", *item_it);
+
+               parsed_tokens += fmt::format("{} ", item_it->lexeme);
 
                stack.pop_back();
                ++item_it;
@@ -104,6 +115,20 @@ namespace fr
                else
                {
                   log.warning("SCANNING...");
+
+                  const auto token = get<grammar::symbol_type::terminal>(top_symbol);
+                  if (token == grammar::token_type::semi_colon)
+                  {
+                     errors.push_back(parse_error{.type = parse_error_type::missing_terminal,
+                                                  .token = token,
+                                                  .pos = (item_it - 1)->pos});
+                  }
+                  else
+                  {
+                     errors.push_back(parse_error{.type = parse_error_type::missing_terminal,
+                                                  .token = token,
+                                                  .pos = item_it->pos});
+                  }
 
                   while (!grammar::is_eof(item_it->type) && item_it->type != top_symbol)
                   {
@@ -184,19 +209,22 @@ namespace fr
                nodes.push_back(ast::node_factory(type, {}, nodes));
             }
          }
+
+         final_derivations += fmt::format("{}{}\n", parsed_tokens, derivation);
       }
-
-      fmt::print(fmt::fg(fmt::color::cyan), "grammar stack: {}\n\n\n\n", stack);
-
-      fmt::print("{}", nodes.back());
 
       if (!grammar::is_eof(item_it->type) || !std::empty(errors))
       {
-         return {.value = parse_status::error, .ast = std::move(nodes.back()), .errors = errors};
+         return {.value = parse_status::error,
+                 .ast = std::move(nodes.back()),
+                 .derivation = final_derivations,
+                 .errors = errors};
       }
 
-      return {
-         .value = parse_status::success, .ast = std::move(nodes.back()), .errors = monad::none};
+      return {.value = parse_status::success,
+              .ast = std::move(nodes.back()),
+              .derivation = final_derivations,
+              .errors = monad::none};
    }
 
    auto parse_items(std::span<const fr::lex_item> items, util::logger_wrapper log) -> parse_result
@@ -215,9 +243,12 @@ namespace fr
 
       // <AddOp>
       {
-         table.set_production({sem::grammar_type::add_op, token_type::plus}, {token_type::plus});
-         table.set_production({sem::grammar_type::add_op, token_type::minus}, {token_type::minus});
-         table.set_production({sem::grammar_type::add_op, token_type::or_op}, {token_type::or_op});
+         table.set_production({sem::grammar_type::add_op, token_type::plus},
+                              {token_type::plus, sem::action_type::value});
+         table.set_production({sem::grammar_type::add_op, token_type::minus},
+                              {token_type::minus, sem::action_type::value});
+         table.set_production({sem::grammar_type::add_op, token_type::or_op},
+                              {token_type::or_op, sem::action_type::value});
       }
 
       // <aParams>
@@ -246,7 +277,8 @@ namespace fr
 
       // <ArithExpr>
       {
-         symbol_array common{sem::grammar_type::term, sem::grammar_type::arith_expr_tail};
+         symbol_array common{sem::grammar_type::term, sem::action_type::term_expr,
+                             sem::grammar_type::arith_expr_tail, sem::action_type::arith_expr_list};
          table.set_production({sem::grammar_type::arith_expr, token_type::minus}, common);
          table.set_production({sem::grammar_type::arith_expr, token_type::plus}, common);
          table.set_production({sem::grammar_type::arith_expr, token_type::id}, common);
@@ -260,28 +292,24 @@ namespace fr
 
       // <ArithExprTail>
       {
-         symbol_array common{sem::grammar_type::add_op, sem::grammar_type::term,
-                             sem::grammar_type::arith_expr_tail};
-         table.set_production({sem::grammar_type::arith_expr_tail, token_type::plus}, common);
-         table.set_production({sem::grammar_type::arith_expr_tail, token_type::minus}, common);
-         table.set_production({sem::grammar_type::arith_expr_tail, token_type::or_op}, common);
-         table.set_production({sem::grammar_type::arith_expr_tail, token_type::comma}, epsilon);
-         table.set_production({sem::grammar_type::arith_expr_tail, token_type::right_square},
-                              epsilon);
-         table.set_production({sem::grammar_type::arith_expr_tail, token_type::semi_colon},
-                              epsilon);
-         table.set_production({sem::grammar_type::arith_expr_tail, token_type::right_paren},
-                              epsilon);
-         table.set_production({sem::grammar_type::arith_expr_tail, token_type::colon}, epsilon);
-         table.set_production({sem::grammar_type::arith_expr_tail, token_type::equal}, epsilon);
-         table.set_production({sem::grammar_type::arith_expr_tail, token_type::not_equal}, epsilon);
-         table.set_production({sem::grammar_type::arith_expr_tail, token_type::less_than}, epsilon);
-         table.set_production({sem::grammar_type::arith_expr_tail, token_type::greater_than},
-                              epsilon);
-         table.set_production({sem::grammar_type::arith_expr_tail, token_type::less_equal_than},
-                              epsilon);
-         table.set_production({sem::grammar_type::arith_expr_tail, token_type::greater_equal_than},
-                              epsilon);
+         symbol_array common{sem::grammar_type::add_op,         sem::action_type::add_op,
+                             sem::grammar_type::term,           sem::action_type::term_expr,
+                             sem::action_type::arith_tail_expr, sem::grammar_type::arith_expr_tail};
+         const auto key = sem::grammar_type::arith_expr_tail;
+         table.set_production({key, token_type::plus}, common);
+         table.set_production({key, token_type::minus}, common);
+         table.set_production({key, token_type::or_op}, common);
+         table.set_production({key, token_type::comma}, epsilon);
+         table.set_production({key, token_type::right_square}, epsilon);
+         table.set_production({key, token_type::semi_colon}, epsilon);
+         table.set_production({key, token_type::right_paren}, epsilon);
+         table.set_production({key, token_type::colon}, epsilon);
+         table.set_production({key, token_type::equal}, epsilon);
+         table.set_production({key, token_type::not_equal}, epsilon);
+         table.set_production({key, token_type::less_than}, epsilon);
+         table.set_production({key, token_type::greater_than}, epsilon);
+         table.set_production({key, token_type::less_equal_than}, epsilon);
+         table.set_production({key, token_type::greater_equal_than}, epsilon);
       }
 
       // <ArraySizeRept>
@@ -311,20 +339,21 @@ namespace fr
       // <ClassDecl>
       {
          table.set_production({sem::grammar_type::class_decl, token_type::id_class},
-                              {token_type::id_class, token_type::id, sem::grammar_type::inherit,
+                              {token_type::id_class, token_type::id, sem::action_type::value,
+                               sem::grammar_type::inherit, sem::action_type::inheritance_decl_list,
                                token_type::left_brace, sem::grammar_type::class_decl_body,
-                               token_type::right_brace, token_type::semi_colon,
+                               sem::action_type::class_body_decl_list, token_type::right_brace,
+                               token_type::semi_colon, sem::action_type::class_decl,
                                sem::grammar_type::class_decl});
-         table.set_production({sem::grammar_type::class_decl, token_type::id_func},
-                              {token_type::epsilon, sem::action_type::epsilon});
-         table.set_production({sem::grammar_type::class_decl, token_type::id_main},
-                              {token_type::epsilon, sem::action_type::epsilon});
+         table.set_production({sem::grammar_type::class_decl, token_type::id_func}, epsilon);
+         table.set_production({sem::grammar_type::class_decl, token_type::id_main}, epsilon);
       }
 
       // <ClassDeclBody>
       {
-         symbol_array common{sem::grammar_type::visibility, sem::grammar_type::member_decl,
-                             sem::grammar_type::class_decl_body};
+         symbol_array common{sem::grammar_type::visibility,     sem::action_type::visibility_decl,
+                             sem::grammar_type::member_decl,    sem::action_type::member_decl,
+                             sem::action_type::class_body_decl, sem::grammar_type::class_decl_body};
 
          table.set_production({sem::grammar_type::class_decl_body, token_type::id}, common);
          table.set_production({sem::grammar_type::class_decl_body, token_type::right_brace},
@@ -346,56 +375,58 @@ namespace fr
 
       // <Expr>
       {
-         symbol_array common{sem::grammar_type::arith_expr, sem::grammar_type::expr_tail};
-         table.set_production({sem::grammar_type::expr, token_type::plus}, common);
-         table.set_production({sem::grammar_type::expr, token_type::minus}, common);
-         table.set_production({sem::grammar_type::expr, token_type::id}, common);
-         table.set_production({sem::grammar_type::expr, token_type::integer_lit}, common);
-         table.set_production({sem::grammar_type::expr, token_type::float_lit}, common);
-         table.set_production({sem::grammar_type::expr, token_type::str_lit}, common);
-         table.set_production({sem::grammar_type::expr, token_type::left_paren}, common);
-         table.set_production({sem::grammar_type::expr, token_type::not_op}, common);
-         table.set_production({sem::grammar_type::expr, token_type::qmark}, common);
+         symbol_array common{sem::grammar_type::arith_expr, sem::action_type::arith_expr,
+                             sem::grammar_type::expr_tail};
+         const auto key = sem::grammar_type::expr;
+         table.set_production({key, token_type::plus}, common);
+         table.set_production({key, token_type::minus}, common);
+         table.set_production({key, token_type::id}, common);
+         table.set_production({key, token_type::integer_lit}, common);
+         table.set_production({key, token_type::float_lit}, common);
+         table.set_production({key, token_type::str_lit}, common);
+         table.set_production({key, token_type::left_paren}, common);
+         table.set_production({key, token_type::not_op}, common);
+         table.set_production({key, token_type::qmark}, common);
       }
 
       // <ExprTail>
       {
-         symbol_array common{sem::grammar_type::relop, sem::grammar_type::arith_expr};
-
-         table.set_production({sem::grammar_type::expr_tail, token_type::comma}, epsilon);
-         table.set_production({sem::grammar_type::expr_tail, token_type::right_square}, epsilon);
-         table.set_production({sem::grammar_type::expr_tail, token_type::semi_colon}, epsilon);
-         table.set_production({sem::grammar_type::expr_tail, token_type::right_paren}, epsilon);
-         table.set_production({sem::grammar_type::expr_tail, token_type::colon}, epsilon);
-         table.set_production({sem::grammar_type::expr_tail, token_type::equal}, common);
-         table.set_production({sem::grammar_type::expr_tail, token_type::not_equal}, common);
-         table.set_production({sem::grammar_type::expr_tail, token_type::less_than}, common);
-         table.set_production({sem::grammar_type::expr_tail, token_type::greater_than}, common);
-         table.set_production({sem::grammar_type::expr_tail, token_type::less_equal_than}, common);
-         table.set_production({sem::grammar_type::expr_tail, token_type::greater_equal_than},
-                              common);
+         symbol_array common{sem::grammar_type::relop, sem::action_type::rel_op,
+                             sem::grammar_type::arith_expr, sem::action_type::arith_expr};
+         const auto key = sem::grammar_type::expr_tail;
+         table.set_production({key, token_type::comma}, epsilon);
+         table.set_production({key, token_type::right_square}, epsilon);
+         table.set_production({key, token_type::semi_colon}, epsilon);
+         table.set_production({key, token_type::right_paren}, epsilon);
+         table.set_production({key, token_type::colon}, epsilon);
+         table.set_production({key, token_type::equal}, common);
+         table.set_production({key, token_type::not_equal}, common);
+         table.set_production({key, token_type::less_than}, common);
+         table.set_production({key, token_type::greater_than}, common);
+         table.set_production({key, token_type::less_equal_than}, common);
+         table.set_production({key, token_type::greater_equal_than}, common);
       }
 
       // <Factor>
       {
-         table.set_production({sem::grammar_type::factor, token_type::minus},
+         const auto key = sem::grammar_type::factor;
+         table.set_production({key, token_type::minus},
                               {sem::grammar_type::sign, sem::grammar_type::factor});
-         table.set_production({sem::grammar_type::factor, token_type::plus},
+         table.set_production({key, token_type::plus},
                               {sem::grammar_type::sign, sem::grammar_type::factor});
-         table.set_production({sem::grammar_type::factor, token_type::id},
-                              {sem::grammar_type::func_or_var});
-         table.set_production({sem::grammar_type::factor, token_type::float_lit},
-                              {token_type::float_lit});
-         table.set_production({sem::grammar_type::factor, token_type::integer_lit},
-                              {token_type::integer_lit});
-         table.set_production({sem::grammar_type::factor, token_type::str_lit},
-                              {token_type::str_lit});
+         table.set_production({key, token_type::id}, {sem::grammar_type::func_or_var});
+         table.set_production({key, token_type::float_lit},
+                              {token_type::float_lit, sem::action_type::value});
+         table.set_production({key, token_type::integer_lit},
+                              {token_type::integer_lit, sem::action_type::value});
+         table.set_production({key, token_type::str_lit},
+                              {token_type::str_lit, sem::action_type::value});
          table.set_production(
-            {sem::grammar_type::factor, token_type::left_paren},
+            {key, token_type::left_paren},
             {token_type::left_paren, sem::grammar_type::expr, token_type::right_paren});
-         table.set_production({sem::grammar_type::factor, token_type::not_op},
+         table.set_production({key, token_type::not_op},
                               {token_type::not_op, sem::grammar_type::factor});
-         table.set_production({sem::grammar_type::factor, token_type::qmark},
+         table.set_production({key, token_type::qmark},
                               {token_type::qmark, token_type::left_square, sem::grammar_type::expr,
                                token_type::colon, sem::grammar_type::expr, token_type::colon,
                                sem::grammar_type::expr, token_type::right_square});
@@ -403,8 +434,14 @@ namespace fr
 
       // <fParams>
       {
-         symbol_array common{sem::grammar_type::type, token_type::id,
-                             sem::grammar_type::array_size_rept, sem::grammar_type::f_params_tail};
+         symbol_array common{sem::grammar_type::type,
+                             sem::action_type::type,
+                             token_type::id,
+                             sem::action_type::value,
+                             sem::grammar_type::array_size_rept,
+                             sem::action_type::array_size_stmt_list,
+                             sem::action_type::function_param_decl,
+                             sem::grammar_type::f_params_tail};
          table.set_production({sem::grammar_type::f_params, token_type::id}, common);
          table.set_production({sem::grammar_type::f_params, token_type::right_paren}, epsilon);
          table.set_production({sem::grammar_type::f_params, token_type::id_integer}, common);
@@ -414,10 +451,12 @@ namespace fr
 
       // <fParamsTail>
       {
-         table.set_production({sem::grammar_type::f_params_tail, token_type::comma},
-                              {token_type::comma, sem::grammar_type::type, token_type::id,
-                               sem::grammar_type::array_size_rept,
-                               sem::grammar_type::f_params_tail});
+         table.set_production(
+            {sem::grammar_type::f_params_tail, token_type::comma},
+            {token_type::comma, sem::grammar_type::type, sem::action_type::type, token_type::id,
+             sem::action_type::value, sem::grammar_type::array_size_rept,
+             sem::action_type::array_size_stmt_list, sem::action_type::function_param_decl,
+             sem::grammar_type::f_params_tail});
          table.set_production({sem::grammar_type::f_params_tail, token_type::right_paren}, epsilon);
       }
 
@@ -431,32 +470,32 @@ namespace fr
 
       {
          table.set_production({sem::grammar_type::func_decl, token_type::id_func},
-                              {token_type::id_func, token_type::id, token_type::left_paren,
-                               sem::grammar_type::f_params, token_type::right_paren,
+                              {token_type::id_func, token_type::id, sem::action_type::value,
+                               token_type::left_paren, sem::grammar_type::f_params,
+                               sem::action_type::function_param_decl_list, token_type::right_paren,
                                token_type::colon, sem::grammar_type::func_decl_tail,
-                               token_type::semi_colon});
+                               sem::action_type::return_type_decl, token_type::semi_colon});
       }
 
       // <FuncDeclTail>
       {
          table.set_production({sem::grammar_type::func_decl_tail, token_type::id},
-                              {sem::grammar_type::type});
+                              {sem::grammar_type::type, sem::action_type::type});
          table.set_production({sem::grammar_type::func_decl_tail, token_type::id_void},
-                              {token_type::id_void});
+                              {token_type::id_void, sem::action_type::type});
          table.set_production({sem::grammar_type::func_decl_tail, token_type::id_integer},
-                              {sem::grammar_type::type});
+                              {sem::grammar_type::type, sem::action_type::type});
          table.set_production({sem::grammar_type::func_decl_tail, token_type::id_float},
-                              {sem::grammar_type::type});
+                              {sem::grammar_type::type, sem::action_type::type});
          table.set_production({sem::grammar_type::func_decl_tail, token_type::id_string},
-                              {sem::grammar_type::type});
+                              {sem::grammar_type::type, sem::action_type::type});
       }
 
       // <FuncDef>
       {
          table.set_production({sem::grammar_type::func_def, token_type::id_func},
                               {sem::grammar_type::function, sem::grammar_type::func_def});
-         table.set_production({sem::grammar_type::func_def, token_type::id_main},
-                              {token_type::epsilon, sem::action_type::epsilon});
+         table.set_production({sem::grammar_type::func_def, token_type::id_main}, epsilon);
       }
 
       // <FuncHead>
@@ -464,8 +503,7 @@ namespace fr
          table.set_production({sem::grammar_type::func_head, token_type::id_func},
                               {token_type::id_func, token_type::id, sem::grammar_type::class_method,
                                token_type::left_paren, sem::grammar_type::f_params,
-                               token_type::right_paren, token_type::colon,
-                               sem::grammar_type::func_decl_tail});
+                               token_type::right_paren, token_type::colon});
       }
 
       // <FuncOrAssignStat>
@@ -622,7 +660,8 @@ namespace fr
       // <Function>
       {
          table.set_production({sem::grammar_type::function, token_type::id_func},
-                              {sem::grammar_type::func_head, sem::grammar_type::func_body});
+                              {sem::grammar_type::func_head, sem::action_type::func_head,
+                               sem::grammar_type::func_body, sem::action_type::func_body});
       }
 
       // <IndiceRep>
@@ -656,9 +695,9 @@ namespace fr
       // <Inherits>
       {
          table.set_production({sem::grammar_type::inherit, token_type::left_brace}, epsilon);
-         table.set_production(
-            {sem::grammar_type::inherit, token_type::id_inherits},
-            {token_type::id_inherits, token_type::id, sem::grammar_type::nested_id});
+         table.set_production({sem::grammar_type::inherit, token_type::id_inherits},
+                              {token_type::id_inherits, token_type::id, sem::action_type::value,
+                               sem::action_type::inherit_decl, sem::grammar_type::nested_id});
       }
 
       // <IntNum>
@@ -673,15 +712,15 @@ namespace fr
       // <MemberDecl>
       {
          table.set_production({sem::grammar_type::member_decl, token_type::id},
-                              {sem::grammar_type::var_decl});
+                              {sem::grammar_type::var_decl, sem::action_type::var_decl});
          table.set_production({sem::grammar_type::member_decl, token_type::id_string},
-                              {sem::grammar_type::var_decl});
+                              {sem::grammar_type::var_decl, sem::action_type::var_decl});
          table.set_production({sem::grammar_type::member_decl, token_type::id_float},
-                              {sem::grammar_type::var_decl});
+                              {sem::grammar_type::var_decl, sem::action_type::var_decl});
          table.set_production({sem::grammar_type::member_decl, token_type::id_integer},
-                              {sem::grammar_type::var_decl});
+                              {sem::grammar_type::var_decl, sem::action_type::var_decl});
          table.set_production({sem::grammar_type::member_decl, token_type::id_func},
-                              {sem::grammar_type::func_decl});
+                              {sem::grammar_type::func_decl, sem::action_type::function_decl});
       }
 
       // <MethodBodyVar>
@@ -706,16 +745,19 @@ namespace fr
       // <MultOp>
       {
          table.set_production({sem::grammar_type::mult_op, token_type::and_op},
-                              {token_type::and_op});
-         table.set_production({sem::grammar_type::mult_op, token_type::div}, {token_type::div});
-         table.set_production({sem::grammar_type::mult_op, token_type::mult}, {token_type::mult});
+                              {token_type::and_op, sem::action_type::value});
+         table.set_production({sem::grammar_type::mult_op, token_type::div},
+                              {token_type::div, sem::action_type::value});
+         table.set_production({sem::grammar_type::mult_op, token_type::mult},
+                              {token_type::mult, sem::action_type::value});
       }
 
       // <NestedId>
       {
          table.set_production({sem::grammar_type::nested_id, token_type::left_brace}, epsilon);
          table.set_production({sem::grammar_type::nested_id, token_type::comma},
-                              {token_type::comma, token_type::id, sem::grammar_type::nested_id});
+                              {token_type::comma, token_type::id, sem::action_type::value,
+                               sem::action_type::inherit_decl, sem::grammar_type::nested_id});
       }
 
       // <Prog>
@@ -732,16 +774,17 @@ namespace fr
       // <RelOp>
       {
          table.set_production({sem::grammar_type::relop, token_type::greater_equal_than},
-                              {token_type::greater_equal_than});
+                              {token_type::greater_equal_than, sem::action_type::value});
          table.set_production({sem::grammar_type::relop, token_type::less_equal_than},
-                              {token_type::less_equal_than});
+                              {token_type::less_equal_than, sem::action_type::value});
          table.set_production({sem::grammar_type::relop, token_type::greater_than},
-                              {token_type::greater_than});
+                              {token_type::greater_than, sem::action_type::value});
          table.set_production({sem::grammar_type::relop, token_type::less_than},
-                              {token_type::less_than});
+                              {token_type::less_than, sem::action_type::value});
          table.set_production({sem::grammar_type::relop, token_type::not_equal},
-                              {token_type::not_equal});
-         table.set_production({sem::grammar_type::relop, token_type::equal}, {token_type::equal});
+                              {token_type::not_equal, sem::action_type::value});
+         table.set_production({sem::grammar_type::relop, token_type::equal},
+                              {token_type::equal, sem::action_type::value});
       }
 
       // <Sign>
@@ -760,7 +803,7 @@ namespace fr
 
       // <StatBlock>
       {
-         symbol_array common{sem::grammar_type::statement};
+         symbol_array common{sem::grammar_type::statement, sem::action_type::statement};
          table.set_production({sem::grammar_type::stat_block, token_type::id}, common);
          table.set_production({sem::grammar_type::stat_block, token_type::semi_colon}, epsilon);
          table.set_production({sem::grammar_type::stat_block, token_type::id_continue}, common);
@@ -771,62 +814,69 @@ namespace fr
          table.set_production({sem::grammar_type::stat_block, token_type::id_while}, common);
          table.set_production({sem::grammar_type::stat_block, token_type::id_else}, epsilon);
          table.set_production({sem::grammar_type::stat_block, token_type::id_if}, common);
-         table.set_production(
-            {sem::grammar_type::stat_block, token_type::left_brace},
-            {token_type::left_brace, sem::grammar_type::statement_list, token_type::right_brace});
+         table.set_production({sem::grammar_type::stat_block, token_type::left_brace},
+                              {token_type::left_brace, sem::grammar_type::statement_list,
+                               sem::action_type::statement_list, token_type::right_brace});
       }
 
       ///////////////////// HERE
 
       // <Statement>
       {
-         table.set_production({sem::grammar_type::statement, token_type::id},
+         const auto key = sem::grammar_type::statement;
+         table.set_production({key, token_type::id},
                               {sem::grammar_type::func_or_assign_stat, token_type::semi_colon});
-         table.set_production({sem::grammar_type::statement, token_type::id_if},
+         table.set_production({key, token_type::id_if},
                               {token_type::id_if, token_type::left_paren, sem::grammar_type::expr,
-                               token_type::right_paren, token_type::id_then,
-                               sem::grammar_type::stat_block, token_type::id_else,
-                               sem::grammar_type::stat_block, token_type::semi_colon});
-         table.set_production({sem::grammar_type::statement, token_type::id_while},
+                               token_type::right_paren, token_type::id_then, token_type::id_else,
+                               sem::action_type::if_statement, token_type::semi_colon});
+         table.set_production({key, token_type::id_while},
                               {token_type::id_while, token_type::left_paren,
-                               sem::grammar_type::expr, token_type::right_paren,
-                               sem::grammar_type::stat_block, token_type::semi_colon});
-         table.set_production({sem::grammar_type::statement, token_type::id_read},
+                               sem::grammar_type::expr, sem::action_type::expr,
+                               token_type::right_paren, sem::grammar_type::stat_block,
+                               sem::action_type::statement_block, sem::action_type::while_statement,
+                               token_type::semi_colon});
+         table.set_production({key, token_type::id_read},
                               {token_type::id_read, token_type::left_paren,
                                sem::grammar_type::variable, token_type::right_paren,
                                token_type::semi_colon});
-         table.set_production({sem::grammar_type::statement, token_type::id_write},
+         table.set_production({key, token_type::id_write},
                               {token_type::id_write, token_type::left_paren,
-                               sem::grammar_type::expr, token_type::right_paren,
+                               sem::grammar_type::expr, sem::action_type::expr,
+                               sem::action_type::write_statement, token_type::right_paren,
                                token_type::semi_colon});
-         table.set_production({sem::grammar_type::statement, token_type::id_return},
+         table.set_production({key, token_type::id_return},
                               {token_type::id_return, token_type::left_paren,
-                               sem::grammar_type::expr, token_type::right_paren,
+                               sem::grammar_type::expr, sem::action_type::expr,
+                               sem::action_type::return_statement, token_type::right_paren,
                                token_type::semi_colon});
-         table.set_production({sem::grammar_type::statement, token_type::id_break},
-                              {token_type::id_break, token_type::semi_colon});
-         table.set_production({sem::grammar_type::statement, token_type::id_continue},
-                              {token_type::id_continue, token_type::semi_colon});
+         table.set_production(
+            {key, token_type::id_break},
+            {token_type::id_break, sem::action_type::statement, token_type::semi_colon});
+         table.set_production(
+            {key, token_type::id_continue},
+            {token_type::id_continue, sem::action_type::statement, token_type::semi_colon});
       }
 
       // <StatementList>
       {
          symbol_array common{sem::grammar_type::statement, sem::grammar_type::statement_list};
-         table.set_production({sem::grammar_type::statement_list, token_type::id}, common);
-         table.set_production({sem::grammar_type::statement_list, token_type::right_brace},
-                              {token_type::epsilon, sem::action_type::epsilon});
-         table.set_production({sem::grammar_type::statement_list, token_type::id_if}, common);
-         table.set_production({sem::grammar_type::statement_list, token_type::id_while}, common);
-         table.set_production({sem::grammar_type::statement_list, token_type::id_read}, common);
-         table.set_production({sem::grammar_type::statement_list, token_type::id_write}, common);
-         table.set_production({sem::grammar_type::statement_list, token_type::id_return}, common);
-         table.set_production({sem::grammar_type::statement_list, token_type::id_break}, common);
-         table.set_production({sem::grammar_type::statement_list, token_type::id_continue}, common);
+         const auto key = sem::grammar_type::statement_list;
+         table.set_production({key, token_type::id}, common);
+         table.set_production({key, token_type::right_brace}, epsilon);
+         table.set_production({key, token_type::id_if}, common);
+         table.set_production({key, token_type::id_while}, common);
+         table.set_production({key, token_type::id_read}, common);
+         table.set_production({key, token_type::id_write}, common);
+         table.set_production({key, token_type::id_return}, common);
+         table.set_production({key, token_type::id_break}, common);
+         table.set_production({key, token_type::id_continue}, common);
       }
 
       // <Term>
       {
-         symbol_array common{sem::grammar_type::factor, sem::grammar_type::term_tail};
+         symbol_array common{sem::grammar_type::factor, sem::action_type::factor_expr,
+                             sem::grammar_type::term_tail, sem::action_type::term_tail_expr_list};
          table.set_production({sem::grammar_type::term, token_type::plus}, common);
          table.set_production({sem::grammar_type::term, token_type::minus}, common);
          table.set_production({sem::grammar_type::term, token_type::id}, common);
@@ -840,8 +890,9 @@ namespace fr
 
       // <TermTail>
       {
-         symbol_array common{sem::grammar_type::mult_op, sem::grammar_type::factor,
-                             sem::grammar_type::term_tail};
+         symbol_array common{sem::grammar_type::mult_op,       sem::action_type::mult_op,
+                             sem::grammar_type::factor,        sem::action_type::factor_expr,
+                             sem::action_type::term_tail_expr, sem::grammar_type::term_tail};
          table.set_production({sem::grammar_type::term_tail, token_type::plus}, epsilon);
          table.set_production({sem::grammar_type::term_tail, token_type::minus}, epsilon);
          table.set_production({sem::grammar_type::term_tail, token_type::or_op}, epsilon);
@@ -880,7 +931,7 @@ namespace fr
                              token_type::id,
                              sem::action_type::value,
                              sem::grammar_type::array_size_rept,
-                             sem::action_type::array_size_list,
+                             sem::action_type::array_size_stmt_list,
                              token_type::semi_colon};
          table.set_production({sem::grammar_type::var_decl, token_type::id}, common);
          table.set_production({sem::grammar_type::var_decl, token_type::id_integer}, common);
@@ -919,10 +970,10 @@ namespace fr
 
       // <VariableIdnestTail>
       {
-         table.set_production({sem::grammar_type::variable_idnest_tail, token_type::right_paren},
-                              epsilon);
+         const auto key = sem::grammar_type::variable_idnest_tail;
+         table.set_production({key, token_type::right_paren}, epsilon);
          table.set_production(
-            {sem::grammar_type::variable_idnest_tail, token_type::period},
+            {key, token_type::period},
             {token_type::period, token_type::id, sem::grammar_type::variable_idnest});
       }
 
@@ -934,9 +985,9 @@ namespace fr
          table.set_production({sem::grammar_type::visibility, token_type::id_float}, epsilon);
          table.set_production({sem::grammar_type::visibility, token_type::id_string}, epsilon);
          table.set_production({sem::grammar_type::visibility, token_type::id_public},
-                              {token_type::id_public});
+                              {token_type::id_public, sem::action_type::value});
          table.set_production({sem::grammar_type::visibility, token_type::id_private},
-                              {token_type::id_private});
+                              {token_type::id_private, sem::action_type::value});
       }
 
       return table;

@@ -9,6 +9,6 @@ namespace fr::ast
    auto epsilon_node::to_string() const -> std::string
    {
       return fmt::format("\"{0}_{1}\";\n\"{0}_{1}\" [label=epsilon];\n",
-                         sem::to_string_view(sem::action_type::epsilon), m_index);
+                         magic_enum::enum_name(sem::action_type::epsilon), m_index);
    }
 } // namespace fr::ast

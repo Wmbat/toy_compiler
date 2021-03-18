@@ -1,51 +1,67 @@
 #pragma once
 
+#include <toy_compiler/util/magic_enum.hpp>
+
 #include <fmt/core.h>
 
 #include <cstdint>
 
 namespace fr::sem
 {
-   namespace detail
-   {
-      constexpr std::array action_names{
-         "program",         "class_decl_list", "func_def_list",   "statement_list", "var_decl_list",
-         "array_size_list", "func_body",       "method_body_var", "var_decl",       "array_size",
-         "value",           "factor",          "factor_value",    "type",           "epsilon"};
-   }
-
    enum struct action_type : std::uint32_t
    {
       program,
       class_decl_list,
+      inheritance_decl_list,
+      class_body_decl_list,
       func_def_list,
+      function_param_decl_list,
       statement_list,
       var_decl_list,
-      array_size_list,
+      array_size_stmt_list,
+      arith_expr_list,
+      term_tail_expr_list,
+      idnest_list,
+      indice_list,
+      function_decl,
+      function_param_decl,
+      return_type_decl,
+      class_decl,
+      class_body_decl,
+      visibility_decl,
+      member_decl,
+      inherit_decl,
+      function,
+      func_head,
       func_body,
+      class_method,
+      statement,
+      write_statement,
+      return_statement,
+      if_statement,
+      while_statement,
+      statement_block,
       method_body_var,
+      idnest_decl,
+      indice_decl,
       var_decl,
+      expr,
+      arith_expr,
+      arith_tail_expr,
+      term_expr,
+      term_tail_expr,
+      var_expr,
       array_size,
       value,
-      factor,
-      factor_value,
+      sign,
+      factor_list,
+      factor_expr,
       type,
+      add_op,
+      mult_op,
+      rel_op,
       epsilon
    };
-
-   /**
-    * @brief convert a `sem::action_type` value to it's string representation
-    *
-    * @param [in] type The `sem::action_type` value to represent as a string
-    *
-    * @return A `std::string_view` into the corresponding `sem::action_type` string
-    * representation.
-    */
-   constexpr auto to_string_view(sem::action_type type) -> std::string_view
-   {
-      return detail::action_names.at(static_cast<std::uint32_t>(type));
-   }
-
 } // namespace fr::sem
 
 /**
@@ -64,6 +80,6 @@ struct fmt::formatter<fr::sem::action_type>
    template <typename FormatContext>
    auto format(fr::sem::action_type type, FormatContext& ctx)
    {
-      return fmt::format_to(ctx.out(), "{}", fr::sem::to_string_view(type));
+      return fmt::format_to(ctx.out(), "{}", magic_enum::enum_name(type));
    }
 };

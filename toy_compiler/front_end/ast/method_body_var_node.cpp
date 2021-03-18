@@ -10,7 +10,7 @@ namespace fr::ast
    auto method_body_var_node::to_string() const -> std::string
    {
       std::string name =
-         fmt::format("\"{}\"", sem::to_string_view(sem::action_type::method_body_var));
+         fmt::format("\"{}\"", magic_enum::enum_name(sem::action_type::method_body_var));
 
       if (!child())
       {

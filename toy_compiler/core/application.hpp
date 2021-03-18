@@ -20,6 +20,7 @@
 #pragma once
 
 #include <toy_compiler/front_end/lexer.hpp>
+#include <toy_compiler/front_end/parser.hpp>
 #include <toy_compiler/util/logger.hpp>
 
 #include <filesystem>
@@ -34,10 +35,11 @@ public:
    application(std::span<const std::string_view> args, util::logger_wrapper log = nullptr);
 
 private:
-   void write_tokens_to_file(const std::filesystem::path& path,
-                             std::span<const fr::lex_item> tokens, util::logger_wrapper log) const;
+   void write_derivations_to_file(const std::filesystem::path& path,
+                                  const std::string& derivation) const;
+   void write_ast_to_file(const std::filesystem::path& path, const fr::ast::node_ptr& root) const;
    void write_errors_to_file(const std::filesystem::path& path,
-                             std::span<const fr::lex_item> tokens, util::logger_wrapper log) const;
+                             std::span<const fr::parse_error> errors) const;
 
    [[nodiscard]] auto fancy_lexical_error_type(fr::grammar::token_type value) const -> std::string;
 

@@ -27,6 +27,11 @@ C++ executable
 * [monads](https://github.com/Wmbat/monads)
 * [doctest (for unit tests)](https://github.com/onqtam/doctest)
 
+## Bugs
+
+* [ ] If statement not working
+* [ ] read statement not working
+
 ## TODO
 
 * [ ] Instead of loading the whole file, load file into chunks

@@ -10,9 +10,12 @@ namespace fr::ast
       type(std::string type_name, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string final;
+   };
 
-   private:
-      std::uint32_t m_index = 0;
+   class void_type : public type
+   {
+   public:
+      void_type(const source_location& location);
    };
 
    class integer_type : public type

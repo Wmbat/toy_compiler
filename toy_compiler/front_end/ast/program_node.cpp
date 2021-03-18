@@ -12,7 +12,7 @@ namespace fr::ast
 
    auto program_node::to_string() const -> std::string
    {
-      std::string name = fmt::format("\"{}\"", sem::to_string_view(sem::action_type::program));
+      std::string name = fmt::format("\"{}\"", magic_enum::enum_name(sem::action_type::program));
 
       if (!child())
       {

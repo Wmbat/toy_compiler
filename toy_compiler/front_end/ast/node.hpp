@@ -20,7 +20,7 @@ namespace fr::ast
    {
    public:
       node() = default;
-      node(std::string lexeme, const source_location& location);
+      node(std::string lexeme, const source_location& location, std::uint32_t index);
       node(const node& rhs) = delete;
       node(node&& rhs) = default;
       virtual ~node() = default;
@@ -30,25 +30,26 @@ namespace fr::ast
 
       [[nodiscard]] auto child() const -> const node_ptr&;
       [[nodiscard]] auto sibling() const -> const node_ptr&;
-      [[nodiscard]] auto lexeme() const -> monad::maybe<std::string_view>;
-      [[nodiscard]] auto location() const -> monad::maybe<source_location>;
+      [[nodiscard]] auto lexeme() const -> std::string_view;
+      [[nodiscard]] auto location() const -> const source_location&;
+      [[nodiscard]] auto index() const -> std::uint32_t;
 
       void make_sibling(node_ptr sibling);
       void make_child(node_ptr child);
 
-      virtual auto to_string() const -> std::string = 0;
+      [[nodiscard]] virtual auto to_string() const -> std::string = 0;
 
    private:
       node_ptr m_child;
       node_ptr m_sibling;
 
       std::string m_lexeme;
-      monad::maybe<source_location> m_location;
+      source_location m_location;
+
+      std::uint32_t m_index = 0;
    };
 
-   using node_ptr = std::unique_ptr<node>;
-
-   auto node_factory(fr::sem::action_type type, lex_item item, std::vector<node_ptr>& recs)
+   auto node_factory(fr::sem::action_type type, const lex_item& item, std::vector<node_ptr>& recs)
       -> node_ptr;
 } // namespace fr::ast
 

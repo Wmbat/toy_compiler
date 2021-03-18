@@ -22,6 +22,7 @@
 #include <toy_compiler/front_end/parser.hpp>
 
 #include <fmt/color.h>
+#include <fmt/ostream.h>
 #include <fmt/ranges.h>
 
 #include <range/v3/algorithm/count_if.hpp>
@@ -57,7 +58,12 @@ application::application(std::span<const std::string_view> args, util::logger_wr
 
                   fmt::print("\n");
                }
+
+               write_errors_to_file(filepath, result.errors.value());
             }
+
+            write_ast_to_file(filepath, result.ast);
+            write_derivations_to_file(filepath, result.derivation);
          }
          else
          {
@@ -79,62 +85,45 @@ application::application(std::span<const std::string_view> args, util::logger_wr
    }
 }
 
-void application::write_tokens_to_file(const std::filesystem::path& path,
-                                       std::span<const fr::lex_item> tokens,
-                                       util::logger_wrapper log) const
+void application::write_derivations_to_file(const std::filesystem::path& path,
+                                            const std::string& derivation) const
 {
    auto output_path = path.parent_path();
    output_path /= path.stem();
-   output_path += ".outlextokens";
-
-   std::string outlextoken;
-   for (std::uint32_t line_counter = 1; const auto& tok : tokens)
-   {
-      for (std::uint32_t i = line_counter; i < tok.pos.line; ++i)
-      {
-         outlextoken.append("\n");
-      }
-
-      outlextoken.append(fmt::format("{} ", tok));
-
-      line_counter = tok.pos.line;
-   }
+   output_path += ".outderivation";
 
    std::ofstream output_file{output_path};
-   output_file << outlextoken;
-
-   log.info("writing tokens to \"{}\"", output_path.c_str());
+   fmt::print(output_file, "{}", derivation);
 }
-
-void application::write_errors_to_file(const std::filesystem::path& path,
-                                       [[maybe_unused]] std::span<const fr::lex_item> tokens,
-                                       [[maybe_unused]] util::logger_wrapper log) const
+void application::write_ast_to_file(const std::filesystem::path& path,
+                                    const fr::ast::node_ptr& root) const
 {
    auto output_path = path.parent_path();
    output_path /= path.stem();
-   output_path += ".outlexerrors";
+   output_path += ".outast";
 
-   std::string outlexerrors;
-   for (const auto& tok : tokens)
+   std::ofstream output_file{output_path};
+   fmt::print(output_file, "digraph AST {{\n{}}}", root);
+}
+void application::write_errors_to_file(const std::filesystem::path& path,
+                                       std::span<const fr::parse_error> errors) const
+{
+   auto output_path = path.parent_path();
+   output_path /= path.stem();
+   output_path += ".outsyntaxerrors";
+
+   std::ofstream output_file{output_path};
+   for (auto& err : errors)
    {
-      if (fr::grammar::is_token_invalid(tok.type))
+      fmt::print(output_file, "{}:{}.{} - ", path.c_str(), err.pos.line, err.pos.column);
+      fmt::print(output_file, "[error]");
+
+      if (err.type == fr::parse_error_type::missing_terminal)
       {
-         outlexerrors.append(fmt::format("Lexical error: {}: \"{}\": line {}.\n",
-                                         fancy_lexical_error_type(tok.type), tok.lexeme,
-                                         tok.pos.line));
+         fmt::print(output_file, " Missing {}\n", err.token);
       }
-   }
 
-   if (!outlexerrors.empty())
-   {
-      std::ofstream output_file{output_path};
-      output_file << outlexerrors;
-
-      log.warning("writing error messages to \"{}\"", output_path.c_str());
-   }
-   else
-   {
-      log.info("no errors found");
+      fmt::print("\n");
    }
 }
 

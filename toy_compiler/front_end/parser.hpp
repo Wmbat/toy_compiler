@@ -60,6 +60,7 @@ namespace fr
    {
       parse_status value{parse_status::success};
       ast::node_ptr ast;
+      std::string derivation;
       monad::maybe<std::vector<parse_error>> errors;
    };
 

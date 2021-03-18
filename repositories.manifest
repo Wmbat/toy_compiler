@@ -12,7 +12,3 @@ location: https://pkg.cppget.org/1/alpha
 :
 role: prerequisite
 location: https://github.com/Wmbat/monads.git
-
-:
-role: prerequisite
-location: https://github.com/Wmbat/build2-spdlog.git#main
