@@ -164,7 +164,31 @@ namespace fr::ast
       if (type == sem::action_type::func_def_list)
       {
          std::vector<node_ptr> nodes;
-         nodes.push_back(pop(recs));
+         auto first = pop(recs);
+
+         if (dynamic_cast<function*>(recs.back().get()))
+         {
+            std::vector<node_ptr> nodes;
+            nodes.push_back(pop(recs));
+
+            const auto is_node_type = [](const node_ptr& node) {
+               return dynamic_cast<function*>(node.get());
+            };
+
+            for (auto& node : recs | vi::reverse | vi::take_while(is_node_type))
+            {
+               nodes.push_back(std::move(node));
+            }
+
+            for ([[maybe_unused]] auto& node : nodes | vi::tail)
+            {
+               pop(recs);
+            }
+
+            return std::make_unique<function_list>(std::move(nodes));
+         }
+
+         nodes.push_back(std::move(first));
 
          return std::make_unique<function_list>(std::move(nodes));
       }

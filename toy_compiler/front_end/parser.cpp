@@ -369,7 +369,7 @@ namespace fr
       // <ClassMethod>
       {
          table.set_production({sem::grammar_type::class_method, token_type::double_colon},
-                              {token_type::double_colon, token_type::id});
+                              {token_type::double_colon, token_type::id, sem::action_type::value});
          table.set_production({sem::grammar_type::class_method, token_type::left_paren}, epsilon);
       }
 
@@ -493,17 +493,21 @@ namespace fr
 
       // <FuncDef>
       {
-         table.set_production({sem::grammar_type::func_def, token_type::id_func},
-                              {sem::grammar_type::function, sem::grammar_type::func_def});
+         table.set_production(
+            {sem::grammar_type::func_def, token_type::id_func},
+            {sem::grammar_type::function, sem::action_type::function, sem::grammar_type::func_def});
          table.set_production({sem::grammar_type::func_def, token_type::id_main}, epsilon);
       }
 
       // <FuncHead>
       {
          table.set_production({sem::grammar_type::func_head, token_type::id_func},
-                              {token_type::id_func, token_type::id, sem::grammar_type::class_method,
+                              {token_type::id_func, token_type::id, sem::action_type::value,
+                               sem::grammar_type::class_method, sem::action_type::class_method,
                                token_type::left_paren, sem::grammar_type::f_params,
-                               token_type::right_paren, token_type::colon});
+                               sem::action_type::function_param_decl_list, token_type::right_paren,
+                               token_type::colon, sem::grammar_type::func_decl_tail,
+                               sem::action_type::return_type_decl});
       }
 
       // <FuncOrAssignStat>

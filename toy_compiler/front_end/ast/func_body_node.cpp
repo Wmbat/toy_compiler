@@ -25,7 +25,7 @@ namespace fr::ast
       }
 
       output +=
-         fmt::format("{} [label={}]\n", name, magic_enum::enum_name(sem::action_type::func_body));
+         fmt::format("{} [label={}]\n", name, magic_enum::enum_name(sem::action_type::function));
 
       return fmt::format("{};\n{}", name, output);
    }
@@ -54,7 +54,7 @@ namespace fr::ast
       }
 
       output +=
-         fmt::format("{} [label={}]\n", name, magic_enum::enum_name(sem::action_type::func_body));
+         fmt::format("{} [label={}]\n", name, magic_enum::enum_name(sem::action_type::func_head));
 
       return fmt::format("{};\n{}", name, output);
    }
