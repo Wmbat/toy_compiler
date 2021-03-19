@@ -90,7 +90,7 @@ namespace front::ast_bis
    class member_decl : public decl
    {
    public:
-      member_decl(node_ptr visibility);
+      member_decl(node_ptr visibility, node_ptr var_or_func);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
@@ -109,5 +109,32 @@ namespace front::ast_bis
 
    class variable_decl : public decl
    {
+   public:
+      variable_decl(node_ptr type, node_ptr id, node_ptr compound_array);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
+
+   private:
+      std::string m_type;
+      std::string m_id;
+   };
+
+   class compound_array_decl : public decl
+   {
+   public:
+      compound_array_decl(std::vector<node_ptr>&& member_decl);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
+   };
+
+   class array_decl : public decl
+   {
+   public:
+      array_decl(node_ptr start_loc, node_ptr integer_lit, node_ptr end_loc);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
+
+   public:
+      fr::source_location m_end_loc;
    };
 } // namespace front::ast_bis

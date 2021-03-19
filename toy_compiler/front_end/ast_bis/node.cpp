@@ -1,6 +1,7 @@
 #include <toy_compiler/front_end/ast_bis/node.hpp>
 
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
+#include <toy_compiler/front_end/ast_bis/literals.hpp>
 
 #include <fmt/color.h>
 #include <fmt/core.h>
@@ -63,6 +64,11 @@ namespace front::ast_bis
       if (action == sem::action::id_decl)
       {
          return std::make_unique<id_decl>(item.lexeme, item.pos);
+      }
+
+      if (action == sem::action::type_decl)
+      {
+         return std::make_unique<type_decl>(item.lexeme, item.pos);
       }
 
       if (action == sem::action::compound_class_decl)
@@ -168,9 +174,10 @@ namespace front::ast_bis
 
       if (action == sem::action::member_decl)
       {
-         node_ptr member = std::make_unique<member_decl>(pop(recs));
+         node_ptr var_or_func = pop(recs);
+         node_ptr visibility = pop(recs);
 
-         return member;
+         return std::make_unique<member_decl>(std::move(visibility), std::move(var_or_func));
       }
 
       if (action == sem::action::visibily_decl)
@@ -178,6 +185,59 @@ namespace front::ast_bis
          node_ptr vis = std::make_unique<visibility_decl>(item.lexeme, item.pos);
 
          return vis;
+      }
+
+      if (action == sem::action::variable_decl)
+      {
+         node_ptr compound_array = pop(recs);
+         node_ptr id = pop(recs);
+         node_ptr type = pop(recs);
+
+         return std::make_unique<variable_decl>(std::move(type), std::move(id),
+                                                std::move(compound_array));
+      }
+
+      if (action == sem::action::compound_array_decl)
+      {
+         std::vector<node_ptr> nodes;
+         auto null = pop(recs);
+
+         if (std::size(recs) >= 1 && dynamic_cast<array_decl*>(recs.back().get()))
+         {
+            std::vector<node_ptr> placeholder;
+            for (auto& node : recs | vi::reverse | vi::take_while([](node_ptr& node) {
+                                 return dynamic_cast<array_decl*>(node.get());
+                              }))
+            {
+               placeholder.push_back(std::move(node));
+            }
+
+            std::vector<node_ptr> nodes;
+            for (auto& node : placeholder | vi::reverse)
+            {
+               pop(recs);
+               nodes.push_back(std::move(node));
+            }
+
+            return std::make_unique<compound_array_decl>(std::move(nodes));
+         }
+
+         return std::make_unique<compound_array_decl>(std::vector<node_ptr>{});
+      }
+
+      if (action == sem::action::array_decl)
+      {
+         node_ptr end_loc = pop(recs);
+         node_ptr size = pop(recs);
+         node_ptr beg_loc = pop(recs);
+
+         return std::make_unique<array_decl>(std::move(beg_loc), std::move(size),
+                                             std::move(end_loc));
+      }
+
+      if (action == sem::action::integer_literal)
+      {
+         return std::make_unique<integer_literal>(item.lexeme, item.pos);
       }
 
       if (action == sem::action::epsilon)

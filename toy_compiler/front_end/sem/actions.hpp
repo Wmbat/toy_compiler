@@ -22,6 +22,9 @@ namespace front::sem
       member_decl,
       visibily_decl,
       variable_decl,
+      compound_array_decl,
+      array_decl,
+      integer_literal,
       epsilon
    };
 };

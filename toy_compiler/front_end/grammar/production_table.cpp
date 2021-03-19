@@ -127,12 +127,16 @@ namespace fr::grammar
       // <ArraySizeRept>
       {
          const auto key = sem::grammar_type::array_size_rept;
-         table.set_production({key, token_type::comma}, epsilon);
+         table.set_production({key, token_type::comma}, {epsilon[0], front::sem::action::epsilon});
          table.set_production({key, token_type::left_square},
-                              {token_type::left_square, sem::grammar_type::int_num,
-                               token_type::right_square, sem::grammar_type::array_size_rept});
-         table.set_production({key, token_type::semi_colon}, epsilon);
-         table.set_production({key, token_type::right_paren}, epsilon);
+                              {token_type::left_square, front::sem::action::location_decl,
+                               sem::grammar_type::int_num, token_type::right_square,
+                               front::sem::action::location_decl, front::sem::action::array_decl,
+                               sem::grammar_type::array_size_rept});
+         table.set_production({key, token_type::semi_colon},
+                              {epsilon[0], front::sem::action::epsilon});
+         table.set_production({key, token_type::right_paren},
+                              {epsilon[0], front::sem::action::epsilon});
       }
 
       // <AssignOp>
@@ -503,8 +507,9 @@ namespace fr::grammar
       // <IntNum>
       {
          table.set_production({sem::grammar_type::int_num, token_type::integer_lit},
-                              {token_type::integer_lit});
-         table.set_production({sem::grammar_type::int_num, token_type::right_square}, epsilon);
+                              {token_type::integer_lit, front::sem::action::integer_literal});
+         table.set_production({sem::grammar_type::int_num, token_type::right_square},
+                              {epsilon[0], front::sem::action::epsilon});
       }
 
       //////////////////// HERE
@@ -512,13 +517,13 @@ namespace fr::grammar
       // <MemberDecl>
       {
          table.set_production({sem::grammar_type::member_decl, token_type::id},
-                              {sem::grammar_type::var_decl});
+                              {sem::grammar_type::var_decl, front::sem::action::variable_decl});
          table.set_production({sem::grammar_type::member_decl, token_type::id_string},
-                              {sem::grammar_type::var_decl});
+                              {sem::grammar_type::var_decl, front::sem::action::variable_decl});
          table.set_production({sem::grammar_type::member_decl, token_type::id_float},
-                              {sem::grammar_type::var_decl});
+                              {sem::grammar_type::var_decl, front::sem::action::variable_decl});
          table.set_production({sem::grammar_type::member_decl, token_type::id_integer},
-                              {sem::grammar_type::var_decl});
+                              {sem::grammar_type::var_decl, front::sem::action::variable_decl});
          table.set_production({sem::grammar_type::member_decl, token_type::id_func},
                               {sem::grammar_type::func_decl});
       }
@@ -719,8 +724,13 @@ namespace fr::grammar
 
       // <VarDecl>
       {
-         symbol_array common{sem::grammar_type::type, token_type::id,
-                             sem::grammar_type::array_size_rept, token_type::semi_colon};
+         symbol_array common{sem::grammar_type::type,
+                             front::sem::action::type_decl,
+                             token_type::id,
+                             front::sem::action::id_decl,
+                             sem::grammar_type::array_size_rept,
+                             front::sem::action::compound_array_decl,
+                             token_type::semi_colon};
          table.set_production({sem::grammar_type::var_decl, token_type::id}, common);
          table.set_production({sem::grammar_type::var_decl, token_type::id_integer}, common);
          table.set_production({sem::grammar_type::var_decl, token_type::id_float}, common);

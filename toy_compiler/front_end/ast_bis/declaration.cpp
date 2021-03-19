@@ -33,6 +33,12 @@ namespace front::ast_bis
 
    auto id_decl::to_string() const -> std::string { return fmt::format("{}", lexeme()); }
 
+   type_decl::type_decl(const std::string& name, const fr::source_location& location) :
+      decl{name, location}
+   {}
+
+   auto type_decl::to_string() const -> std::string { return fmt::format("{}", lexeme()); }
+
    compound_class_decl::compound_class_decl(std::vector<node_ptr>&& class_decls)
    {
       if (std::size(class_decls) > 0)
@@ -139,13 +145,18 @@ namespace front::ast_bis
 
    auto compound_member_decl::to_string() const -> std::string { return "compound_member_decl"; }
 
-   member_decl::member_decl(node_ptr visibility)
+   member_decl::member_decl(node_ptr visibility, node_ptr var_or_func)
    {
       if (visibility != nullptr)
       {
          assert(dynamic_cast<visibility_decl*>(visibility.get())); // NOLINT
 
+         visibility->make_sibling(std::move(var_or_func));
          make_child(std::move(visibility));
+      }
+      else
+      {
+         make_child(std::move(var_or_func));
       }
    }
 
@@ -163,5 +174,59 @@ namespace front::ast_bis
    {
       return fmt::format("{} <line:{}, col:{}> '{}'", "visibility_decl", location().line,
                          location().column, lexeme());
+   }
+
+   variable_decl::variable_decl(node_ptr type, node_ptr id, node_ptr compound_array_decl) :
+      decl{type->location()},
+      m_type(type->lexeme()),
+      m_id{id->lexeme()}
+   {
+      if (compound_array_decl->child())
+      {
+         make_child(std::move(compound_array_decl));
+      }
+   }
+
+   auto variable_decl::to_string() const -> std::string
+   {
+      return fmt::format("variable_decl <line:{}, col:{}> {} '{}'", location().line,
+                         location().line, m_id, m_type);
+   }
+
+   compound_array_decl::compound_array_decl(std::vector<node_ptr>&& array_decls)
+   {
+      if (std::size(array_decls) > 0)
+      {
+         node* it = array_decls.front().get();
+         for (node_ptr& node : array_decls | vi::tail)
+         {
+            // NOLINTNEXTLINE
+            assert(dynamic_cast<array_decl*>(it));
+
+            auto temp = node.get();
+            it->make_sibling(std::move(node));
+            it = temp;
+         }
+
+         make_child(std::move(array_decls.front()));
+      }
+   }
+
+   auto compound_array_decl::to_string() const -> std::string { return "compound_array_decl"; }
+
+   array_decl::array_decl(node_ptr start_loc, node_ptr integer_lit, node_ptr end_loc) :
+      decl{start_loc->location()},
+      m_end_loc{end_loc->location()}
+   {
+      if (integer_lit)
+      {
+         make_child(std::move(integer_lit));
+      }
+   }
+
+   auto array_decl::to_string() const -> std::string
+   {
+      return fmt::format("array_decl <line:{}, col:{}> <line:{}, col:{}>", location().line,
+                         location().column, m_end_loc.line, m_end_loc.column);
    }
 }; // namespace front::ast_bis
