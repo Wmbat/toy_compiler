@@ -137,4 +137,10 @@ namespace front::ast_bis
    public:
       fr::source_location m_end_loc;
    };
+
+   class func_decl : public decl
+   {
+   public:
+      func_decl(node_ptr id, node_ptr params, node_ptr tail);
+   };
 } // namespace front::ast_bis

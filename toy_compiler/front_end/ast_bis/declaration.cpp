@@ -214,19 +214,24 @@ namespace front::ast_bis
 
    auto compound_array_decl::to_string() const -> std::string { return "compound_array_decl"; }
 
-   array_decl::array_decl(node_ptr start_loc, node_ptr integer_lit, node_ptr end_loc) :
-      decl{start_loc->location()},
-      m_end_loc{end_loc->location()}
+   auto get_lexeme(node_ptr& node) -> std::string
    {
-      if (integer_lit)
+      if (node)
       {
-         make_child(std::move(integer_lit));
+         return std::string{node->lexeme()};
       }
+
+      return {};
    }
+
+   array_decl::array_decl(node_ptr start_loc, node_ptr integer_lit, node_ptr end_loc) :
+      decl{get_lexeme(integer_lit), start_loc->location()},
+      m_end_loc{end_loc->location()}
+   {}
 
    auto array_decl::to_string() const -> std::string
    {
-      return fmt::format("array_decl <line:{}, col:{}> <line:{}, col:{}>", location().line,
-                         location().column, m_end_loc.line, m_end_loc.column);
+      return fmt::format("array_decl <line:{}, col:{}> <line:{}, col:{}> '[{}]'", location().line,
+                         location().column, m_end_loc.line, m_end_loc.column, lexeme());
    }
 }; // namespace front::ast_bis
