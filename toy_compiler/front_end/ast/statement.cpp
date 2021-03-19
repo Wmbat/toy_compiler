@@ -10,7 +10,7 @@ namespace fr::ast
 
    auto continue_statement::to_string() const -> std::string
    {
-      const auto continue_name = grammar::to_string_view(grammar::token_type::id_continue);
+      const auto continue_name = magic_enum::enum_name(grammar::token_type::id_continue);
       const auto name = fmt::format("\"{}_{}\"", continue_name, index());
       const auto label = fmt::format("{} [label={}]\n", name, continue_name);
 
@@ -21,7 +21,7 @@ namespace fr::ast
 
    auto break_statement::to_string() const -> std::string
    {
-      const auto continue_name = grammar::to_string_view(grammar::token_type::id_break);
+      const auto continue_name = magic_enum::enum_name(grammar::token_type::id_break);
       const auto name = fmt::format("\"{}_{}\"", continue_name, index());
       const auto label = fmt::format("{} [label={}]\n", name, continue_name);
 
@@ -36,7 +36,7 @@ namespace fr::ast
 
    auto read_statement::to_string() const -> std::string
    {
-      const auto read_name = grammar::to_string_view(grammar::token_type::id_read);
+      const auto read_name = magic_enum::enum_name(grammar::token_type::id_read);
       const auto name = fmt::format("\"{}_{}\"", read_name, index());
       auto output = name + fmt::format(" -> {}", child());
 
@@ -60,7 +60,7 @@ namespace fr::ast
 
    auto return_statement::to_string() const -> std::string
    {
-      const auto read_name = grammar::to_string_view(grammar::token_type::id_return);
+      const auto read_name = magic_enum::enum_name(grammar::token_type::id_return);
       const auto name = fmt::format("\"{}_{}\"", read_name, index());
       auto output = name + fmt::format(" -> {}", child());
 
@@ -84,7 +84,7 @@ namespace fr::ast
 
    auto write_statement::to_string() const -> std::string
    {
-      const auto read_name = grammar::to_string_view(grammar::token_type::id_return);
+      const auto read_name = magic_enum::enum_name(grammar::token_type::id_return);
       const auto name = fmt::format("\"{}_{}\"", read_name, index());
       auto output = name + fmt::format(" -> {}", child());
 
@@ -110,7 +110,7 @@ namespace fr::ast
 
    auto while_statement::to_string() const -> std::string
    {
-      const auto read_name = grammar::to_string_view(grammar::token_type::id_while);
+      const auto read_name = magic_enum::enum_name(grammar::token_type::id_while);
       const auto name = fmt::format("\"{}_{}\"", read_name, index());
       auto output = name + fmt::format(" -> {}", child());
 
@@ -137,7 +137,7 @@ namespace fr::ast
 
    auto if_statement::to_string() const -> std::string
    {
-      const auto read_name = grammar::to_string_view(grammar::token_type::id_if);
+      const auto read_name = magic_enum::enum_name(grammar::token_type::id_if);
       const auto name = fmt::format("\"{}_{}\"", read_name, index());
       auto output = name + fmt::format(" -> {}", child());
 
@@ -161,8 +161,7 @@ namespace fr::ast
 
    auto statement_block::to_string() const -> std::string
    {
-      std::string name = fmt::format(
-         "\"{}_{}\"", magic_enum::enum_name(sem::action_type::statement_block), index());
+      std::string name = fmt::format("\"{}_{}\"", "statement_block", index());
       std::string output = name + fmt::format(" -> {}", child());
 
       const node* temp = child().get();
@@ -172,8 +171,7 @@ namespace fr::ast
          temp = temp->sibling().get();
       }
 
-      output += fmt::format("{} [label={}]\n", name,
-                            magic_enum::enum_name(sem::action_type::statement_block));
+      output += fmt::format("{} [label={}]\n", name, "statement_block");
 
       return fmt::format("{};\n{}", name, output);
    }

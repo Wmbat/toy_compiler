@@ -21,6 +21,8 @@
 
 #include <toy_compiler/front_end/grammar/token_type.hpp>
 
+#include <magic_enum.hpp>
+
 #include <range/v3/view/iota.hpp>
 
 template <typename T>
@@ -31,42 +33,6 @@ constexpr auto to(std::uint32_t i) -> T
 
 TEST_SUITE("grammar/token_type.hpp test suite")
 {
-   TEST_CASE("to_string_view()")
-   {
-      using namespace fr::grammar;
-
-      namespace vi = ranges::views;
-
-      for (auto i : vi::iota(0u, static_cast<std::uint32_t>(token_type::max_size)))
-      {
-         CHECK(to_string_view(to<token_type>(i)) == detail::token_names[i]);
-      }
-   }
-   TEST_CASE("keyword_to_token_type")
-   {
-      using namespace fr::grammar;
-
-      REQUIRE(keyword_to_token_type(detail::keywords[0]) == token_type::id_if);
-      REQUIRE(keyword_to_token_type(detail::keywords[1]) == token_type::id_then);
-      REQUIRE(keyword_to_token_type(detail::keywords[2]) == token_type::id_else);
-      REQUIRE(keyword_to_token_type(detail::keywords[3]) == token_type::id_integer);
-      REQUIRE(keyword_to_token_type(detail::keywords[4]) == token_type::id_float);
-      REQUIRE(keyword_to_token_type(detail::keywords[5]) == token_type::id_string);
-      REQUIRE(keyword_to_token_type(detail::keywords[6]) == token_type::id_void);
-      REQUIRE(keyword_to_token_type(detail::keywords[7]) == token_type::id_public);
-      REQUIRE(keyword_to_token_type(detail::keywords[8]) == token_type::id_private);
-      REQUIRE(keyword_to_token_type(detail::keywords[9]) == token_type::id_func);
-      REQUIRE(keyword_to_token_type(detail::keywords[10]) == token_type::id_var);
-      REQUIRE(keyword_to_token_type(detail::keywords[11]) == token_type::id_class);
-      REQUIRE(keyword_to_token_type(detail::keywords[12]) == token_type::id_while);
-      REQUIRE(keyword_to_token_type(detail::keywords[13]) == token_type::id_read);
-      REQUIRE(keyword_to_token_type(detail::keywords[14]) == token_type::id_write);
-      REQUIRE(keyword_to_token_type(detail::keywords[15]) == token_type::id_return);
-      REQUIRE(keyword_to_token_type(detail::keywords[16]) == token_type::id_main);
-      REQUIRE(keyword_to_token_type(detail::keywords[17]) == token_type::id_inherits);
-      REQUIRE(keyword_to_token_type(detail::keywords[18]) == token_type::id_break);
-      REQUIRE(keyword_to_token_type(detail::keywords[19]) == token_type::id_continue);
-   }
    TEST_CASE("is_token_invalid()")
    {
       using namespace fr::grammar;
@@ -91,9 +57,9 @@ TEST_SUITE("grammar/token_type.hpp test suite")
 
       namespace vi = ranges::views;
 
-      for (auto i : vi::iota(0u, static_cast<std::uint32_t>(token_type::max_size)))
+      for (auto i : magic_enum::enum_values<token_type>())
       {
-         CHECK(fmt::format("{}", to<token_type>(i)) == detail::token_names[i]);
+         CHECK(fmt::format("{}", i) == magic_enum::enum_name(i));
       }
    }
 }

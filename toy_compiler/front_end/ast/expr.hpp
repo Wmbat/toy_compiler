@@ -15,7 +15,7 @@ namespace fr::ast
       [[nodiscard]] auto to_string() const -> std::string override;
 
    protected:
-      [[nodiscard]] auto to_string_impl(sem::action_type type) const -> std::string;
+      [[nodiscard]] auto to_string_impl(const std::string& type) const -> std::string;
    };
 
    class arith_expr : public expr

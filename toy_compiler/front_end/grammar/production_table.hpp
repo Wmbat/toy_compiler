@@ -71,4 +71,6 @@ namespace fr::grammar
    private:
       std::array<std::array<grammar::production, height>, width> m_data;
    };
+
+   auto construct_production_table() -> const grammar::production_table;
 } // namespace fr::grammar

@@ -34,6 +34,13 @@
 namespace vi = ranges::views;
 namespace fs = std::filesystem;
 
+/**
+ * @brief All possible keywords of the language
+ */
+constexpr std::array keywords{"if",     "then",    "else", "integer",  "float", "string",  "void",
+                              "public", "private", "func", "var",      "class", "while",   "read",
+                              "write",  "return",  "main", "inherits", "break", "continue"};
+
 namespace fr
 {
    auto lexer(const std::string_view data, fr::source_location pos) -> lex_item;
@@ -132,13 +139,15 @@ namespace fr
 
    auto lex_alphanum(const std::string_view data, fr::source_location pos) -> lex_item
    {
-      using namespace grammar::detail;
-
       const auto lexeme = data | vi::take_while(is_alphanum) | ranges::to<std::string>;
 
       if (const auto* it = ranges::find(keywords, lexeme); it != std::end(keywords))
       {
-         return {.type = grammar::keyword_to_token_type(*it), .lexeme = lexeme, .pos = pos};
+         std::string adjusted = "id_";
+         adjusted.append(*it);
+         return {.type = magic_enum::enum_cast<grammar::token_type>(adjusted).value(),
+                 .lexeme = lexeme,
+                 .pos = pos};
       }
 
       return {.type = grammar::token_type::id, .lexeme = lexeme, .pos = pos};
@@ -373,7 +382,8 @@ namespace fr
 
       return {.type = grammar::token_type::float_lit, .lexeme = "." + lexeme, .pos = pos};
    }
-   auto handle_fraction_leading_zero(const std::string_view data, fr::source_location pos) -> lex_item
+   auto handle_fraction_leading_zero(const std::string_view data, fr::source_location pos)
+      -> lex_item
    {
       if (std::size(data) > 1) // only 0
       {
@@ -550,7 +560,8 @@ namespace fr
 
       return {.type = grammar::token_type::less_than, .lexeme = {data.at(0)}, .pos = pos};
    }
-   auto handle_leading_greater_than(const std::string_view data, fr::source_location pos) -> lex_item
+   auto handle_leading_greater_than(const std::string_view data, fr::source_location pos)
+      -> lex_item
    {
       if (std::size(data) > 1 && data.at(1) == '=')
       {

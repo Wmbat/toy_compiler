@@ -10,8 +10,7 @@ namespace fr::ast
 
    auto type::to_string() const -> std::string
    {
-      const auto name =
-         fmt::format("\"{}_{}\"", magic_enum::enum_name(sem::action_type::type), index());
+      const auto name = fmt::format("\"{}_{}\"", "type", index());
       return fmt::format("{0};\n{0} [label=\"{1}\"]\n", name, lexeme());
    }
 

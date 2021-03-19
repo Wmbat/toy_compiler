@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include <toy_compiler/front_end/grammar/action_type.hpp>
 #include <toy_compiler/front_end/grammar/grammar_type.hpp>
 #include <toy_compiler/front_end/grammar/token_type.hpp>
+#include <toy_compiler/front_end/sem/actions.hpp>
 
 #include <array>
 #include <cstdint>
@@ -61,7 +61,7 @@ namespace fr::grammar
       template <>
       struct convert_helper<symbol_type::action>
       {
-         using type = sem::action_type;
+         using type = front::sem::action;
       };
 
       template <>
@@ -101,7 +101,7 @@ namespace fr::grammar
    class symbol
    {
    public:
-      using storage = std::variant<bool, token_type, sem::grammar_type, sem::action_type>;
+      using storage = std::variant<bool, token_type, sem::grammar_type, front::sem::action>;
 
       /**
        * @brief Construct a default **terminal** `grammar::symbol`
@@ -137,7 +137,7 @@ namespace fr::grammar
       constexpr symbol(sem::grammar_type value) : m_type{symbol_type::non_terminal}, m_data{value}
       {}
 
-      constexpr symbol(sem::action_type value) : m_type{symbol_type::action}, m_data{value} {}
+      constexpr symbol(front::sem::action value) : m_type{symbol_type::action}, m_data{value} {}
 
       constexpr auto operator==(const symbol& symbol) const -> bool = default;
       constexpr auto operator==(token_type tok) const -> bool
@@ -158,11 +158,11 @@ namespace fr::grammar
 
          return false;
       }
-      constexpr auto operator==(sem::action_type action) const -> bool
+      constexpr auto operator==(front::sem::action action) const -> bool
       {
          if (m_type == symbol_type::action)
          {
-            return std::get<sem::action_type>(m_data) == action;
+            return std::get<front::sem::action>(m_data) == action;
          }
 
          return false;
@@ -246,8 +246,8 @@ namespace fr::grammar
    {
       return get<symbol_type::non_terminal>(s);
    }
-
-   constexpr auto get_action_type(const symbol& s) -> sem::action_type
+   
+   constexpr auto get_action_type(const symbol& s) -> front::sem::action
    {
       return get<symbol_type::action>(s);
    }

@@ -24,34 +24,17 @@
 #include <range/v3/view/iota.hpp>
 #include <range/v3/view/transform.hpp>
 
-template <typename T>
-constexpr auto to(std::uint32_t i) -> T
-{
-   return static_cast<T>(i);
-}
-
 TEST_SUITE("grammar/grammar_type.hpp test suite")
 {
-   TEST_CASE("to_string_view()")
-   {
-      using namespace fr::sem;
-
-      namespace vi = ranges::views;
-
-      for (auto i : vi::iota(0u, static_cast<std::uint32_t>(grammar_type::max_size)))
-      {
-         CHECK(to_string_view(to<grammar_type>(i)) == detail::grammar_names[i]);
-      }
-   }
    TEST_CASE("fmt::formatter - grammar_type")
    {
       using namespace fr::sem;
 
       namespace vi = ranges::views;
 
-      for (auto i : vi::iota(0u, static_cast<std::uint32_t>(grammar_type::max_size)))
+      for (auto i : magic_enum::enum_values<grammar_type>())
       {
-         CHECK(fmt::format("{}", to<grammar_type>(i)) == detail::grammar_names[i]);
+         CHECK(fmt::format("{}", i) == magic_enum::enum_name(i));
       }
    }
 }

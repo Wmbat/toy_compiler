@@ -32,6 +32,13 @@
 
 namespace fs = std::filesystem;
 
+auto pop(std::vector<front::ast_bis::node*>& stack) -> front::ast_bis::node*
+{
+   auto temp = *(std::end(stack) - 1);
+   stack.pop_back();
+   return temp;
+}
+
 application::application(std::span<const std::string_view> args, util::logger_wrapper log) :
    m_logger{log}
 {
@@ -96,14 +103,33 @@ void application::write_derivations_to_file(const std::filesystem::path& path,
    fmt::print(output_file, "{}", derivation);
 }
 void application::write_ast_to_file(const std::filesystem::path& path,
-                                    const fr::ast::node_ptr& root) const
+                                    const front::ast_bis::node_ptr& root) const
 {
    auto output_path = path.parent_path();
    output_path /= path.stem();
    output_path += ".outast";
 
    std::ofstream output_file{output_path};
-   fmt::print(output_file, "digraph AST {{\n{}}}", root);
+
+   std::vector<front::ast_bis::node*> stack;
+
+   front::ast_bis::node* curr = root.get();
+   while (!std::empty(stack) || curr)
+   {
+      if (curr)
+      {
+         const auto name = fmt::format("- {}\n", *curr);
+         fmt::print("{:>{}}", name, std::size(name) + std::size(stack) * 2);
+
+         stack.push_back(curr);
+         curr = curr->child().get();
+      }
+      else
+      {
+         curr = pop(stack);
+         curr = curr->sibling().get();
+      };
+   }
 }
 void application::write_errors_to_file(const std::filesystem::path& path,
                                        std::span<const fr::parse_error> errors) const

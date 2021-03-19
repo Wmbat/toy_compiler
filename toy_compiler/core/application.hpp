@@ -37,7 +37,8 @@ public:
 private:
    void write_derivations_to_file(const std::filesystem::path& path,
                                   const std::string& derivation) const;
-   void write_ast_to_file(const std::filesystem::path& path, const fr::ast::node_ptr& root) const;
+   void write_ast_to_file(const std::filesystem::path& path,
+                          const front::ast_bis::node_ptr& root) const;
    void write_errors_to_file(const std::filesystem::path& path,
                              std::span<const fr::parse_error> errors) const;
 

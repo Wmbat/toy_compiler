@@ -13,8 +13,7 @@ namespace fr::ast
 
    auto function::to_string() const -> std::string
    {
-      std::string name =
-         fmt::format("\"{}_{}\"", magic_enum::enum_name(sem::action_type::function), index());
+      std::string name = fmt::format("\"{}_{}\"", "function", index());
       std::string output = name + fmt::format(" -> {}", child());
 
       const node* temp = child().get();
@@ -24,8 +23,7 @@ namespace fr::ast
          temp = temp->sibling().get();
       }
 
-      output +=
-         fmt::format("{} [label={}]\n", name, magic_enum::enum_name(sem::action_type::function));
+      output += fmt::format("{} [label={}]\n", name, "function");
 
       return fmt::format("{};\n{}", name, output);
    }
@@ -42,8 +40,7 @@ namespace fr::ast
 
    auto func_head::to_string() const -> std::string
    {
-      std::string name =
-         fmt::format("\"{}_{}\"", magic_enum::enum_name(sem::action_type::func_head), index());
+      std::string name = fmt::format("\"{}_{}\"", "func_head", index());
       std::string output = name + fmt::format(" -> {}", child());
 
       const node* temp = child().get();
@@ -53,8 +50,7 @@ namespace fr::ast
          temp = temp->sibling().get();
       }
 
-      output +=
-         fmt::format("{} [label={}]\n", name, magic_enum::enum_name(sem::action_type::func_head));
+      output += fmt::format("{} [label={}]\n", name, "func_head");
 
       return fmt::format("{};\n{}", name, output);
    }
@@ -68,8 +64,7 @@ namespace fr::ast
 
    auto func_body_node::to_string() const -> std::string
    {
-      std::string name =
-         fmt::format("\"{}_{}\"", magic_enum::enum_name(sem::action_type::func_body), index());
+      std::string name = fmt::format("\"{}_{}\"", "func_body", index());
       std::string output = name + fmt::format(" -> {}", child());
 
       const node* temp = child().get();
@@ -79,8 +74,7 @@ namespace fr::ast
          temp = temp->sibling().get();
       }
 
-      output +=
-         fmt::format("{} [label={}]\n", name, magic_enum::enum_name(sem::action_type::func_body));
+      output += fmt::format("{} [label={}]\n", name, "func_body");
 
       return fmt::format("{};\n{}", name, output);
    }
@@ -93,8 +87,7 @@ namespace fr::ast
 
    auto class_method::to_string() const -> std::string
    {
-      std::string name =
-         fmt::format("\"{}_{}\"", magic_enum::enum_name(sem::action_type::class_method), index());
+      std::string name = fmt::format("\"{}_{}\"", "class_method", index());
       std::string output = name + fmt::format(" -> {}", child());
 
       const node* temp = child().get();
@@ -104,8 +97,7 @@ namespace fr::ast
          temp = temp->sibling().get();
       }
 
-      output += fmt::format("{} [label={}]\n", name,
-                            magic_enum::enum_name(sem::action_type::class_method));
+      output += fmt::format("{} [label={}]\n", name, "class_method");
 
       return fmt::format("{};\n{}", name, output);
    }

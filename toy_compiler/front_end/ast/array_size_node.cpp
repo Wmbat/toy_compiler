@@ -11,8 +11,7 @@ namespace fr::ast
 
    auto array_size_node::to_string() const -> std::string
    {
-      std::string name =
-         fmt::format("\"{}_{}\"", magic_enum::enum_name(sem::action_type::array_size), m_index);
+      std::string name = fmt::format("\"{}_{}\"", "array_size", m_index);
       std::string output = name + fmt::format(" -> {}", child());
 
       const node* temp = child().get();
@@ -22,8 +21,7 @@ namespace fr::ast
          temp = temp->sibling().get();
       }
 
-      output +=
-         fmt::format("{} [label={}]\n", name, magic_enum::enum_name(sem::action_type::array_size));
+      output += fmt::format("{} [label={}]\n", name, "array_size");
 
       return fmt::format("{};\n{}", name, output);
    }

@@ -11,8 +11,7 @@ namespace fr::ast
 
    auto method_body_var_node::to_string() const -> std::string
    {
-      std::string name = fmt::format(
-         "\"{}_{}\"", magic_enum::enum_name(sem::action_type::method_body_var), index());
+      std::string name = fmt::format("\"{}_{}\"", "method_body_var", index());
 
       if (!child())
       {
@@ -28,8 +27,7 @@ namespace fr::ast
          temp = temp->sibling().get();
       }
 
-      output += fmt::format("{} [label={}]\n", name,
-                            magic_enum::enum_name(sem::action_type::method_body_var));
+      output += fmt::format("{} [label={}]\n", name, "method_body_var");
 
       return fmt::format("{};\n{}", name, output);
    }

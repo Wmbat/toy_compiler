@@ -12,7 +12,7 @@ namespace fr::ast
       [[nodiscard]] auto to_string() const -> std::string override = 0;
 
    protected:
-      [[nodiscard]] auto to_string_impl(sem::action_type type) const -> std::string;
+      [[nodiscard]] auto to_string_impl(const std::string& name) const -> std::string;
    };
 
    class variable_decl final : public decl

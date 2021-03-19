@@ -18,11 +18,11 @@ namespace fr::ast
       make_child(std::move(arith_expr_0));
    }
 
-   auto expr::to_string() const -> std::string { return to_string_impl(sem::action_type::expr); };
+   auto expr::to_string() const -> std::string { return to_string_impl("expr"); };
 
-   auto expr::to_string_impl(sem::action_type type) const -> std::string
+   auto expr::to_string_impl(const std::string& type) const -> std::string
    {
-      std::string name = fmt::format("\"{}_{}\"", magic_enum::enum_name(type), index());
+      std::string name = fmt::format("\"{}_{}\"", type, index());
       std::string output = name + fmt::format(" -> {}", child());
 
       const node* temp = child().get();
@@ -32,7 +32,7 @@ namespace fr::ast
          temp = temp->sibling().get();
       }
 
-      output += fmt::format("{} [label={}]\n", name, magic_enum::enum_name(type));
+      output += fmt::format("{} [label={}]\n", name, type);
 
       return fmt::format("{};\n{}", name, output);
    }
@@ -45,10 +45,7 @@ namespace fr::ast
       make_child(std::move(term));
    }
 
-   auto arith_expr::to_string() const -> std::string
-   {
-      return to_string_impl(sem::action_type::arith_expr);
-   }
+   auto arith_expr::to_string() const -> std::string { return to_string_impl("arith_expr"); }
 
    arith_tail_expr::arith_tail_expr(node_ptr add_op, node_ptr term,
                                     const source_location& location) :
@@ -60,7 +57,7 @@ namespace fr::ast
 
    auto arith_tail_expr::to_string() const -> std::string
    {
-      return to_string_impl(sem::action_type::arith_expr);
+      return to_string_impl("arith_expr_tail");
    }
 
    term_expr::term_expr(node_ptr factor, node_ptr term_tail_expr_list,
@@ -71,10 +68,7 @@ namespace fr::ast
       make_child(std::move(factor));
    }
 
-   auto term_expr::to_string() const -> std::string
-   {
-      return to_string_impl(sem::action_type::term_expr);
-   }
+   auto term_expr::to_string() const -> std::string { return to_string_impl("term_expr"); }
 
    term_tail_expr::term_tail_expr(node_ptr mult_op, node_ptr factor,
                                   const source_location& location) :
@@ -86,7 +80,7 @@ namespace fr::ast
 
    auto term_tail_expr::to_string() const -> std::string
    {
-      return to_string_impl(sem::action_type::term_tail_expr);
+      return to_string_impl("term_tail_expr");
    }
 
    variable_expr::variable_expr(node_ptr id, node_ptr idnest_list,
@@ -107,7 +101,7 @@ namespace fr::ast
 
    auto float_lit_factor_expr::to_string() const -> std::string
    {
-      return to_string_impl(sem::action_type::factor_expr);
+      return to_string_impl("factor_expr");
    }
 
    integer_lit_factor_expr::integer_lit_factor_expr(node_ptr value,
@@ -119,7 +113,7 @@ namespace fr::ast
 
    auto integer_lit_factor_expr::to_string() const -> std::string
    {
-      return to_string_impl(sem::action_type::factor_expr);
+      return to_string_impl("factor_expr");
    }
 
    string_lit_factor_expr::string_lit_factor_expr(node_ptr value, const source_location& location) :
@@ -130,11 +124,8 @@ namespace fr::ast
 
    auto string_lit_factor_expr::to_string() const -> std::string
    {
-      return to_string_impl(sem::action_type::factor_expr);
+      return to_string_impl("factor_expr");
    }
 
-   auto variable_expr::to_string() const -> std::string
-   {
-      return to_string_impl(sem::action_type::var_expr);
-   }
+   auto variable_expr::to_string() const -> std::string { return to_string_impl("var_expr"); }
 } // namespace fr::ast

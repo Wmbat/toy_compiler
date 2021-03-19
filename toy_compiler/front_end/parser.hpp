@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <toy_compiler/front_end/ast/node.hpp>
+#include <toy_compiler/front_end/ast_bis/node.hpp>
 #include <toy_compiler/front_end/lexer.hpp>
 #include <toy_compiler/util/logger.hpp>
 
@@ -59,7 +59,7 @@ namespace fr
    struct [[nodiscard]] parse_result
    {
       parse_status value{parse_status::success};
-      ast::node_ptr ast;
+      front::ast_bis::node_ptr ast;
       std::string derivation;
       monad::maybe<std::vector<parse_error>> errors;
    };

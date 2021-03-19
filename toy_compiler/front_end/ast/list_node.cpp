@@ -21,9 +21,9 @@ namespace fr::ast
       make_child(std::move(children.front()));
    }
 
-   auto list::to_string_impl(sem::action_type type) const -> std::string
+   auto list::to_string_impl(const std::string& type) const -> std::string
    {
-      std::string name = fmt::format("\"{}_{}\"", magic_enum::enum_name(type), index());
+      std::string name = fmt::format("\"{}_{}\"", type, index());
 
       std::string output = name + fmt::format(" -> {}", child());
       const node* temp = child().get();
@@ -33,7 +33,7 @@ namespace fr::ast
          temp = temp->sibling().get();
       }
 
-      output += fmt::format("{} [label={}]\n", name, magic_enum::enum_name(type));
+      output += fmt::format("{} [label={}]\n", name, type);
 
       return fmt::format("{0};\n{1}", name, output);
    }
@@ -42,7 +42,7 @@ namespace fr::ast
 
    auto class_decl_list::to_string() const -> std::string
    {
-      return to_string_impl(sem::action_type::class_decl_list);
+      return to_string_impl("class_decl_list");
    }
 
    inheritance_declaration_list::inheritance_declaration_list(std::vector<node_ptr>&& children) :
@@ -51,7 +51,7 @@ namespace fr::ast
 
    auto inheritance_declaration_list::to_string() const -> std::string
    {
-      return to_string_impl(sem::action_type::inheritance_decl_list);
+      return to_string_impl("inheritance_decl_list");
    }
 
    class_body_declaration_list::class_body_declaration_list(std::vector<node_ptr>&& children) :
@@ -60,15 +60,12 @@ namespace fr::ast
 
    auto class_body_declaration_list::to_string() const -> std::string
    {
-      return to_string_impl(sem::action_type::class_body_decl_list);
+      return to_string_impl("class_body_decl_list");
    }
 
    function_list::function_list(std::vector<node_ptr>&& children) : list{std::move(children)} {}
 
-   auto function_list::to_string() const -> std::string
-   {
-      return to_string_impl(sem::action_type::func_def_list);
-   }
+   auto function_list::to_string() const -> std::string { return to_string_impl("func_def_list"); }
 
    function_param_decl_list::function_param_decl_list(std::vector<node_ptr>&& children) :
       list{std::move(children)}
@@ -76,14 +73,14 @@ namespace fr::ast
 
    auto function_param_decl_list::to_string() const -> std::string
    {
-      return to_string_impl(sem::action_type::function_param_decl_list);
+      return to_string_impl("function_param_decl_list");
    }
 
    statement_list::statement_list(std::vector<node_ptr>&& children) : list{std::move(children)} {}
 
    auto statement_list::to_string() const -> std::string
    {
-      return to_string_impl(sem::action_type::statement_list);
+      return to_string_impl("statement_list");
    }
 
    variable_declaration_list::variable_declaration_list(std::vector<node_ptr>&& children) :
@@ -92,7 +89,7 @@ namespace fr::ast
 
    auto variable_declaration_list::to_string() const -> std::string
    {
-      return to_string_impl(sem::action_type::var_decl_list);
+      return to_string_impl("var_decl_list");
    }
 
    array_size_statement_list::array_size_statement_list(std::vector<node_ptr>&& children) :
@@ -101,14 +98,14 @@ namespace fr::ast
 
    auto array_size_statement_list::to_string() const -> std::string
    {
-      return to_string_impl(sem::action_type::array_size_stmt_list);
+      return to_string_impl("array_size_stmt_list");
    }
 
    arith_expr_list::arith_expr_list(std::vector<node_ptr>&& children) : list{std::move(children)} {}
 
    auto arith_expr_list::to_string() const -> std::string
    {
-      return to_string_impl(sem::action_type::arith_expr_list);
+      return to_string_impl("arith_expr_list");
    }
 
    term_tail_expr_list::term_tail_expr_list(std::vector<node_ptr>&& children) :
@@ -117,7 +114,7 @@ namespace fr::ast
 
    auto term_tail_expr_list::to_string() const -> std::string
    {
-      return to_string_impl(sem::action_type::term_tail_expr_list);
+      return to_string_impl("term_tail_expr_list");
    }
 
    factor_expr_list::factor_expr_list(std::vector<node_ptr>&& children) : list{std::move(children)}
@@ -125,20 +122,14 @@ namespace fr::ast
 
    auto factor_expr_list::to_string() const -> std::string
    {
-      return to_string_impl(sem::action_type::term_tail_expr_list);
+      return to_string_impl("term_tail_expr_list");
    }
 
    idnest_list::idnest_list(std::vector<node_ptr>&& children) : list{std::move(children)} {}
 
-   auto idnest_list::to_string() const -> std::string
-   {
-      return to_string_impl(sem::action_type::idnest_list);
-   }
+   auto idnest_list::to_string() const -> std::string { return to_string_impl("idnest_list"); }
 
    indice_list::indice_list(std::vector<node_ptr>&& children) : list{std::move(children)} {}
 
-   auto indice_list::to_string() const -> std::string
-   {
-      return to_string_impl(sem::action_type::indice_list);
-   }
+   auto indice_list::to_string() const -> std::string { return to_string_impl("indice_list"); }
 } // namespace fr::ast

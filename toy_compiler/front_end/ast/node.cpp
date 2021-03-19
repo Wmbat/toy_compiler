@@ -58,10 +58,10 @@ namespace fr::ast
       return temp;
    }
 
-   auto node_factory(sem::action_type type, const lex_item& item, std::vector<node_ptr>& recs)
-      -> node_ptr
+   auto node_factory(front::sem::action type, [[maybe_unused]] const lex_item& item,
+                     std::vector<node_ptr>& recs) -> node_ptr
    {
-      if (type == sem::action_type::program)
+      if (type == front::sem::action::translation_unit)
       {
          node_ptr func_body = pop(recs);
          node_ptr func_def_list = pop(recs);
@@ -71,6 +71,7 @@ namespace fr::ast
                                                std::move(func_body));
       }
 
+      /*
       if (type == sem::action_type::class_decl_list)
       {
          std::vector<node_ptr> nodes;
@@ -757,6 +758,7 @@ namespace fr::ast
       {
          return std::make_unique<epsilon_node>();
       }
+      */
 
       return nullptr;
    }

@@ -3,14 +3,9 @@
 #include <toy_compiler/front_end/lexer.hpp>
 #include <toy_compiler/front_end/sem/actions.hpp>
 
-#include <monads/maybe.hpp>
-
-#include <fmt/core.h>
-
 #include <memory>
-#include <vector>
 
-namespace fr::ast
+namespace front::ast_bis
 {
    class node;
 
@@ -20,7 +15,8 @@ namespace fr::ast
    {
    public:
       node() = default;
-      node(std::string lexeme, const source_location& location, std::uint32_t index);
+      node(const fr::source_location& location);
+      node(std::string lexeme, const fr::source_location& location);
       node(const node& rhs) = delete;
       node(node&& rhs) = default;
       virtual ~node() = default;
@@ -31,8 +27,7 @@ namespace fr::ast
       [[nodiscard]] auto child() const -> const node_ptr&;
       [[nodiscard]] auto sibling() const -> const node_ptr&;
       [[nodiscard]] auto lexeme() const -> std::string_view;
-      [[nodiscard]] auto location() const -> const source_location&;
-      [[nodiscard]] auto index() const -> std::uint32_t;
+      [[nodiscard]] auto location() const -> const fr::source_location&;
 
       void make_sibling(node_ptr sibling);
       void make_child(node_ptr child);
@@ -44,17 +39,15 @@ namespace fr::ast
       node_ptr m_sibling;
 
       std::string m_lexeme;
-      source_location m_location;
-
-      std::uint32_t m_index = 0;
+      fr::source_location m_location;
    };
 
-   auto node_factory(front::sem::action type, const lex_item& item, std::vector<node_ptr>& recs)
+   auto node_factory(sem::action type, const fr::lex_item& item, std::vector<node_ptr>& recs)
       -> node_ptr;
-} // namespace fr::ast
+}; // namespace front::ast_bis
 
 template <>
-struct fmt::formatter<fr::ast::node>
+struct fmt::formatter<front::ast_bis::node>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -63,14 +56,14 @@ struct fmt::formatter<fr::ast::node>
    }
 
    template <typename FormatContext>
-   auto format(const fr::ast::node& node, FormatContext& ctx)
+   auto format(const front::ast_bis::node& node, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "{}", node.to_string());
    }
 };
 
 template <>
-struct fmt::formatter<fr::ast::node_ptr>
+struct fmt::formatter<front::ast_bis::node_ptr>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -79,7 +72,7 @@ struct fmt::formatter<fr::ast::node_ptr>
    }
 
    template <typename FormatContext>
-   auto format(const fr::ast::node_ptr& node, FormatContext& ctx)
+   auto format(const front::ast_bis::node_ptr& node, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "{}", node->to_string());
    }
