@@ -27,7 +27,7 @@
 #include <functional>
 #include <string_view>
 
-namespace fr::sem
+namespace front::sem
 {
    enum struct grammar_type : std::uint32_t
    {
@@ -87,14 +87,14 @@ namespace fr::sem
       visibility,
       max_size
    };
-} // namespace fr::sem
+} // namespace front::sem
 
 /**
  * @brief A specialization for using the `sem::grammar_type` enum in the **fmt** & **spdlog**
  * libraries
  */
 template <>
-struct fmt::formatter<fr::sem::grammar_type>
+struct fmt::formatter<front::sem::grammar_type>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -103,7 +103,7 @@ struct fmt::formatter<fr::sem::grammar_type>
    }
 
    template <typename FormatContext>
-   auto format(fr::sem::grammar_type type, FormatContext& ctx)
+   auto format(front::sem::grammar_type type, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "{}", magic_enum::enum_name(type));
    }

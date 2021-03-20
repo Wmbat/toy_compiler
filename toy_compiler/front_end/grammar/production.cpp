@@ -18,17 +18,18 @@
  */
 
 #include <toy_compiler/front_end/grammar/production.hpp>
+
 #include <utility>
 
 namespace fr::grammar
 {
-   production::production(sem::grammar_type start, symbol_array tail, nullable_t nullable) :
+   production::production(front::sem::grammar_type start, symbol_array tail, nullable_t nullable) :
       m_start{start},
       m_symbols{std::move(tail)},
       m_is_nullable{nullable}
    {}
 
-   auto production::start() const -> sem::grammar_type { return m_start; }
+   auto production::start() const -> front::sem::grammar_type { return m_start; }
 
    auto production::tail() const -> const symbol_array& { return m_symbols; }
    auto production::tail() -> symbol_array& { return m_symbols; }

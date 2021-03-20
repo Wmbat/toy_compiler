@@ -103,14 +103,12 @@ namespace front::ast_bis
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 
-   class function_decl : public decl
-   {
-   };
-
    class variable_decl : public decl
    {
    public:
       variable_decl(node_ptr type, node_ptr id, node_ptr compound_array);
+
+      [[nodiscard]] auto type() const -> std::string;
 
       [[nodiscard]] auto to_string() const -> std::string override;
 
@@ -134,13 +132,30 @@ namespace front::ast_bis
 
       [[nodiscard]] auto to_string() const -> std::string override;
 
-   public:
+   private:
       fr::source_location m_end_loc;
    };
 
-   class func_decl : public decl
+   class function_decl : public decl
    {
    public:
-      func_decl(node_ptr id, node_ptr params, node_ptr tail);
+      function_decl(node_ptr location, node_ptr id, node_ptr compound_params, node_ptr tail);
+
+      [[nodiscard]] auto return_type() const -> std::string;
+      [[nodiscard]] auto params() const -> std::vector<std::string>;
+
+      [[nodiscard]] auto to_string() const -> std::string override;
+
+   private:
+      std::string m_return_type;
+      std::vector<std::string> m_params;
+   };
+
+   class compound_params_decl : public decl
+   {
+   public:
+      compound_params_decl(std::vector<node_ptr>&& member_decl);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
    };
 } // namespace front::ast_bis

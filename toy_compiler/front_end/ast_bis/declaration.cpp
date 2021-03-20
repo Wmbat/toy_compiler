@@ -1,6 +1,7 @@
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
 
 #include <range/v3/view/tail.hpp>
+#include <range/v3/view/take.hpp>
 
 #include <cassert>
 
@@ -187,6 +188,7 @@ namespace front::ast_bis
       }
    }
 
+   auto variable_decl::type() const -> std::string { return m_type; }
    auto variable_decl::to_string() const -> std::string
    {
       return fmt::format("variable_decl <line:{}, col:{}> {} '{}'", location().line,
@@ -234,4 +236,57 @@ namespace front::ast_bis
       return fmt::format("array_decl <line:{}, col:{}> <line:{}, col:{}> '[{}]'", location().line,
                          location().column, m_end_loc.line, m_end_loc.column, lexeme());
    }
+
+   function_decl::function_decl(node_ptr location, node_ptr id, node_ptr compound_param,
+                                node_ptr tail) :
+      decl{std::string{id->lexeme()}, location->location()},
+      m_return_type{tail->lexeme()}
+   {
+      if (compound_param->child())
+      {
+         node* it = compound_param->child().get();
+         while (it)
+         {
+            m_params.emplace_back(dynamic_cast<variable_decl*>(it)->type());
+            it = it->sibling().get();
+         }
+
+         make_child(std::move(compound_param));
+      }
+   }
+
+   auto function_decl::to_string() const -> std::string
+   {
+      std::string params;
+      for (const auto& param : m_params)
+      {
+         params += param;
+         params += ", ";
+      }
+
+      return fmt::format("func_decl <line:{}, col:{}> {} '{} ({})'", location().line,
+                         location().column, lexeme(), m_return_type,
+                         params.substr(0, std::size(params) - 2));
+   }
+
+   compound_params_decl::compound_params_decl(std::vector<node_ptr>&& param_decls)
+   {
+      if (std::size(param_decls) > 0)
+      {
+         node* it = param_decls.front().get();
+         for (node_ptr& node : param_decls | vi::tail)
+         {
+            // NOLINTNEXTLINE
+            assert(dynamic_cast<variable_decl*>(it));
+
+            auto temp = node.get();
+            it->make_sibling(std::move(node));
+            it = temp;
+         }
+
+         make_child(std::move(param_decls.front()));
+      }
+   }
+
+   auto compound_params_decl::to_string() const -> std::string { return "compound_array_decl"; }
 }; // namespace front::ast_bis

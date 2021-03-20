@@ -34,7 +34,7 @@ constexpr auto to(std::uint32_t i) -> T
 TEST_SUITE("grammar/symbol.hpp test suite")
 {
    using namespace fr::grammar;
-   using namespace fr::sem;
+   using namespace front::sem;
 
    namespace vi = ranges::views;
 

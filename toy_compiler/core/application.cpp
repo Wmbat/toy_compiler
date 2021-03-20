@@ -112,14 +112,14 @@ void application::write_ast_to_file(const std::filesystem::path& path,
    std::ofstream output_file{output_path};
 
    std::vector<front::ast_bis::node*> stack;
-
    front::ast_bis::node* curr = root.get();
+
    while (!std::empty(stack) || curr)
    {
       if (curr)
       {
          const auto name = fmt::format("- {}\n", *curr);
-         fmt::print("{:>{}}", name, std::size(name) + std::size(stack) * 2);
+         fmt::print(output_file, "{:>{}}", name, std::size(name) + std::size(stack) * 2);
 
          stack.push_back(curr);
          curr = curr->child().get();

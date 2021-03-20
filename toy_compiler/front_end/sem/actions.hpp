@@ -24,6 +24,8 @@ namespace front::sem
       variable_decl,
       compound_array_decl,
       array_decl,
+      function_decl,
+      compound_param_decl,
       integer_literal,
       epsilon
    };

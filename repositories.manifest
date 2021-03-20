@@ -15,4 +15,4 @@ location: https://github.com/Wmbat/monads.git
 
 :
 role: prerequisite
-location: https://github.com/Wmbat/magic_enum.git#main
+location: https://github.com/build2-packaging/magic_enum.git#main

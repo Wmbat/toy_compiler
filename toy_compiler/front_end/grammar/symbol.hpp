@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include <toy_compiler/front_end/grammar/grammar_type.hpp>
 #include <toy_compiler/front_end/grammar/token_type.hpp>
 #include <toy_compiler/front_end/sem/actions.hpp>
+#include <toy_compiler/front_end/sem/grammar_type.hpp>
 
 #include <array>
 #include <cstdint>
@@ -55,7 +55,7 @@ namespace fr::grammar
       template <>
       struct convert_helper<symbol_type::non_terminal>
       {
-         using type = sem::grammar_type;
+         using type = front::sem::grammar_type;
       };
 
       template <>
@@ -101,7 +101,7 @@ namespace fr::grammar
    class symbol
    {
    public:
-      using storage = std::variant<bool, token_type, sem::grammar_type, front::sem::action>;
+      using storage = std::variant<bool, token_type, front::sem::grammar_type, front::sem::action>;
 
       /**
        * @brief Construct a default **terminal** `grammar::symbol`
@@ -110,11 +110,14 @@ namespace fr::grammar
       /**
        * @brief Construct a default **non_terminal** `grammar::symbol`
        */
-      static constexpr auto non_terminal() -> symbol { return {sem::grammar_type::max_size}; }
+      static constexpr auto non_terminal() -> symbol
+      {
+         return {front::sem::grammar_type::max_size};
+      }
       /**
        * @brief Construct a default **start** `grammar::symbol`
        */
-      static constexpr auto start() -> symbol { return {sem::grammar_type::start}; }
+      static constexpr auto start() -> symbol { return {front::sem::grammar_type::start}; }
       /**
        * @brief Construct a default **stop** `grammar::symbol`
        */
@@ -134,7 +137,9 @@ namespace fr::grammar
        *
        * @param[in] value The `sem::grammar_type` value to store
        */
-      constexpr symbol(sem::grammar_type value) : m_type{symbol_type::non_terminal}, m_data{value}
+      constexpr symbol(front::sem::grammar_type value) :
+         m_type{symbol_type::non_terminal},
+         m_data{value}
       {}
 
       constexpr symbol(front::sem::action value) : m_type{symbol_type::action}, m_data{value} {}
@@ -149,11 +154,11 @@ namespace fr::grammar
 
          return false;
       }
-      constexpr auto operator==(sem::grammar_type tok) const -> bool
+      constexpr auto operator==(front::sem::grammar_type tok) const -> bool
       {
          if (m_type == symbol_type::non_terminal)
          {
-            return std::get<sem::grammar_type>(m_data) == tok;
+            return std::get<front::sem::grammar_type>(m_data) == tok;
          }
 
          return false;
@@ -242,11 +247,11 @@ namespace fr::grammar
     *
     * @return The `sem::grammar_type` value stored in `grammar::symbol`
     */
-   constexpr auto get_grammar_type(const symbol& s) -> sem::grammar_type
+   constexpr auto get_grammar_type(const symbol& s) -> front::sem::grammar_type
    {
       return get<symbol_type::non_terminal>(s);
    }
-   
+
    constexpr auto get_action_type(const symbol& s) -> front::sem::action
    {
       return get<symbol_type::action>(s);

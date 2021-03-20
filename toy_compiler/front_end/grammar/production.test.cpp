@@ -37,7 +37,7 @@ TEST_SUITE("grammar/production.hpp test suite")
    TEST_CASE("empty production")
    {
       using namespace fr::grammar;
-      using namespace fr::sem;
+      using namespace front::sem;
 
       production r1{};
 
@@ -47,7 +47,7 @@ TEST_SUITE("grammar/production.hpp test suite")
    TEST_CASE("normal production")
    {
       using namespace fr::grammar;
-      using namespace fr::sem;
+      using namespace front::sem;
 
       namespace vi = ranges::views;
 
@@ -82,7 +82,7 @@ TEST_SUITE("grammar/production.hpp test suite")
    TEST_CASE("fmt::formatter - production")
    {
       using namespace fr::grammar;
-      using namespace fr::sem;
+      using namespace front::sem;
 
       namespace vi = ranges::views;
 

@@ -32,13 +32,14 @@ namespace fr::grammar
    class production_table
    {
       static constexpr std::size_t width = static_cast<std::size_t>(token_type::max_size);
-      static constexpr std::size_t height = static_cast<std::size_t>(sem::grammar_type::max_size);
+      static constexpr std::size_t height =
+         static_cast<std::size_t>(front::sem::grammar_type::max_size);
 
    public:
       /**
        * @brief The type used to access elements within the `symbol_table`
        */
-      using key = std::pair<sem::grammar_type, token_type>;
+      using key = std::pair<front::sem::grammar_type, token_type>;
 
    public:
       /**
