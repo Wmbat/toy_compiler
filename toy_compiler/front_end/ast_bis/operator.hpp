@@ -2,7 +2,7 @@
 
 #include <toy_compiler/front_end/ast_bis/node.hpp>
 
-namespace fr::ast_bis
+namespace front::ast
 {
    class op : public node
    {

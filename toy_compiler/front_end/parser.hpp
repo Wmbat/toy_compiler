@@ -48,8 +48,8 @@ namespace fr
    struct parse_error
    {
       parse_error_type type{parse_error_type::max_size};
-      grammar::token_type token;
-      fr::source_location pos{};
+      front::sem::token_type token;
+      front::source_location pos{};
       std::string line;
    };
 
@@ -59,7 +59,7 @@ namespace fr
    struct [[nodiscard]] parse_result
    {
       parse_status value{parse_status::success};
-      front::ast_bis::node_ptr ast;
+      front::ast::node_ptr ast;
       std::string derivation;
       monad::maybe<std::vector<parse_error>> errors;
    };
@@ -67,6 +67,6 @@ namespace fr
    /**
     * @param items The lexed items to use for parsing
     */
-   auto parse_items(std::span<const fr::lex_item> items, util::logger_wrapper log = nullptr)
+   auto parse_items(std::span<const front::lex_item> items, util::logger_wrapper log = nullptr)
       -> parse_result;
 } // namespace fr

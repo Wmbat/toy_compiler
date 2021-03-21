@@ -19,7 +19,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <toy_compiler/front_end/grammar/token_type.hpp>
+#include <toy_compiler/front_end/sem/token_type.hpp>
 
 #include <magic_enum.hpp>
 
@@ -35,7 +35,7 @@ TEST_SUITE("grammar/token_type.hpp test suite")
 {
    TEST_CASE("is_token_invalid()")
    {
-      using namespace fr::grammar;
+      using namespace front::sem;
 
       namespace vi = ranges::views;
 
@@ -53,7 +53,7 @@ TEST_SUITE("grammar/token_type.hpp test suite")
    }
    TEST_CASE("fmt::formatter - token_type")
    {
-      using namespace fr::grammar;
+      using namespace front::sem;
 
       namespace vi = ranges::views;
 

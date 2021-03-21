@@ -2,14 +2,14 @@
 
 #include <toy_compiler/front_end/ast_bis/node.hpp>
 
-namespace front::ast_bis
+namespace front::ast
 {
    class decl : public node
    {
    public:
       decl() = default;
-      decl(const fr::source_location& location);
-      decl(const std::string& lexeme, const fr::source_location& location);
+      decl(const source_location& location);
+      decl(const std::string& lexeme, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override = 0;
    };
@@ -25,7 +25,7 @@ namespace front::ast_bis
    class location_decl : public decl
    {
    public:
-      location_decl(const fr::source_location& location);
+      location_decl(const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
@@ -33,7 +33,7 @@ namespace front::ast_bis
    class type_decl : public decl
    {
    public:
-      type_decl(const std::string& name, const fr::source_location& location);
+      type_decl(const std::string& name, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
@@ -41,7 +41,7 @@ namespace front::ast_bis
    class id_decl : public decl
    {
    public:
-      id_decl(const std::string& lexeme, const fr::source_location& location);
+      id_decl(const std::string& lexeme, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
@@ -74,7 +74,7 @@ namespace front::ast_bis
    class inheritance_decl : public decl
    {
    public:
-      inheritance_decl(const std::string& name, const fr::source_location& location);
+      inheritance_decl(const std::string& name, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
@@ -98,7 +98,7 @@ namespace front::ast_bis
    class visibility_decl : public decl
    {
    public:
-      visibility_decl(const std::string& name, const fr::source_location& location);
+      visibility_decl(const std::string& name, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
@@ -133,7 +133,7 @@ namespace front::ast_bis
       [[nodiscard]] auto to_string() const -> std::string override;
 
    private:
-      fr::source_location m_end_loc;
+      source_location m_end_loc;
    };
 
    class function_decl : public decl

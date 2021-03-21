@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace front::ast_bis
+namespace front::ast
 {
    class node;
 
@@ -15,8 +15,8 @@ namespace front::ast_bis
    {
    public:
       node() = default;
-      node(const fr::source_location& location);
-      node(std::string lexeme, const fr::source_location& location);
+      node(const source_location& location);
+      node(std::string lexeme, const source_location& location);
       node(const node& rhs) = delete;
       node(node&& rhs) = default;
       virtual ~node() = default;
@@ -27,7 +27,7 @@ namespace front::ast_bis
       [[nodiscard]] auto child() const -> const node_ptr&;
       [[nodiscard]] auto sibling() const -> const node_ptr&;
       [[nodiscard]] auto lexeme() const -> std::string_view;
-      [[nodiscard]] auto location() const -> const fr::source_location&;
+      [[nodiscard]] auto location() const -> const source_location&;
 
       void make_sibling(node_ptr sibling);
       void make_child(node_ptr child);
@@ -39,15 +39,15 @@ namespace front::ast_bis
       node_ptr m_sibling;
 
       std::string m_lexeme;
-      fr::source_location m_location;
+      source_location m_location;
    };
 
-   auto node_factory(sem::action type, const fr::lex_item& item, std::vector<node_ptr>& recs)
+   auto node_factory(sem::action type, const lex_item& item, std::vector<node_ptr>& recs)
       -> node_ptr;
 }; // namespace front::ast_bis
 
 template <>
-struct fmt::formatter<front::ast_bis::node>
+struct fmt::formatter<front::ast::node>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -56,14 +56,14 @@ struct fmt::formatter<front::ast_bis::node>
    }
 
    template <typename FormatContext>
-   auto format(const front::ast_bis::node& node, FormatContext& ctx)
+   auto format(const front::ast::node& node, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "{}", node.to_string());
    }
 };
 
 template <>
-struct fmt::formatter<front::ast_bis::node_ptr>
+struct fmt::formatter<front::ast::node_ptr>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -72,7 +72,7 @@ struct fmt::formatter<front::ast_bis::node_ptr>
    }
 
    template <typename FormatContext>
-   auto format(const front::ast_bis::node_ptr& node, FormatContext& ctx)
+   auto format(const front::ast::node_ptr& node, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "{}", node->to_string());
    }

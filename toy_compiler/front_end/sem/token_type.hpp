@@ -28,7 +28,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace fr::grammar
+namespace front::sem
 {
    /**
     * @brief All the possible item type that may be lexed from a source file
@@ -124,14 +124,14 @@ namespace fr::grammar
    constexpr char close_square = ']';
    constexpr char open_curly = '{';
    constexpr char close_curly = '}';
-} // namespace fr::grammar
+} // namespace front::sem
 
 /**
  * @brief A specialization for using the `grammar::token_type` enum in the **fmt** & **spdlog**
  * libraries
  */
 template <>
-struct fmt::formatter<fr::grammar::token_type>
+struct fmt::formatter<front::sem::token_type>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -140,7 +140,7 @@ struct fmt::formatter<fr::grammar::token_type>
    }
 
    template <typename FormatContext>
-   auto format(fr::grammar::token_type t, FormatContext& ctx)
+   auto format(front::sem::token_type t, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "{}", magic_enum::enum_name(t));
    }

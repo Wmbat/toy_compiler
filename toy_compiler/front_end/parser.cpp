@@ -43,8 +43,11 @@ namespace fr
    namespace vi = ranges::views;
 
    auto construct_symbol_table() -> const grammar::production_table;
-   auto is_comment(const fr::lex_item& item) -> bool;
-   auto is_epsilon(const grammar::symbol& s) -> bool { return s == grammar::token_type::epsilon; }
+   auto is_comment(const front::lex_item& item) -> bool;
+   auto is_epsilon(const grammar::symbol& s) -> bool
+   {
+      return s == front::sem::token_type::epsilon;
+   }
    auto pop(std::vector<grammar::symbol>& stack) -> grammar::symbol
    {
       auto temp = *(std::end(stack) - 1);
@@ -52,7 +55,7 @@ namespace fr
       return temp;
    }
 
-   auto check_follow_sets(grammar::token_type type, const grammar::symbol& top) -> bool
+   auto check_follow_sets(front::sem::token_type type, const grammar::symbol& top) -> bool
    {
       const auto tail =
          ranges::find(grammar::sets::follow, top, &grammar::production::start)->tail();
@@ -60,19 +63,17 @@ namespace fr
       return ranges::find(tail, type) != std::end(tail);
    }
 
-   auto contains(const grammar::symbol_array& tail, grammar::token_type type) -> bool
+   auto contains(const grammar::symbol_array& tail, front::sem::token_type type) -> bool
    {
       return ranges::find(tail, type) != std::end(tail);
    }
 
-   auto skip_error() {}
-
-   auto parse_impl(std::span<const fr::lex_item> items, util::logger_wrapper log) -> parse_result
+   auto parse_impl(std::span<const front::lex_item> items, util::logger_wrapper log) -> parse_result
    {
       static const auto table = fr::grammar::construct_production_table();
 
       std::vector<parse_error> errors;
-      std::vector<front::ast_bis::node_ptr> nodes;
+      std::vector<front::ast::node_ptr> nodes;
       std::vector<grammar::symbol> stack;
       stack.push_back(grammar::symbol::stop());
       stack.push_back(grammar::symbol::start());
@@ -95,7 +96,7 @@ namespace fr
 
          if (grammar::is_terminal(top_symbol))
          {
-            if (!grammar::is_eof(item_it->type) && top_symbol == item_it->type)
+            if (!front::sem::is_eof(item_it->type) && top_symbol == item_it->type)
             {
                log.info("Parsed token: {}", *item_it);
 
@@ -106,7 +107,7 @@ namespace fr
             }
             else
             {
-               if (grammar::is_eof(item_it->type))
+               if (front::sem::is_eof(item_it->type))
                {
                   log.info("symbol {} popped from stack", top_symbol);
 
@@ -117,7 +118,7 @@ namespace fr
                   log.warning("SCANNING...");
 
                   const auto token = get<grammar::symbol_type::terminal>(top_symbol);
-                  if (token == grammar::token_type::semi_colon)
+                  if (token == front::sem::token_type::semi_colon)
                   {
                      errors.push_back(parse_error{.type = parse_error_type::missing_terminal,
                                                   .token = token,
@@ -132,7 +133,7 @@ namespace fr
                                                   .line = {}});
                   }
 
-                  while (!grammar::is_eof(item_it->type) && item_it->type != top_symbol)
+                  while (!front::sem::is_eof(item_it->type) && item_it->type != top_symbol)
                   {
                      log.warning("\t{} : {}", top_symbol, *item_it);
 
@@ -160,7 +161,8 @@ namespace fr
             }
             else
             {
-               if (grammar::is_eof(item_it->type) || check_follow_sets(item_it->type, top_symbol))
+               if (front::sem::is_eof(item_it->type) ||
+                   check_follow_sets(item_it->type, top_symbol))
                {
                   log.info("symbol {} popped from stack", top_symbol);
                   stack.pop_back();
@@ -176,7 +178,7 @@ namespace fr
 
                   if (first_it->nullable())
                   {
-                     while (!grammar::is_eof(item_it->type) &&
+                     while (!front::sem::is_eof(item_it->type) &&
                             !contains(follow_it->tail(), item_it->type))
                      {
                         log.warning("\t{} : {}", top_symbol, *item_it);
@@ -186,7 +188,7 @@ namespace fr
                   }
                   else
                   {
-                     while (!grammar::is_eof(item_it->type) &&
+                     while (!front::sem::is_eof(item_it->type) &&
                             !contains(first_it->tail(), item_it->type))
                      {
                         log.warning("\t{} : {}", top_symbol, *item_it);
@@ -204,18 +206,18 @@ namespace fr
             stack.pop_back();
             if (item_it != std::begin(items))
             {
-               nodes.push_back(front::ast_bis::node_factory(type, *(item_it - 1), nodes));
+               nodes.push_back(front::ast::node_factory(type, *(item_it - 1), nodes));
             }
             else
             {
-               nodes.push_back(front::ast_bis::node_factory(type, {}, nodes));
+               nodes.push_back(front::ast::node_factory(type, {}, nodes));
             }
          }
 
          final_derivations += fmt::format("{}{}\n", parsed_tokens, derivation);
       }
 
-      if (!grammar::is_eof(item_it->type) || !std::empty(errors))
+      if (!front::sem::is_eof(item_it->type) || !std::empty(errors))
       {
          return {.value = parse_status::error,
                  .ast = std::move(nodes.back()),
@@ -229,16 +231,18 @@ namespace fr
               .errors = monad::none};
    }
 
-   auto parse_items(std::span<const fr::lex_item> items, util::logger_wrapper log) -> parse_result
+   auto parse_items(std::span<const front::lex_item> items, util::logger_wrapper log)
+      -> parse_result
    {
       const auto cleaned = items | vi::filter(ranges::not_fn(is_comment)) | ranges::to_vector;
 
       return parse_impl(cleaned, log);
    }
 
-   auto is_comment(const fr::lex_item& item) -> bool
+   auto is_comment(const front::lex_item& item) -> bool
    {
       using namespace grammar;
-      return (item.type == token_type::block_cmt) || (item.type == token_type::line_cmt);
+      return (item.type == front::sem::token_type::block_cmt) ||
+         (item.type == front::sem::token_type::line_cmt);
    }
 } // namespace fr

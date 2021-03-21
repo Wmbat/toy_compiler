@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <toy_compiler/front_end/grammar/token_type.hpp>
+#include <toy_compiler/front_end/sem/token_type.hpp>
 #include <toy_compiler/util/logger.hpp>
 
 #include <monads/maybe.hpp>
@@ -27,12 +27,12 @@
 #include <filesystem>
 #include <vector>
 
-namespace fr
+namespace front
 {
    struct source_location
    {
-      std::uint32_t line = std::numeric_limits<std::uint32_t>::max();
-      std::uint32_t column = std::numeric_limits<std::uint32_t>::max();
+      std::uint32_t line = std::numeric_limits<std::uint32_t>::max();   // NOLINT
+      std::uint32_t column = std::numeric_limits<std::uint32_t>::max(); // NOLINT
 
       constexpr auto operator<=>(const source_location& other) const
          -> std::strong_ordering = default;
@@ -43,9 +43,9 @@ namespace fr
     */
    struct lex_item
    {
-      grammar::token_type type{}; // NOLINT
-      std::string lexeme{};       // NOLINT
-      source_location pos{};      // NOLINT
+      sem::token_type type{}; // NOLINT
+      std::string lexeme{};   // NOLINT
+      source_location pos{};  // NOLINT
 
       auto operator<=>(const lex_item& other) const -> std::strong_ordering = default;
    };
@@ -59,11 +59,11 @@ namespace fr
     * @return The list of `fr::lex_item` from the file
     */
    auto lex_file(const std::filesystem::path& path, util::logger_wrapper log = nullptr)
-      -> monad::maybe<std::vector<fr::lex_item>>;
-} // namespace fr
+      -> monad::maybe<std::vector<front::lex_item>>;
+} // namespace front
 
 template <>
-struct fmt::formatter<fr::source_location>
+struct fmt::formatter<front::source_location>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -72,7 +72,7 @@ struct fmt::formatter<fr::source_location>
    }
 
    template <typename FormatContext>
-   auto format(const fr::source_location& pos, FormatContext& ctx)
+   auto format(const front::source_location& pos, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "({}:{})", pos.line, pos.column);
    }
@@ -82,7 +82,7 @@ struct fmt::formatter<fr::source_location>
  * @brief A specialization for using the `fr::lex_item` struct in the **fmt** & **spdlog** libraries
  */
 template <>
-struct fmt::formatter<fr::lex_item>
+struct fmt::formatter<front::lex_item>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -91,7 +91,7 @@ struct fmt::formatter<fr::lex_item>
    }
 
    template <typename FormatContext>
-   auto format(const fr::lex_item& tok, FormatContext& ctx)
+   auto format(const front::lex_item& tok, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "[.type = {0}, .lexeme = {1}, .position = {2}]", tok.type,
                             tok.lexeme, tok.pos);

@@ -38,11 +38,11 @@ private:
    void write_derivations_to_file(const std::filesystem::path& path,
                                   const std::string& derivation) const;
    void write_ast_to_file(const std::filesystem::path& path,
-                          const front::ast_bis::node_ptr& root) const;
+                          const front::ast::node_ptr& root) const;
    void write_errors_to_file(const std::filesystem::path& path,
                              std::span<const fr::parse_error> errors) const;
 
-   [[nodiscard]] auto fancy_lexical_error_type(fr::grammar::token_type value) const -> std::string;
+   [[nodiscard]] auto fancy_lexical_error_type(front::sem::token_type value) const -> std::string;
 
 private:
    util::logger_wrapper m_logger;

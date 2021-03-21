@@ -32,7 +32,7 @@
 
 namespace fs = std::filesystem;
 
-auto pop(std::vector<front::ast_bis::node*>& stack) -> front::ast_bis::node*
+auto pop(std::vector<front::ast::node*>& stack) -> front::ast::node*
 {
    auto temp = *(std::end(stack) - 1);
    stack.pop_back();
@@ -47,7 +47,7 @@ application::application(std::span<const std::string_view> args, util::logger_wr
       const auto filepath = fs::path{filename};
       if (filepath.extension() == ".src")
       {
-         if (auto maybe = fr::lex_file(filepath, m_logger))
+         if (auto maybe = front::lex_file(filepath, m_logger))
          {
             const auto result = fr::parse_items(maybe.value(), m_logger);
             if (result.value == fr::parse_status::error)
@@ -103,7 +103,7 @@ void application::write_derivations_to_file(const std::filesystem::path& path,
    fmt::print(output_file, "{}", derivation);
 }
 void application::write_ast_to_file(const std::filesystem::path& path,
-                                    const front::ast_bis::node_ptr& root) const
+                                    const front::ast::node_ptr& root) const
 {
    auto output_path = path.parent_path();
    output_path /= path.stem();
@@ -111,8 +111,8 @@ void application::write_ast_to_file(const std::filesystem::path& path,
 
    std::ofstream output_file{output_path};
 
-   std::vector<front::ast_bis::node*> stack;
-   front::ast_bis::node* curr = root.get();
+   std::vector<front::ast::node*> stack;
+   front::ast::node* curr = root.get();
 
    while (!std::empty(stack) || curr)
    {
@@ -153,12 +153,12 @@ void application::write_errors_to_file(const std::filesystem::path& path,
    }
 }
 
-auto application::fancy_lexical_error_type(fr::grammar::token_type value) const -> std::string
+auto application::fancy_lexical_error_type(front::sem::token_type value) const -> std::string
 {
    // NOLINTNEXTLINE
-   assert(fr::grammar::is_token_invalid(value) && "Only invalid types should be passed");
+   assert(front::sem::is_token_invalid(value) && "Only invalid types should be passed");
 
-   using namespace fr::grammar;
+   using namespace front::sem;
 
    if (value == token_type::invalid_char)
    {

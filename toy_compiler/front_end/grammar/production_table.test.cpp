@@ -41,7 +41,7 @@ constexpr auto to_key(std::tuple<std::uint32_t, std::uint32_t> t)
    -> fr::grammar::production_table::key
 {
    return {to<front::sem::grammar_type>(std::get<0>(t)),
-           to<fr::grammar::token_type>(std::get<1>(t))};
+           to<front::sem::token_type>(std::get<1>(t))};
 }
 
 auto create_table() -> fr::grammar::production_table
@@ -51,7 +51,7 @@ auto create_table() -> fr::grammar::production_table
    namespace vi = ranges::views;
 
    const auto grammar_size = static_cast<std::uint32_t>(front::sem::grammar_type::max_size);
-   const auto token_size = static_cast<std::uint32_t>(token_type::max_size);
+   const auto token_size = static_cast<std::uint32_t>(front::sem::token_type::max_size);
 
    std::mt19937 rng(std::random_device{}());
    std::uniform_int_distribution<std::uint32_t> grammar_size_dist{0, grammar_size};
@@ -74,7 +74,7 @@ auto create_table() -> fr::grammar::production_table
          }
          else
          {
-            tail.push_back(to<token_type>(token_size_dist(rng)));
+            tail.push_back(to<front::sem::token_type>(token_size_dist(rng)));
          }
       }
 
@@ -96,7 +96,7 @@ auto generate_tail(std::mt19937& rng, udist& arr_size_dist, udist& grammar_size_
       }
       else
       {
-         tail.push_back(to<fr::grammar::token_type>(token_size_dist(rng)));
+         tail.push_back(to<front::sem::token_type>(token_size_dist(rng)));
       }
    }
    return tail;
@@ -112,7 +112,7 @@ TEST_SUITE("grammar/symbol_table.hpp test suite")
       namespace vi = ranges::views;
 
       const auto grammar_size = static_cast<std::uint32_t>(front::sem::grammar_type::max_size);
-      const auto token_size = static_cast<std::uint32_t>(token_type::max_size);
+      const auto token_size = static_cast<std::uint32_t>(front::sem::token_type::max_size);
 
       std::mt19937 rng(std::random_device{}());
       std::uniform_int_distribution<std::uint32_t> arr_size_dist{0, 10};
@@ -140,7 +140,7 @@ TEST_SUITE("grammar/symbol_table.hpp test suite")
       namespace vi = ranges::views;
 
       const auto grammar_size = static_cast<std::uint32_t>(front::sem::grammar_type::max_size);
-      const auto token_size = static_cast<std::uint32_t>(token_type::max_size);
+      const auto token_size = static_cast<std::uint32_t>(front::sem::token_type::max_size);
 
       production_table table = create_table();
 
@@ -161,7 +161,7 @@ TEST_SUITE("grammar/symbol_table.hpp test suite")
       namespace vi = ranges::views;
 
       const auto grammar_size = static_cast<std::uint32_t>(front::sem::grammar_type::max_size);
-      const auto token_size = static_cast<std::uint32_t>(token_type::max_size);
+      const auto token_size = static_cast<std::uint32_t>(front::sem::token_type::max_size);
 
       const production_table table = create_table();
 

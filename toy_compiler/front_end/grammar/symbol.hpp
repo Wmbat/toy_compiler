@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include <toy_compiler/front_end/grammar/token_type.hpp>
 #include <toy_compiler/front_end/sem/actions.hpp>
 #include <toy_compiler/front_end/sem/grammar_type.hpp>
+#include <toy_compiler/front_end/sem/token_type.hpp>
 
 #include <array>
 #include <cstdint>
@@ -49,7 +49,7 @@ namespace fr::grammar
       template <>
       struct convert_helper<symbol_type::terminal>
       {
-         using type = token_type;
+         using type = front::sem::token_type;
       };
 
       template <>
@@ -101,12 +101,13 @@ namespace fr::grammar
    class symbol
    {
    public:
-      using storage = std::variant<bool, token_type, front::sem::grammar_type, front::sem::action>;
+      using storage =
+         std::variant<bool, front::sem::token_type, front::sem::grammar_type, front::sem::action>;
 
       /**
        * @brief Construct a default **terminal** `grammar::symbol`
        */
-      static constexpr auto terminal() -> symbol { return {token_type::max_size}; }
+      static constexpr auto terminal() -> symbol { return {front::sem::token_type::max_size}; }
       /**
        * @brief Construct a default **non_terminal** `grammar::symbol`
        */
@@ -130,7 +131,8 @@ namespace fr::grammar
        *
        * @param[in] value The `grammar::token_type` value to store
        */
-      constexpr symbol(token_type value) : m_type{symbol_type::terminal}, m_data{value} {}
+      constexpr symbol(front::sem::token_type value) : m_type{symbol_type::terminal}, m_data{value}
+      {}
       /**
        * @brief Construct a `grammar::symbol` of type `grammar::symbol_type::non_terminal` from a
        * `grammar::grammar_type` value
@@ -145,11 +147,11 @@ namespace fr::grammar
       constexpr symbol(front::sem::action value) : m_type{symbol_type::action}, m_data{value} {}
 
       constexpr auto operator==(const symbol& symbol) const -> bool = default;
-      constexpr auto operator==(token_type tok) const -> bool
+      constexpr auto operator==(front::sem::token_type tok) const -> bool
       {
          if (m_type == symbol_type::terminal)
          {
-            return std::get<token_type>(m_data) == tok;
+            return std::get<front::sem::token_type>(m_data) == tok;
          }
 
          return false;
@@ -233,7 +235,7 @@ namespace fr::grammar
     *
     * @return The `grammar::token_type` value stored in `grammar::symbol`
     */
-   constexpr auto get_token_type(const symbol& s) -> token_type
+   constexpr auto get_token_type(const symbol& s) -> front::sem::token_type
    {
       return get<symbol_type::terminal>(s);
    }

@@ -13,12 +13,12 @@
 
 #include <utility>
 
-namespace front::ast_bis
+namespace front::ast
 {
    namespace vi = ranges::views;
 
-   node::node(const fr::source_location& location) : m_location{location} {}
-   node::node(std::string lexeme, const fr::source_location& location) :
+   node::node(const source_location& location) : m_location{location} {}
+   node::node(std::string lexeme, const source_location& location) :
       m_lexeme{std::move(lexeme)},
       m_location{location}
    {}
@@ -34,7 +34,7 @@ namespace front::ast_bis
 
       return {};
    }
-   auto node::location() const -> const fr::source_location& { return m_location; }
+   auto node::location() const -> const source_location& { return m_location; }
 
    void node::make_sibling(node_ptr sibling) { m_sibling = std::move(sibling); }
    void node::make_child(node_ptr child) { m_child = std::move(child); }
@@ -46,8 +46,8 @@ namespace front::ast_bis
       return temp;
    }
 
-   auto node_factory(front::sem::action action, const fr::lex_item& item,
-                     std::vector<node_ptr>& recs) -> node_ptr
+   auto node_factory(front::sem::action action, const lex_item& item, std::vector<node_ptr>& recs)
+      -> node_ptr
    {
       if (action == sem::action::translation_unit)
       {

@@ -41,14 +41,14 @@ constexpr std::array keywords{"if",     "then",    "else", "integer",  "float", 
                               "public", "private", "func", "var",      "class", "while",   "read",
                               "write",  "return",  "main", "inherits", "break", "continue"};
 
-namespace fr
+namespace front
 {
-   auto lexer(const std::string_view data, fr::source_location pos) -> lex_item;
+   auto lexer(const std::string_view data, source_location pos) -> lex_item;
    auto trim_leading_whitespaces(const std::string_view data)
       -> std::tuple<std::string_view, std::uint32_t, std::uint32_t>;
    auto check_for_newlines(const lex_item& tok) -> std::uint32_t
    {
-      if (tok.type == grammar::token_type::block_cmt)
+      if (tok.type == sem::token_type::block_cmt)
       {
          return static_cast<std::uint32_t>(ranges::count(tok.lexeme, '\n'));
       }
@@ -57,22 +57,22 @@ namespace fr
    }
    auto cleanup_lexeme(const lex_item& tok) -> std::string
    {
-      if (tok.type == grammar::token_type::block_cmt)
+      if (tok.type == sem::token_type::block_cmt)
       {
          return to_literal(tok.lexeme);
       }
 
-      if (tok.type == grammar::token_type::line_cmt)
+      if (tok.type == sem::token_type::line_cmt)
       {
          return to_literal(tok.lexeme);
       }
 
-      if (tok.type == grammar::token_type::invalid_cmt)
+      if (tok.type == sem::token_type::invalid_cmt)
       {
          return to_literal(tok.lexeme);
       }
 
-      if (tok.type == grammar::token_type::str_lit)
+      if (tok.type == sem::token_type::str_lit)
       {
          return tok.lexeme.substr(1, std::size(tok.lexeme) - 2);
       }
@@ -132,12 +132,12 @@ namespace fr
 
       log.info("tokenization of file \"{}\" completed", path.c_str());
 
-      tokens.push_back(lex_item{.type = grammar::token_type::eof, .lexeme = "$"});
+      tokens.push_back(lex_item{.type = sem::token_type::eof, .lexeme = "$"});
 
       return tokens;
    }
 
-   auto lex_alphanum(const std::string_view data, fr::source_location pos) -> lex_item
+   auto lex_alphanum(const std::string_view data, source_location pos) -> lex_item
    {
       const auto lexeme = data | vi::take_while(is_alphanum) | ranges::to<std::string>;
 
@@ -145,53 +145,53 @@ namespace fr
       {
          std::string adjusted = "id_";
          adjusted.append(*it);
-         return {.type = magic_enum::enum_cast<grammar::token_type>(adjusted).value(),
+         return {.type = magic_enum::enum_cast<sem::token_type>(adjusted).value(),
                  .lexeme = lexeme,
                  .pos = pos};
       }
 
-      return {.type = grammar::token_type::id, .lexeme = lexeme, .pos = pos};
+      return {.type = sem::token_type::id, .lexeme = lexeme, .pos = pos};
    }
 
-   auto lex_braces(const std::string_view data, fr::source_location pos) -> lex_item
+   auto lex_braces(const std::string_view data, source_location pos) -> lex_item
    {
       const char lexeme = data.at(0);
 
-      if (lexeme == grammar::open_curly)
+      if (lexeme == sem::open_curly)
       {
-         return {.type = grammar::token_type::left_brace, .lexeme = {lexeme}, .pos = pos};
+         return {.type = sem::token_type::left_brace, .lexeme = {lexeme}, .pos = pos};
       }
-      if (lexeme == grammar::close_curly)
+      if (lexeme == sem::close_curly)
       {
-         return {.type = grammar::token_type::right_brace, .lexeme = {lexeme}, .pos = pos};
+         return {.type = sem::token_type::right_brace, .lexeme = {lexeme}, .pos = pos};
       }
-      if (lexeme == grammar::open_square)
+      if (lexeme == sem::open_square)
       {
-         return {.type = grammar::token_type::left_square, .lexeme = {lexeme}, .pos = pos};
+         return {.type = sem::token_type::left_square, .lexeme = {lexeme}, .pos = pos};
       }
-      if (lexeme == grammar::close_square)
+      if (lexeme == sem::close_square)
       {
-         return {.type = grammar::token_type::right_square, .lexeme = {lexeme}, .pos = pos};
+         return {.type = sem::token_type::right_square, .lexeme = {lexeme}, .pos = pos};
       }
-      if (lexeme == grammar::open_parenth)
+      if (lexeme == sem::open_parenth)
       {
-         return {.type = grammar::token_type::left_paren, .lexeme = {lexeme}, .pos = pos};
+         return {.type = sem::token_type::left_paren, .lexeme = {lexeme}, .pos = pos};
       }
-      if (lexeme == grammar::close_parenth)
+      if (lexeme == sem::close_parenth)
       {
-         return {.type = grammar::token_type::right_paren, .lexeme = {lexeme}, .pos = pos};
+         return {.type = sem::token_type::right_paren, .lexeme = {lexeme}, .pos = pos};
       }
 
-      return {.type = grammar::token_type::invalid_char, .lexeme = {lexeme}, .pos = pos};
+      return {.type = sem::token_type::invalid_char, .lexeme = {lexeme}, .pos = pos};
    }
 
-   auto lex_comments(const std::string_view data, fr::source_location pos) -> lex_item;
-   auto lex_numeric(const std::string_view data, fr::source_location pos) -> lex_item;
-   auto lex_punctuation(const std::string_view data, fr::source_location pos) -> lex_item;
-   auto lex_string(const std::string_view data, fr::source_location pos) -> lex_item;
-   auto lex_operator(const std::string_view data, fr::source_location pos) -> lex_item;
+   auto lex_comments(const std::string_view data, source_location pos) -> lex_item;
+   auto lex_numeric(const std::string_view data, source_location pos) -> lex_item;
+   auto lex_punctuation(const std::string_view data, source_location pos) -> lex_item;
+   auto lex_string(const std::string_view data, source_location pos) -> lex_item;
+   auto lex_operator(const std::string_view data, source_location pos) -> lex_item;
 
-   auto lexer(const std::string_view data, fr::source_location pos) -> lex_item
+   auto lexer(const std::string_view data, source_location pos) -> lex_item
    {
       if (std::size(data) >= 2 && is_comment(data.substr(0, 2)))
       {
@@ -229,7 +229,7 @@ namespace fr
          return lex_operator(data, pos);
       }
 
-      return {.type = grammar::token_type::invalid_char, .lexeme = {first}, .pos = pos};
+      return {.type = sem::token_type::invalid_char, .lexeme = {first}, .pos = pos};
    }
 
    auto newline_counter(const std::string_view data) -> std::uint32_t
@@ -273,11 +273,11 @@ namespace fr
 
    /////////////// NUMBERS //////////////////
 
-   auto handle_leading_zero(const std::string_view, fr::source_location) -> lex_item;
-   auto handle_leading_nonzero(const std::string_view, fr::source_location) -> lex_item;
-   auto handle_fraction(const std::string_view, fr::source_location) -> lex_item;
+   auto handle_leading_zero(const std::string_view, source_location) -> lex_item;
+   auto handle_leading_nonzero(const std::string_view, source_location) -> lex_item;
+   auto handle_fraction(const std::string_view, source_location) -> lex_item;
 
-   auto lex_numeric(const std::string_view data, fr::source_location pos) -> lex_item
+   auto lex_numeric(const std::string_view data, source_location pos) -> lex_item
    {
       if (data.at(0) == '0')
       {
@@ -287,13 +287,13 @@ namespace fr
       return handle_leading_nonzero(data, pos);
    }
 
-   auto handle_leading_zero(const std::string_view data, fr::source_location pos) -> lex_item
+   auto handle_leading_zero(const std::string_view data, source_location pos) -> lex_item
    {
       const char first = data.at(0);
       if (std::size(data) > 1)
       {
          const char second = data.at(1);
-         if (second == grammar::period)
+         if (second == sem::period)
          {
             const auto float_token = handle_fraction(data.substr(1), pos);
             return {.type = float_token.type,
@@ -302,14 +302,14 @@ namespace fr
          }
       }
 
-      return {.type = grammar::token_type::integer_lit, .lexeme = {first}, .pos = pos};
+      return {.type = sem::token_type::integer_lit, .lexeme = {first}, .pos = pos};
    }
-   auto handle_leading_nonzero(const std::string_view data, fr::source_location pos) -> lex_item
+   auto handle_leading_nonzero(const std::string_view data, source_location pos) -> lex_item
    {
       const auto lexeme = data | vi::take_while(is_digit) | ranges::to<std::string>;
       const auto* const last = std::begin(data) + std::size(lexeme);
 
-      if (last != std::end(data) && *last == grammar::period)
+      if (last != std::end(data) && *last == sem::period)
       {
          const auto float_token = handle_fraction(data.substr(std::size(lexeme)), pos);
          return {.type = float_token.type,
@@ -317,13 +317,12 @@ namespace fr
                  .pos = float_token.pos};
       }
 
-      return {.type = grammar::token_type::integer_lit, .lexeme = lexeme, .pos = pos};
+      return {.type = sem::token_type::integer_lit, .lexeme = lexeme, .pos = pos};
    }
-   auto handle_scientific_notation(const std::string_view data, fr::source_location pos) -> lex_item
+   auto handle_scientific_notation(const std::string_view data, source_location pos) -> lex_item
    {
       const auto convert = [](const lex_item& tok) {
-         return tok.type != grammar::token_type::invalid_num ? grammar::token_type::float_lit
-                                                             : tok.type;
+         return tok.type != sem::token_type::invalid_num ? sem::token_type::float_lit : tok.type;
       };
 
       const auto first = data.at(0);
@@ -342,7 +341,7 @@ namespace fr
             return {.type = convert(integer), .lexeme = first + integer.lexeme, .pos = pos};
          }
 
-         return {.type = grammar::token_type::invalid_num, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::invalid_num, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '0')
@@ -357,9 +356,9 @@ namespace fr
          return {.type = convert(integer), .lexeme = integer.lexeme, .pos = pos};
       }
 
-      return {.type = grammar::token_type::invalid_num, .lexeme = {first}, .pos = pos};
+      return {.type = sem::token_type::invalid_num, .lexeme = {first}, .pos = pos};
    }
-   auto handle_fraction_nonzero(const std::string_view data, fr::source_location pos) -> lex_item
+   auto handle_fraction_nonzero(const std::string_view data, source_location pos) -> lex_item
    {
       const auto lexeme = data | vi::take_while(is_digit) | ranges::to<std::string>;
 
@@ -375,15 +374,14 @@ namespace fr
       const auto last = std::end(lexeme) - 1;
       if (*last == '0')
       {
-         return {.type = grammar::token_type::float_lit,
+         return {.type = sem::token_type::float_lit,
                  .lexeme = "." + std::string{std::begin(lexeme), last},
                  .pos = pos};
       }
 
-      return {.type = grammar::token_type::float_lit, .lexeme = "." + lexeme, .pos = pos};
+      return {.type = sem::token_type::float_lit, .lexeme = "." + lexeme, .pos = pos};
    }
-   auto handle_fraction_leading_zero(const std::string_view data, fr::source_location pos)
-      -> lex_item
+   auto handle_fraction_leading_zero(const std::string_view data, source_location pos) -> lex_item
    {
       if (std::size(data) > 1) // only 0
       {
@@ -405,9 +403,9 @@ namespace fr
          }
       }
 
-      return {.type = grammar::token_type::float_lit, .lexeme = ".0", .pos = pos};
+      return {.type = sem::token_type::float_lit, .lexeme = ".0", .pos = pos};
    }
-   auto handle_fraction(const std::string_view data, fr::source_location pos) -> lex_item
+   auto handle_fraction(const std::string_view data, source_location pos) -> lex_item
    {
       const char period = *std::begin(data);
       const auto* const first = std::begin(data) + 1;
@@ -425,12 +423,12 @@ namespace fr
          }
       }
 
-      return {.type = grammar::token_type::invalid_num, .lexeme = {period}, .pos = pos};
+      return {.type = sem::token_type::invalid_num, .lexeme = {period}, .pos = pos};
    }
 
    /////////////// COMMENTS //////////////////
 
-   auto lex_comments(const std::string_view data, fr::source_location pos) -> lex_item
+   auto lex_comments(const std::string_view data, source_location pos) -> lex_item
    {
       const auto start = data.substr(0, 2);
       if (start == "/*")
@@ -438,68 +436,68 @@ namespace fr
          const auto str_pos = data.find("*/");
          if (str_pos != std::string_view::npos)
          {
-            return {.type = grammar::token_type::block_cmt,
+            return {.type = sem::token_type::block_cmt,
                     .lexeme = std::string{data.substr(0, str_pos + 2)},
                     .pos = pos};
          }
 
-         return {.type = grammar::token_type::invalid_cmt, .lexeme = std::string{data}, .pos = pos};
+         return {.type = sem::token_type::invalid_cmt, .lexeme = std::string{data}, .pos = pos};
       }
 
-      return {.type = grammar::token_type::line_cmt,
+      return {.type = sem::token_type::line_cmt,
               .lexeme = std::string{data.substr(0, data.find_first_of('\n'))},
               .pos = pos};
    }
 
    /////////////// PUNCTUATION //////////////////
 
-   auto handle_colon(std::string_view data, fr::source_location pos) -> lex_item
+   auto handle_colon(std::string_view data, source_location pos) -> lex_item
    {
       const auto lexeme = data.substr(0, std::min(data.find_first_not_of(':'), std::size(data)));
 
       if (std::size(lexeme) >= 2)
       {
-         return {.type = grammar::token_type::double_colon,
+         return {.type = sem::token_type::double_colon,
                  .lexeme = {std::begin(lexeme), std::begin(lexeme) + 2},
                  .pos = pos};
       }
 
-      return {.type = grammar::token_type::colon, .lexeme = std::string{lexeme}, .pos = pos};
+      return {.type = sem::token_type::colon, .lexeme = std::string{lexeme}, .pos = pos};
    }
 
-   auto lex_punctuation(const std::string_view data, fr::source_location pos) -> lex_item
+   auto lex_punctuation(const std::string_view data, source_location pos) -> lex_item
    {
       // NOLINTNEXTLINE
       assert(is_punctuation(data.at(0)) && "first character must be a punctuation symbol");
 
       const char first = data.at(0);
 
-      if (first == grammar::period)
+      if (first == sem::period)
       {
-         return {.type = grammar::token_type::period, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::period, .lexeme = {first}, .pos = pos};
       }
 
-      if (first == grammar::comma)
+      if (first == sem::comma)
       {
-         return {.type = grammar::token_type::comma, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::comma, .lexeme = {first}, .pos = pos};
       }
 
-      if (first == grammar::semi_colon)
+      if (first == sem::semi_colon)
       {
-         return {.type = grammar::token_type::semi_colon, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::semi_colon, .lexeme = {first}, .pos = pos};
       }
 
-      if (first == grammar::colon)
+      if (first == sem::colon)
       {
          return handle_colon(data, pos);
       }
 
-      return {.type = grammar::token_type::invalid_char, .lexeme{first}, .pos = pos};
+      return {.type = sem::token_type::invalid_char, .lexeme{first}, .pos = pos};
    }
 
    /////////// STRING TOKENIZATION //////////////
 
-   auto handle_terminated_string(const std::string_view data, fr::source_location pos) -> lex_item
+   auto handle_terminated_string(const std::string_view data, source_location pos) -> lex_item
    {
       // clang-format off
       const auto lexeme = data 
@@ -509,17 +507,17 @@ namespace fr
 
       if (std::size(lexeme) == std::size(data))
       {
-         return {.type = grammar::token_type::str_lit,
+         return {.type = sem::token_type::str_lit,
                  .lexeme = '\"' + std::string{data} + '\"',
                  .pos = pos};
       }
 
-      return {.type = grammar::token_type::invalid_str,
+      return {.type = sem::token_type::invalid_str,
               .lexeme = '\"' + std::string{data} + '\"',
               .pos = pos};
    }
 
-   auto lex_string(const std::string_view data, fr::source_location pos) -> lex_item
+   auto lex_string(const std::string_view data, source_location pos) -> lex_item
    {
       // NOLINTNEXTLINE
       assert(data.at(0) == '\"' && "first character must be a quotation mark (\")");
@@ -532,99 +530,97 @@ namespace fr
          return handle_terminated_string(data.substr(1, next_quotation_mark), pos);
       }
 
-      return {.type = grammar::token_type::invalid_str,
+      return {.type = sem::token_type::invalid_str,
               .lexeme = std::string{data.substr(0, next_newline + 1)},
               .pos = pos};
    }
 
    /////////// OPERATORS //////////////
 
-   auto handle_leading_less_than(const std::string_view data, fr::source_location pos) -> lex_item
+   auto handle_leading_less_than(const std::string_view data, source_location pos) -> lex_item
    {
       if (std::size(data) > 1)
       {
          if (data.at(1) == '=')
          {
-            return {.type = grammar::token_type::less_equal_than,
+            return {.type = sem::token_type::less_equal_than,
                     .lexeme = std::string{data.substr(0, 2)},
                     .pos = pos};
          }
 
          if (data.at(1) == '>')
          {
-            return {.type = grammar::token_type::not_equal,
+            return {.type = sem::token_type::not_equal,
                     .lexeme = std::string{data.substr(0, 2)},
                     .pos = pos};
          }
       }
 
-      return {.type = grammar::token_type::less_than, .lexeme = {data.at(0)}, .pos = pos};
+      return {.type = sem::token_type::less_than, .lexeme = {data.at(0)}, .pos = pos};
    }
-   auto handle_leading_greater_than(const std::string_view data, fr::source_location pos)
-      -> lex_item
+   auto handle_leading_greater_than(const std::string_view data, source_location pos) -> lex_item
    {
       if (std::size(data) > 1 && data.at(1) == '=')
       {
-         return {.type = grammar::token_type::greater_equal_than,
+         return {.type = sem::token_type::greater_equal_than,
                  .lexeme = std::string{data.substr(0, 2)},
                  .pos = pos};
       }
 
-      return {.type = grammar::token_type::greater_than, .lexeme = {data.at(0)}, .pos = pos};
+      return {.type = sem::token_type::greater_than, .lexeme = {data.at(0)}, .pos = pos};
    }
-   auto handle_leading_equal(const std::string_view data, fr::source_location pos) -> lex_item
+   auto handle_leading_equal(const std::string_view data, source_location pos) -> lex_item
    {
       if (std::size(data) > 1 && data.at(1) == '=')
       {
-         return {.type = grammar::token_type::equal,
-                 .lexeme = std::string{data.substr(0, 2)},
-                 .pos = pos};
+         return {
+            .type = sem::token_type::equal, .lexeme = std::string{data.substr(0, 2)}, .pos = pos};
       }
 
-      return {.type = grammar::token_type::assign, .lexeme = {data.at(0)}, .pos = pos};
+      return {.type = sem::token_type::assign, .lexeme = {data.at(0)}, .pos = pos};
    }
 
-   auto lex_operator(const std::string_view data, fr::source_location pos) -> lex_item
+   auto lex_operator(const std::string_view data, source_location pos) -> lex_item
    {
       const auto first = data.at(0);
       if (first == '+')
       {
-         return {.type = grammar::token_type::plus, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::plus, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '-')
       {
-         return {.type = grammar::token_type::minus, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::minus, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '*')
       {
-         return {.type = grammar::token_type::mult, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::mult, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '/')
       {
-         return {.type = grammar::token_type::div, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::div, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '|')
       {
-         return {.type = grammar::token_type::or_op, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::or_op, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '&')
       {
-         return {.type = grammar::token_type::and_op, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::and_op, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '!')
       {
-         return {.type = grammar::token_type::not_op, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::not_op, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '?')
       {
-         return {.type = grammar::token_type::qmark, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::qmark, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '<')
@@ -639,4 +635,4 @@ namespace fr
 
       return handle_leading_equal(data, pos);
    }
-} // namespace fr
+} // namespace front

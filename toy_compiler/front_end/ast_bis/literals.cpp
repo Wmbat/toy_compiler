@@ -4,15 +4,14 @@
 
 #include <cassert>
 
-namespace front::ast_bis
+namespace front::ast
 {
-   literal::literal(const fr::source_location& location) : node{location} {}
-   literal::literal(const std::string& lexeme, const fr::source_location& location) :
+   literal::literal(const source_location& location) : node{location} {}
+   literal::literal(const std::string& lexeme, const source_location& location) :
       node{lexeme, location}
    {}
 
-   integer_literal::integer_literal(const std::string& lexeme,
-                                    const fr::source_location& location) :
+   integer_literal::integer_literal(const std::string& lexeme, const source_location& location) :
       literal{lexeme, location}
    {}
 

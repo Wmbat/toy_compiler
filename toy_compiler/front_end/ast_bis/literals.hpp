@@ -2,14 +2,14 @@
 
 #include <toy_compiler/front_end/ast_bis/node.hpp>
 
-namespace front::ast_bis
+namespace front::ast
 {
    class literal : public node
    {
    public:
       literal() = default;
-      literal(const fr::source_location& location);
-      literal(const std::string& lexeme, const fr::source_location& location);
+      literal(const source_location& location);
+      literal(const std::string& lexeme, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override = 0;
    };
@@ -17,7 +17,7 @@ namespace front::ast_bis
    class integer_literal : public literal
    {
    public:
-      integer_literal(const std::string& lexeme, const fr::source_location& location);
+      integer_literal(const std::string& lexeme, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };

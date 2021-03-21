@@ -5,13 +5,12 @@
 
 #include <cassert>
 
-namespace front::ast_bis
+namespace front::ast
 {
    namespace vi = ranges::views;
 
-   decl::decl(const fr::source_location& location) : node{location} {}
-   decl::decl(const std::string& lexeme, const fr::source_location& location) :
-      node{lexeme, location}
+   decl::decl(const source_location& location) : node{location} {}
+   decl::decl(const std::string& lexeme, const source_location& location) : node{lexeme, location}
    {}
 
    translation_unit_decl::translation_unit_decl(node_ptr compound_class)
@@ -24,17 +23,17 @@ namespace front::ast_bis
 
    auto translation_unit_decl::to_string() const -> std::string { return "translation_unit_decl"; }
 
-   location_decl::location_decl(const fr::source_location& location) : decl{location} {}
+   location_decl::location_decl(const source_location& location) : decl{location} {}
 
    auto location_decl::to_string() const -> std::string { return fmt::format("{}", location()); }
 
-   id_decl::id_decl(const std::string& lexeme, const fr::source_location& location) :
+   id_decl::id_decl(const std::string& lexeme, const source_location& location) :
       decl{lexeme, location}
    {}
 
    auto id_decl::to_string() const -> std::string { return fmt::format("{}", lexeme()); }
 
-   type_decl::type_decl(const std::string& name, const fr::source_location& location) :
+   type_decl::type_decl(const std::string& name, const source_location& location) :
       decl{name, location}
    {}
 
@@ -114,8 +113,7 @@ namespace front::ast_bis
       return "compound_inheritance_decl";
    }
 
-   inheritance_decl::inheritance_decl(const std::string& name,
-                                      const fr::source_location& location) :
+   inheritance_decl::inheritance_decl(const std::string& name, const source_location& location) :
       decl{name, location}
    {}
 
@@ -167,7 +165,7 @@ namespace front::ast_bis
                          child()->location().column);
    }
 
-   visibility_decl::visibility_decl(const std::string& name, const fr::source_location& location) :
+   visibility_decl::visibility_decl(const std::string& name, const source_location& location) :
       decl{name, location}
    {}
 
