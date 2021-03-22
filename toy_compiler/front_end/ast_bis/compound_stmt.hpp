@@ -1,0 +1,14 @@
+#pragma once
+
+#include <toy_compiler/front_end/ast_bis/statement.hpp>
+
+namespace front::ast
+{
+   class compound_stmt : public stmt
+   {
+   public:
+      compound_stmt(std::vector<node_ptr>&& statements);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
+   };
+} // namespace front::ast

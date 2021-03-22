@@ -17,7 +17,7 @@ namespace front::ast
    class translation_unit_decl : public decl
    {
    public:
-      translation_unit_decl(node_ptr compound_class);
+      translation_unit_decl(node_ptr compound_class, node_ptr compound_function, node_ptr main);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
@@ -136,10 +136,10 @@ namespace front::ast
       source_location m_end_loc;
    };
 
-   class function_decl : public decl
+   class member_function_decl : public decl
    {
    public:
-      function_decl(node_ptr location, node_ptr id, node_ptr compound_params, node_ptr tail);
+      member_function_decl(node_ptr location, node_ptr id, node_ptr compound_params, node_ptr tail);
 
       [[nodiscard]] auto return_type() const -> std::string;
       [[nodiscard]] auto params() const -> std::vector<std::string>;
@@ -158,4 +158,20 @@ namespace front::ast
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
-} // namespace front::ast_bis
+
+   class compound_variable_decl : public decl
+   {
+   public:
+      compound_variable_decl(std::vector<node_ptr>&& variables);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
+   };
+
+   class main_decl : public decl
+   {
+   public:
+      main_decl(node_ptr location, node_ptr func_body);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
+   };
+} // namespace front::ast

@@ -14,6 +14,10 @@ namespace front::sem
       location_decl,
       type_decl,
       id_decl,
+      compound_function_decl,
+      function_decl,
+      function_head_decl,
+      function_body_decl,
       compound_class_decl,
       class_decl,
       compound_inheritance_decl,
@@ -24,8 +28,11 @@ namespace front::sem
       variable_decl,
       compound_array_decl,
       array_decl,
-      function_decl,
+      member_function_decl,
       compound_param_decl,
+      compound_variable_decl,
+      main_decl,
+      compound_stmt,
       integer_literal,
       epsilon
    };

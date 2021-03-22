@@ -18,7 +18,11 @@
  *
  * @mainpage
  *
- * This is the main page of the doxygen documentation for the **toy_compiler** project
+ * Compiler build for my **COMP 442: Compiler Design** class in University.
+ *
+ * @page grammar
+ *
+ * The language this project compiles is using the following LL(1) grammar
  */
 
 #include <toy_compiler/core/application.hpp>

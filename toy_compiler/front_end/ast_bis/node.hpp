@@ -3,6 +3,10 @@
 #include <toy_compiler/front_end/lexer.hpp>
 #include <toy_compiler/front_end/sem/actions.hpp>
 
+#include <toy_compiler/util/strong_type.hpp>
+
+#include <range/v3/view/tail.hpp>
+
 #include <memory>
 
 namespace front::ast
@@ -34,6 +38,27 @@ namespace front::ast
 
       [[nodiscard]] virtual auto to_string() const -> std::string = 0;
 
+   protected:
+      template <typename NodeType>
+      void make_family(std::vector<node_ptr>&& children)
+      {
+         if (std::size(children) > 0)
+         {
+            node* it = children.front().get();
+            for (node_ptr& node : children | ranges::views::tail)
+            {
+               // NOLINTNEXTLINE
+               assert(dynamic_cast<NodeType*>(it));
+
+               auto temp = node.get();
+               it->make_sibling(std::move(node));
+               it = temp;
+            }
+
+            make_child(std::move(children.front()));
+         }
+      }
+
    private:
       node_ptr m_child;
       node_ptr m_sibling;
@@ -44,7 +69,16 @@ namespace front::ast
 
    auto node_factory(sem::action type, const lex_item& item, std::vector<node_ptr>& recs)
       -> node_ptr;
-}; // namespace front::ast_bis
+
+   namespace detail
+   {
+      template <typename Any>
+      auto is_type(const node_ptr& n) -> bool
+      {
+         return dynamic_cast<Any*>(n.get());
+      }
+   } // namespace detail
+};   // namespace front::ast
 
 template <>
 struct fmt::formatter<front::ast::node>

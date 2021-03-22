@@ -6,6 +6,12 @@ namespace front::ast
 {
    class stmt : public node
    {
+   public:
+      stmt() = default;
+      stmt(const source_location& location);
+      stmt(const std::string& lexeme, const source_location& location);
+
+      [[nodiscard]] auto to_string() const -> std::string override = 0;
    };
 
    class assign_stmt : public stmt
@@ -39,4 +45,4 @@ namespace front::ast
    class continue_stmt : public stmt
    {
    };
-} // namespace fr::ast_bis
+} // namespace front::ast

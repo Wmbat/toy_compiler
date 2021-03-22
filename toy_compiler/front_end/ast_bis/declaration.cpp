@@ -1,9 +1,12 @@
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
 
+#include <toy_compiler/front_end/ast_bis/function_decl.hpp>
+
 #include <range/v3/view/tail.hpp>
 #include <range/v3/view/take.hpp>
 
 #include <cassert>
+#include <utility>
 
 namespace front::ast
 {
@@ -13,11 +16,15 @@ namespace front::ast
    decl::decl(const std::string& lexeme, const source_location& location) : node{lexeme, location}
    {}
 
-   translation_unit_decl::translation_unit_decl(node_ptr compound_class)
+   translation_unit_decl::translation_unit_decl(node_ptr compound_class, node_ptr compound_function,
+                                                node_ptr main)
    {
-      // NOLINTNEXTLINE
-      assert(dynamic_cast<compound_class_decl*>(compound_class.get()));
+      assert(dynamic_cast<compound_class_decl*>(compound_class.get()));       // NOLINT
+      assert(dynamic_cast<compound_function_decl*>(compound_function.get())); // NOLINT
+      assert(dynamic_cast<main_decl*>(main.get()));                           // NOLINT
 
+      compound_function->make_sibling(std::move(main));
+      compound_class->make_sibling(std::move(compound_function));
       make_child(std::move(compound_class));
    }
 
@@ -41,21 +48,7 @@ namespace front::ast
 
    compound_class_decl::compound_class_decl(std::vector<node_ptr>&& class_decls)
    {
-      if (std::size(class_decls) > 0)
-      {
-         node* it = class_decls.front().get();
-         for (node_ptr& node : class_decls | vi::tail)
-         {
-            // NOLINTNEXTLINE
-            assert(dynamic_cast<class_decl*>(it));
-
-            auto temp = node.get();
-            it->make_sibling(std::move(node));
-            it = temp;
-         }
-
-         make_child(std::move(class_decls.front()));
-      }
+      make_family<class_decl>(std::move(class_decls));
    };
 
    auto compound_class_decl::to_string() const -> std::string { return "compound_class_decl"; }
@@ -89,23 +82,9 @@ namespace front::ast
                          location().column, lexeme());
    }
 
-   compound_inheritance_decl::compound_inheritance_decl(std::vector<node_ptr>&& class_decls)
+   compound_inheritance_decl::compound_inheritance_decl(std::vector<node_ptr>&& inheritance_decls)
    {
-      if (std::size(class_decls) > 0)
-      {
-         node* it = class_decls.front().get();
-         for (node_ptr& node : class_decls | vi::tail)
-         {
-            // NOLINTNEXTLINE
-            assert(dynamic_cast<inheritance_decl*>(it));
-
-            auto temp = node.get();
-            it->make_sibling(std::move(node));
-            it = temp;
-         }
-
-         make_child(std::move(class_decls.front()));
-      }
+      make_family<inheritance_decl>(std::move(inheritance_decls));
    }
 
    auto compound_inheritance_decl::to_string() const -> std::string
@@ -125,21 +104,7 @@ namespace front::ast
 
    compound_member_decl::compound_member_decl(std::vector<node_ptr>&& member_decls)
    {
-      if (std::size(member_decls) > 0)
-      {
-         node* it = member_decls.front().get();
-         for (node_ptr& node : member_decls | vi::tail)
-         {
-            // NOLINTNEXTLINE
-            assert(dynamic_cast<member_decl*>(it));
-
-            auto temp = node.get();
-            it->make_sibling(std::move(node));
-            it = temp;
-         }
-
-         make_child(std::move(member_decls.front()));
-      }
+      make_family<member_decl>(std::move(member_decls));
    }
 
    auto compound_member_decl::to_string() const -> std::string { return "compound_member_decl"; }
@@ -190,7 +155,7 @@ namespace front::ast
    auto variable_decl::to_string() const -> std::string
    {
       return fmt::format("variable_decl <line:{}, col:{}> {} '{}'", location().line,
-                         location().line, m_id, m_type);
+                         location().column, m_id, m_type);
    }
 
    compound_array_decl::compound_array_decl(std::vector<node_ptr>&& array_decls)
@@ -235,8 +200,8 @@ namespace front::ast
                          location().column, m_end_loc.line, m_end_loc.column, lexeme());
    }
 
-   function_decl::function_decl(node_ptr location, node_ptr id, node_ptr compound_param,
-                                node_ptr tail) :
+   member_function_decl::member_function_decl(node_ptr location, node_ptr id,
+                                              node_ptr compound_param, node_ptr tail) :
       decl{std::string{id->lexeme()}, location->location()},
       m_return_type{tail->lexeme()}
    {
@@ -253,7 +218,7 @@ namespace front::ast
       }
    }
 
-   auto function_decl::to_string() const -> std::string
+   auto member_function_decl::to_string() const -> std::string
    {
       std::string params;
       for (const auto& param : m_params)
@@ -286,5 +251,27 @@ namespace front::ast
       }
    }
 
-   auto compound_params_decl::to_string() const -> std::string { return "compound_array_decl"; }
-}; // namespace front::ast_bis
+   auto compound_params_decl::to_string() const -> std::string { return "compound_param_decl"; }
+
+   compound_variable_decl::compound_variable_decl(std::vector<node_ptr>&& variables)
+   {
+      make_family<variable_decl>(std::move(variables));
+   }
+
+   auto compound_variable_decl::to_string() const -> std::string
+   {
+      return "compound_variable_decl";
+   }
+
+   main_decl::main_decl(node_ptr id, node_ptr func_body) :
+      decl{std::string{id->lexeme()}, id->location()}
+   {
+      make_child(std::move(func_body));
+   }
+
+   auto main_decl::to_string() const -> std::string
+   {
+      return fmt::format("main_decl <line:{}, col:{}> {}", location().line, location().column,
+                         lexeme());
+   }
+}; // namespace front::ast

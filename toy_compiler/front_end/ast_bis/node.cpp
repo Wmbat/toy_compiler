@@ -1,7 +1,10 @@
 #include <toy_compiler/front_end/ast_bis/node.hpp>
 
+#include <toy_compiler/front_end/ast_bis/compound_stmt.hpp>
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
+#include <toy_compiler/front_end/ast_bis/function_decl.hpp>
 #include <toy_compiler/front_end/ast_bis/literals.hpp>
+#include <toy_compiler/front_end/ast_bis/statement.hpp>
 
 #include <fmt/color.h>
 #include <fmt/core.h>
@@ -51,9 +54,13 @@ namespace front::ast
    {
       if (action == sem::action::translation_unit)
       {
+         node_ptr main_decl = pop(recs);
+         node_ptr compound_function_decl = pop(recs);
          node_ptr compound_class_decl = pop(recs);
 
-         return std::make_unique<translation_unit_decl>(std::move(compound_class_decl));
+         return std::make_unique<translation_unit_decl>(std::move(compound_class_decl),
+                                                        std::move(compound_function_decl),
+                                                        std::move(main_decl));
       };
 
       if (action == sem::action::location_decl)
@@ -69,6 +76,63 @@ namespace front::ast
       if (action == sem::action::type_decl)
       {
          return std::make_unique<type_decl>(item.lexeme, item.pos);
+      }
+
+      if (action == sem::action::compound_function_decl)
+      {
+         std::vector<node_ptr> nodes;
+         auto null = pop(recs);
+
+         if (std::size(recs) >= 1 && dynamic_cast<function_decl*>(recs.back().get()))
+         {
+            std::vector<node_ptr> place_holders;
+            for (auto& node : recs | vi::reverse | vi::take_while([](node_ptr& node) {
+                                 return dynamic_cast<function_decl*>(node.get());
+                              }))
+            {
+               place_holders.push_back(std::move(node));
+            }
+
+            std::vector<node_ptr> class_decls;
+            for (auto& node : place_holders | vi::reverse)
+            {
+               pop(recs);
+               class_decls.push_back(std::move(node));
+            }
+
+            return std::make_unique<compound_function_decl>(std::move(class_decls));
+         }
+
+         return std::make_unique<compound_function_decl>(std::vector<node_ptr>{});
+      }
+
+      if (action == sem::action::function_decl)
+      {
+         node_ptr statements = pop(recs);
+         node_ptr function_head = pop(recs);
+
+         return std::make_unique<function_decl>(std::move(function_head), std::move(statements));
+      }
+
+      if (action == sem::action::function_head_decl)
+      {
+         node_ptr return_type = pop(recs);
+         node_ptr function_params = pop(recs);
+         node_ptr class_method = pop(recs);
+         node_ptr id = pop(recs);
+         node_ptr location = pop(recs);
+
+         return std::make_unique<function_head_decl>(
+            std::move(location), std::move(id), std::move(class_method), std::move(function_params),
+            std::move(return_type));
+      }
+
+      if (action == sem::action::function_body_decl)
+      {
+         node_ptr statements = pop(recs);
+         node_ptr variables = pop(recs);
+
+         return std::make_unique<function_body_decl>(std::move(variables), std::move(statements));
       }
 
       if (action == sem::action::compound_class_decl)
@@ -235,15 +299,15 @@ namespace front::ast
                                              std::move(end_loc));
       }
 
-      if (action == sem::action::function_decl)
+      if (action == sem::action::member_function_decl)
       {
          node_ptr tail = pop(recs);
          node_ptr compound_param = pop(recs);
          node_ptr id = pop(recs);
          node_ptr location = pop(recs);
 
-         return std::make_unique<function_decl>(std::move(location), std::move(id),
-                                                std::move(compound_param), std::move(tail));
+         return std::make_unique<member_function_decl>(std::move(location), std::move(id),
+                                                       std::move(compound_param), std::move(tail));
       }
 
       if (action == sem::action::compound_param_decl)
@@ -274,6 +338,68 @@ namespace front::ast
          return std::make_unique<compound_params_decl>(std::vector<node_ptr>{});
       }
 
+      if (action == sem::action::compound_variable_decl)
+      {
+         std::vector<node_ptr> nodes;
+         auto null = pop(recs);
+
+         if (std::size(recs) >= 1 && dynamic_cast<variable_decl*>(recs.back().get()))
+         {
+            std::vector<node_ptr> placeholder;
+            for (auto& node : recs | vi::reverse | vi::take_while([](node_ptr& node) {
+                                 return dynamic_cast<variable_decl*>(node.get());
+                              }))
+            {
+               placeholder.push_back(std::move(node));
+            }
+
+            std::vector<node_ptr> nodes;
+            for (auto& node : placeholder | vi::reverse)
+            {
+               pop(recs);
+               nodes.push_back(std::move(node));
+            }
+
+            return std::make_unique<compound_variable_decl>(std::move(nodes));
+         }
+
+         return std::make_unique<compound_variable_decl>(std::vector<node_ptr>{});
+      }
+
+      if (action == sem::action::main_decl)
+      {
+         node_ptr func_body = pop(recs);
+         node_ptr id = pop(recs);
+
+         return std::make_unique<main_decl>(std::move(id), std::move(func_body));
+      }
+
+      if (action == sem::action::compound_stmt)
+      {
+         std::vector<node_ptr> nodes;
+         auto null = pop(recs);
+
+         if (std::size(recs) >= 1 && dynamic_cast<stmt*>(recs.back().get()))
+         {
+            std::vector<node_ptr> placeholder;
+            for (auto& node : recs | vi::reverse | vi::take_while(detail::is_type<stmt>))
+            {
+               placeholder.push_back(std::move(node));
+            }
+
+            std::vector<node_ptr> nodes;
+            for (auto& node : placeholder | vi::reverse)
+            {
+               pop(recs);
+               nodes.push_back(std::move(node));
+            }
+
+            return std::make_unique<compound_stmt>(std::move(nodes));
+         }
+
+         return std::make_unique<compound_stmt>(std::vector<node_ptr>{});
+      }
+
       if (action == sem::action::integer_literal)
       {
          return std::make_unique<integer_literal>(item.lexeme, item.pos);
@@ -286,4 +412,4 @@ namespace front::ast
 
       return nullptr;
    }
-} // namespace front::ast_bis
+} // namespace front::ast

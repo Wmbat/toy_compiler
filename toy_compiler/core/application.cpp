@@ -120,6 +120,7 @@ void application::write_ast_to_file(const std::filesystem::path& path,
       {
          const auto name = fmt::format("- {}\n", *curr);
          fmt::print(output_file, "{:>{}}", name, std::size(name) + std::size(stack) * 2);
+         fmt::print("{:>{}}", name, std::size(name) + std::size(stack) * 2);
 
          stack.push_back(curr);
          curr = curr->child().get();

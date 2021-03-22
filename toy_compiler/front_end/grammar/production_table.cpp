@@ -180,8 +180,9 @@ namespace fr::grammar
       // <ClassMethod>
       {
          table.set_production({grammar_type::class_method, token_type::double_colon},
-                              {token_type::double_colon, token_type::id});
-         table.set_production({grammar_type::class_method, token_type::left_paren}, epsilon);
+                              {token_type::double_colon, token_type::id, action::id_decl});
+         table.set_production({grammar_type::class_method, token_type::left_paren},
+                              {epsilon[0], action::epsilon});
       }
 
       // <Expr>
@@ -269,7 +270,8 @@ namespace fr::grammar
       {
          table.set_production({grammar_type::func_body, token_type::left_brace},
                               {token_type::left_brace, grammar_type::block_variable_decl,
-                               grammar_type::statement_list, token_type::right_brace});
+                               action::compound_variable_decl, grammar_type::statement_list,
+                               action::compound_stmt, token_type::right_brace});
       }
 
       // <FuncDecl>
@@ -297,18 +299,21 @@ namespace fr::grammar
 
       // <FuncDef>
       {
-         table.set_production({grammar_type::func_def, token_type::id_func},
-                              {grammar_type::function, grammar_type::func_def});
-         table.set_production({grammar_type::func_def, token_type::id_main}, epsilon);
+         table.set_production(
+            {grammar_type::func_def, token_type::id_func},
+            {grammar_type::function, action::function_decl, grammar_type::func_def});
+         table.set_production({grammar_type::func_def, token_type::id_main},
+                              {epsilon[0], action::epsilon});
       }
 
       // <FuncHead>
       {
          table.set_production({grammar_type::func_head, token_type::id_func},
-                              {token_type::id_func, token_type::id, grammar_type::class_method,
-                               token_type::left_paren, grammar_type::f_params,
+                              {token_type::id_func, action::location_decl, token_type::id,
+                               action::id_decl, grammar_type::class_method, token_type::left_paren,
+                               grammar_type::f_params, action::compound_param_decl,
                                token_type::right_paren, token_type::colon,
-                               grammar_type::func_decl_tail});
+                               grammar_type::func_decl_tail, action::type_decl});
       }
 
       // <FuncOrAssignStat>
@@ -445,7 +450,8 @@ namespace fr::grammar
       // <Function>
       {
          table.set_production({grammar_type::function, token_type::id_func},
-                              {grammar_type::func_head, grammar_type::func_body});
+                              {grammar_type::func_head, action::function_head_decl,
+                               grammar_type::func_body, action::function_body_decl});
       }
 
       // <IndiceRep>
@@ -504,25 +510,24 @@ namespace fr::grammar
          table.set_production({grammar_type::member_decl, token_type::id_integer},
                               {grammar_type::var_decl, action::variable_decl});
          table.set_production({grammar_type::member_decl, token_type::id_func},
-                              {grammar_type::func_decl, action::function_decl});
+                              {grammar_type::func_decl, action::member_function_decl});
       }
 
       // <MethodBodyVar>
       {
-         table.set_production({grammar_type::block_variable_decl, token_type::id}, epsilon);
-         table.set_production({grammar_type::block_variable_decl, token_type::id_continue},
-                              epsilon);
-         table.set_production({grammar_type::block_variable_decl, token_type::id_break}, epsilon);
-         table.set_production({grammar_type::block_variable_decl, token_type::id_return}, epsilon);
-         table.set_production({grammar_type::block_variable_decl, token_type::id_write}, epsilon);
-         table.set_production({grammar_type::block_variable_decl, token_type::id_read}, epsilon);
-         table.set_production({grammar_type::block_variable_decl, token_type::id_while}, epsilon);
-         table.set_production({grammar_type::block_variable_decl, token_type::id_if}, epsilon);
-         table.set_production({grammar_type::block_variable_decl, token_type::id_var},
+         const auto key = grammar_type::block_variable_decl;
+         table.set_production({key, token_type::id}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::id_continue}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::id_break}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::id_return}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::id_write}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::id_read}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::id_while}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::id_if}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::id_var},
                               {token_type::id_var, token_type::left_brace,
                                grammar_type::var_decl_rep, token_type::right_brace});
-         table.set_production({grammar_type::block_variable_decl, token_type::right_brace},
-                              epsilon);
+         table.set_production({key, token_type::right_brace}, {epsilon[0], action::epsilon});
       }
 
       // <MultOp>
@@ -543,8 +548,10 @@ namespace fr::grammar
 
       // <Prog>
       {
-         symbol_array common{grammar_type::class_decl, action::compound_class_decl,
-                             grammar_type::func_def, token_type::id_main, grammar_type::func_body};
+         symbol_array common{
+            grammar_type::class_decl,       action::compound_class_decl, grammar_type::func_def,
+            action::compound_function_decl, token_type::id_main,         action::id_decl,
+            grammar_type::func_body,        action::function_body_decl,  action::main_decl};
          table.set_production({grammar_type::prog, token_type::id_main}, common);
          table.set_production({grammar_type::prog, token_type::id_func}, common);
          table.set_production({grammar_type::prog, token_type::id_class}, common);
@@ -632,7 +639,7 @@ namespace fr::grammar
          symbol_array common{grammar_type::statement, grammar_type::statement_list};
          const auto key = grammar_type::statement_list;
          table.set_production({key, token_type::id}, common);
-         table.set_production({key, token_type::right_brace}, epsilon);
+         table.set_production({key, token_type::right_brace}, {epsilon[0], action::epsilon});
          table.set_production({key, token_type::id_if}, common);
          table.set_production({key, token_type::id_while}, common);
          table.set_production({key, token_type::id_read}, common);

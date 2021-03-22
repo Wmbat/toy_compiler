@@ -1,13 +1,11 @@
-#toy_compiler
+# toy_compiler
 
-C++ executable
+Compiler build for my **COMP 442: Compiler Design** class in University.
 
 ## Table of Contents
 
 * [Requirements](#Requirements)
-* [Dependencies](#Dependencies)
 * [Third-party libraries](#Third-party-libraries)
-* [Instructions](#Instructions)
 
 ## Requirements
 
@@ -15,40 +13,11 @@ C++ executable
 * [Build2](https://build2.org/)
 * Linux
 
-## Dependencies
-
-* [spdlog - 1.6.1](https://github.com/gabime/spdlog)
-
 ## Third-party Libraries
 
 * [range-v3](https://github.com/ericniebler/range-v3)
 * [doctest](https://github.com/onqtam/doctest)
-* [libcaramel](https://github.com/Wmbat/libcaramel)
 * [monads](https://github.com/Wmbat/monads)
+* [spdlog - 1.6.1](https://github.com/gabime/spdlog)
+* [magic_enum](https://github.com/Neargye/magic_enum)
 * [doctest (for unit tests)](https://github.com/onqtam/doctest)
-
-## Bugs
-
-* [ ] If statement not working
-* [ ] read statement not working
-
-## TODO
-
-* [ ] Instead of loading the whole file, load file into chunks
-* [X] Implement Scientific notation
-* [ ] Properly handle nested block comments
-* [X] Implement testing for the Application class
-* [X] Document public API
-* [X] lexer.cpp:
-   * [X] Add ability to count columns when lexing
-* [ ] parser.cpp:
-   * [ ] Better error data
-* [o] Implement unit test:
-   * [X] grammar/:
-      * [X] grammar_type.hpp
-      * [X] rule.hpp
-      * [X] symbol.hpp
-      * [X] symbol_table.hpp
-      * [X] token_type.hpp
-   * [ ] core/:
-      * [ ] parser.hpp
