@@ -1,11 +1,14 @@
 # toy_compiler
 
-Compiler build for my **COMP 442: Compiler Design** class in University.
-
 ## Table of Contents
 
+* [Overview](#overview)
 * [Requirements](#Requirements)
 * [Third-party libraries](#Third-party-libraries)
+
+## Overview
+
+toy_compiler is a project compiler from my `COMP 442: Compiler Design` class in University.
 
 ## Requirements
 

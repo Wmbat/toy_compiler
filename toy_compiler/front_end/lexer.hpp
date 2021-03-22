@@ -20,6 +20,7 @@
 #pragma once
 
 #include <toy_compiler/front_end/sem/token_type.hpp>
+#include <toy_compiler/front_end/source_location.hpp>
 #include <toy_compiler/util/logger.hpp>
 
 #include <monads/maybe.hpp>
@@ -29,15 +30,6 @@
 
 namespace front
 {
-   struct source_location
-   {
-      std::uint32_t line = std::numeric_limits<std::uint32_t>::max();   // NOLINT
-      std::uint32_t column = std::numeric_limits<std::uint32_t>::max(); // NOLINT
-
-      constexpr auto operator<=>(const source_location& other) const
-         -> std::strong_ordering = default;
-   };
-
    /**
     * @brief Holds a the information of a parsed token.
     */

@@ -15,14 +15,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
- * @mainpage
- *
- * Compiler build for my **COMP 442: Compiler Design** class in University.
- *
- * @page grammar
- *
- * The language this project compiles is using the following LL(1) grammar
  */
 
 #include <toy_compiler/core/application.hpp>
