@@ -7,7 +7,7 @@
     --primary-lightest-color: #e9f1f8;
 
     /* page base colors */
-    --page-background-color: white;
+    --page-background-color: #161b22;
     --page-foreground-color: #2c3e50;
     --page-secondary-foreground-color: #67727e;
 
@@ -95,7 +95,7 @@
     --code-foreground: var(--page-foreground-color);
 
     /* fragment colors */
-    --fragment-background: #282c34;
+    --fragment-background: #161b22;
     --fragment-foreground: #fff;
     --fragment-keyword: #cc99cd;
     --fragment-keywordtype: #ab99cd;
@@ -132,9 +132,9 @@
         --separator-color: #000000;
         --side-nav-background: #252628;
 
-        --code-background: #2a2c2f;
+        --code-background: #161b22;
 
-        --tablehead-background: #2a2c2f;
+        --tablehead-background: #161b22;
 
         --blockquote-background: #1f2022;
         --blockquote-foreground: #77848a;

@@ -127,7 +127,7 @@ namespace front::sem
 } // namespace front::sem
 
 /**
- * @brief A specialization for using the `grammar::token_type` enum in the **fmt** & **spdlog**
+ * @brief A specialization for using the `sem::token_type` enum in the **fmt** & **spdlog**
  * libraries
  */
 template <>
