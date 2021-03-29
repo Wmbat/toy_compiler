@@ -33,7 +33,19 @@ namespace front::sem
       compound_variable_decl,
       main_decl,
       compound_stmt,
+      return_stmt,
+      break_stmt,
+      continue_stmt,
       integer_literal,
+      rel_op,
+      mult_op,
+      add_op,
+      int_factor_decl,
+      float_factor_decl,
+      expr_factor_decl,
+      str_factor_decl,
+      not_factor_decl,
+      sign_factor_decl,
       epsilon
    };
 };

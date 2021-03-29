@@ -1,7 +1,9 @@
 .bdep/
 .cache/
+.clangd/
 
 docs/
+
 
 compile_commands.json
 

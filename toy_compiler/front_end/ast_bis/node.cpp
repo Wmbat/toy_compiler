@@ -2,18 +2,23 @@
 
 #include <toy_compiler/front_end/ast_bis/compound_stmt.hpp>
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
+#include <toy_compiler/front_end/ast_bis/factor.hpp>
 #include <toy_compiler/front_end/ast_bis/function_decl.hpp>
 #include <toy_compiler/front_end/ast_bis/literals.hpp>
+#include <toy_compiler/front_end/ast_bis/operator.hpp>
 #include <toy_compiler/front_end/ast_bis/statement.hpp>
 
 #include <fmt/color.h>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 
+#include <range/v3/range/conversion.hpp>
+#include <range/v3/view/move.hpp>
 #include <range/v3/view/reverse.hpp>
 #include <range/v3/view/tail.hpp>
 #include <range/v3/view/take_while.hpp>
 
+#include <memory>
 #include <utility>
 
 namespace front::ast
@@ -30,6 +35,7 @@ namespace front::ast
    auto node::sibling() const -> const node_ptr& { return m_sibling; }
    auto node::lexeme() const -> std::string_view
    {
+
       if (!std::empty(m_lexeme))
       {
          return std::string_view{m_lexeme};
@@ -85,13 +91,8 @@ namespace front::ast
 
          if (std::size(recs) >= 1 && dynamic_cast<function_decl*>(recs.back().get()))
          {
-            std::vector<node_ptr> place_holders;
-            for (auto& node : recs | vi::reverse | vi::take_while([](node_ptr& node) {
-                                 return dynamic_cast<function_decl*>(node.get());
-                              }))
-            {
-               place_holders.push_back(std::move(node));
-            }
+            std::vector<node_ptr> place_holders = recs | vi::reverse |
+               vi::take_while(detail::is_type<function_decl>) | vi::move | ranges::to_vector;
 
             std::vector<node_ptr> class_decls;
             for (auto& node : place_holders | vi::reverse)
@@ -138,20 +139,20 @@ namespace front::ast
       if (action == sem::action::compound_class_decl)
       {
          std::vector<node_ptr> nodes;
-         auto null = pop(recs);
+         node_ptr null = pop(recs);
 
          if (std::size(recs) >= 1 && dynamic_cast<class_decl*>(recs.back().get()))
          {
-            std::vector<node_ptr> place_holders;
-            for (auto& node : recs | vi::reverse | vi::take_while([](node_ptr& node) {
-                                 return dynamic_cast<class_decl*>(node.get());
-                              }))
-            {
-               place_holders.push_back(std::move(node));
-            }
+            // clang-format off
+            std::vector place_holder = recs 
+               | vi::reverse 
+               | vi::take_while(detail::is_type<class_decl>) 
+               | vi::move
+               | ranges::to_vector;
+            // clang-format on
 
             std::vector<node_ptr> class_decls;
-            for (auto& node : place_holders | vi::reverse)
+            for (auto& node : place_holder | vi::reverse)
             {
                pop(recs);
                class_decls.push_back(std::move(node));
@@ -215,16 +216,11 @@ namespace front::ast
 
          if (std::size(recs) >= 1 && dynamic_cast<member_decl*>(recs.back().get()))
          {
-            std::vector<node_ptr> placeholder;
-            for (auto& node : recs | vi::reverse | vi::take_while([](node_ptr& node) {
-                                 return dynamic_cast<member_decl*>(node.get());
-                              }))
-            {
-               placeholder.push_back(std::move(node));
-            }
+            std::vector place_holders = recs | vi::reverse |
+               vi::take_while(detail::is_type<member_decl>) | vi::move | ranges::to_vector;
 
             std::vector<node_ptr> nodes;
-            for (auto& node : placeholder | vi::reverse)
+            for (auto& node : place_holders | vi::reverse)
             {
                pop(recs);
                nodes.push_back(std::move(node));
@@ -313,7 +309,9 @@ namespace front::ast
       if (action == sem::action::compound_param_decl)
       {
          std::vector<node_ptr> nodes;
-         auto null = pop(recs);
+         node_ptr epsilon = pop(recs);
+
+         assert(epsilon == nullptr); // NOLINT
 
          if (std::size(recs) >= 1 && dynamic_cast<variable_decl*>(recs.back().get()))
          {
@@ -341,20 +339,15 @@ namespace front::ast
       if (action == sem::action::compound_variable_decl)
       {
          std::vector<node_ptr> nodes;
-         auto null = pop(recs);
+         node_ptr null = pop(recs);
 
          if (std::size(recs) >= 1 && dynamic_cast<variable_decl*>(recs.back().get()))
          {
-            std::vector<node_ptr> placeholder;
-            for (auto& node : recs | vi::reverse | vi::take_while([](node_ptr& node) {
-                                 return dynamic_cast<variable_decl*>(node.get());
-                              }))
-            {
-               placeholder.push_back(std::move(node));
-            }
+            std::vector place_holders = recs | vi::reverse |
+               vi::take_while(detail::is_type<variable_decl>) | vi::move | ranges::to_vector;
 
             std::vector<node_ptr> nodes;
-            for (auto& node : placeholder | vi::reverse)
+            for (auto& node : place_holders | vi::reverse)
             {
                pop(recs);
                nodes.push_back(std::move(node));
@@ -372,6 +365,92 @@ namespace front::ast
          node_ptr id = pop(recs);
 
          return std::make_unique<main_decl>(std::move(id), std::move(func_body));
+      }
+
+      if (action == sem::action::rel_op)
+      {
+         node_ptr term_1 = pop(recs);
+         node_ptr id = pop(recs);
+         node_ptr term_0 = pop(recs);
+
+         assert(dynamic_cast<id_decl*>(id.get())); // NOLINT
+
+         return std::make_unique<mult_op>(std::move(term_0), std::move(id), std::move(term_1));
+      }
+
+      if (action == sem::action::add_op)
+      {
+         node_ptr factor_1 = pop(recs);
+         node_ptr id = pop(recs);
+         node_ptr factor_0 = pop(recs);
+
+         assert(dynamic_cast<id_decl*>(id.get())); // NOLINT
+
+         return std::make_unique<mult_op>(std::move(factor_0), std::move(id), std::move(factor_1));
+      }
+
+      if (action == sem::action::mult_op)
+      {
+         node_ptr factor_1 = pop(recs);
+         node_ptr id = pop(recs);
+         node_ptr factor_0 = pop(recs);
+
+         assert(dynamic_cast<factor_decl*>(factor_0.get())); // NOLINT
+         assert(dynamic_cast<id_decl*>(id.get()));           // NOLINT
+         assert(dynamic_cast<factor_decl*>(factor_1.get())); // NOLINT
+
+         return std::make_unique<mult_op>(std::move(factor_0), std::move(id), std::move(factor_1));
+      }
+
+      if (action == sem::action::int_factor_decl)
+      {
+         return std::make_unique<integer_factor_decl>(item.lexeme, item.pos);
+      }
+
+      if (action == sem::action::float_factor_decl)
+      {
+         return std::make_unique<float_factor_decl>(item.lexeme, item.pos);
+      }
+
+      if (action == sem::action::str_factor_decl)
+      {
+         return std::make_unique<str_factor_decl>(item.lexeme, item.pos);
+      }
+
+      if (action == sem::action::expr_factor_decl)
+      {
+         node_ptr expr = pop(recs);
+         node_ptr location = pop(recs);
+
+         return std::make_unique<expr_factor_decl>(std::move(location), std::move(expr));
+      }
+
+      if (action == sem::action::not_factor_decl)
+      {
+         node_ptr factor = pop(recs);
+         node_ptr id = pop(recs);
+
+         return std::make_unique<not_factor_decl>(std::move(id), std::move(factor));
+      }
+
+      if (action == sem::action::not_factor_decl)
+      {
+         node_ptr factor = pop(recs);
+         node_ptr id = pop(recs);
+
+         return std::make_unique<not_factor_decl>(std::move(id), std::move(factor));
+      }
+
+      if (action == sem::action::sign_factor_decl)
+      {
+         node_ptr factor = pop(recs);
+         node_ptr id = pop(recs);
+
+         assert(dynamic_cast<id_decl*>(id.get())); // NOLINT
+         // NOLINTNEXTLINE
+         assert(dynamic_cast<factor_decl*>(factor.get()) || dynamic_cast<mult_op*>(factor.get()));
+
+         return std::make_unique<sign_factor_decl>(std::move(id), std::move(factor));
       }
 
       if (action == sem::action::compound_stmt)
@@ -398,6 +477,24 @@ namespace front::ast
          }
 
          return std::make_unique<compound_stmt>(std::vector<node_ptr>{});
+      }
+
+      if (action == sem::action::return_stmt)
+      {
+         node_ptr expr = pop(recs);
+         node_ptr id = pop(recs);
+
+         return std::make_unique<return_stmt>(std::move(id), std::move(expr));
+      }
+
+      if (action == sem::action::break_stmt)
+      {
+         return std::make_unique<break_stmt>(item.lexeme, item.pos);
+      }
+
+      if (action == sem::action::continue_stmt)
+      {
+         return std::make_unique<continue_stmt>(item.lexeme, item.pos);
       }
 
       if (action == sem::action::integer_literal)

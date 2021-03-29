@@ -1,9 +1,15 @@
 @mainpage
 
-# What is toy_compiler?
+# What is Toy Compiler?
 
-**toy_compiler** is a university project for the **Compiler Design** class. Whose purpose is to implement a fully functional compiler for a language defined by
+**Toy Compiler** is a university project for the **Compiler Design** class. Whose purpose is to implement a fully functional compiler for a language defined by
 the professor.
+
+# How to use
+
+```sh
+./toy_compiler file1
+```
 
 # Lexing
 
@@ -18,7 +24,7 @@ string         ::= "(([a-zA-Z0-9_])| )*"
 
 # Grammar
 
-The grammar of the language compiled by the compiler is presented below in it's **LL(1)** form.
+The grammar of the language compiled by the compiler is presented below in it's normal **EBNF** form.
 
 ```
 <START>        ::= <prog>

@@ -260,7 +260,7 @@ namespace front::ast
 
    auto compound_variable_decl::to_string() const -> std::string
    {
-      return "compound_variable_decl";
+      return fmt::format("compound_variable_decl");
    }
 
    main_decl::main_decl(node_ptr id, node_ptr func_body) :

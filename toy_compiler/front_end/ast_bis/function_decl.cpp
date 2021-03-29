@@ -77,6 +77,13 @@ namespace front::ast
             make_child(std::move(statements));
          }
       }
+      else
+      {
+         if (variables->child())
+         {
+            make_child(std::move(variables));
+         }
+      }
    }
 
    auto compound_function_decl::to_string() const -> std::string

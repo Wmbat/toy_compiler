@@ -58,14 +58,17 @@ namespace fr
     */
    struct [[nodiscard]] parse_result
    {
-      parse_status value{parse_status::success};
-      front::ast::node_ptr ast;
+      parse_status value = parse_status::success;
+      front::ast::node_ptr ast = nullptr;
       std::string derivation;
-      monad::maybe<std::vector<parse_error>> errors;
+      monad::maybe<std::vector<parse_error>> errors = {};
    };
 
    /**
-    * @param items The lexed items to use for parsing
+    * @brief Parse an array of `front::lex_item` into a usable AST and performs simple syntax error
+    * checking
+    *
+    * @param[in] items The lexed items to use for parsing
     */
    auto parse_items(std::span<const front::lex_item> items, util::logger_wrapper log = nullptr)
       -> parse_result;

@@ -19,6 +19,7 @@
 
 #include <toy_compiler/core/application.hpp>
 
+#include <toy_compiler/front_end/lexer.hpp>
 #include <toy_compiler/front_end/parser.hpp>
 
 #include <fmt/color.h>

@@ -104,8 +104,8 @@ namespace fr::grammar
 
       // <ArithExprTail>
       {
-         symbol_array common{grammar_type::add_op, grammar_type::term,
-                             grammar_type::arith_expr_tail};
+         symbol_array common{grammar_type::add_op, action::id_decl, grammar_type::term,
+                             action::add_op, grammar_type::arith_expr_tail};
          const auto key = grammar_type::arith_expr_tail;
          table.set_production({key, token_type::plus}, common);
          table.set_production({key, token_type::minus}, common);
@@ -202,7 +202,8 @@ namespace fr::grammar
 
       // <ExprTail>
       {
-         symbol_array common{grammar_type::relop, grammar_type::arith_expr};
+         symbol_array common{grammar_type::relop, action::id_decl, grammar_type::arith_expr,
+                             action::rel_op};
          const auto key = grammar_type::expr_tail;
          table.set_production({key, token_type::comma}, epsilon);
          table.set_production({key, token_type::right_square}, epsilon);
@@ -220,15 +221,22 @@ namespace fr::grammar
       // <Factor>
       {
          const auto key = grammar_type::factor;
-         table.set_production({key, token_type::minus}, {grammar_type::sign, grammar_type::factor});
-         table.set_production({key, token_type::plus}, {grammar_type::sign, grammar_type::factor});
-         table.set_production({key, token_type::id}, {grammar_type::func_or_var});
-         table.set_production({key, token_type::float_lit}, {token_type::float_lit});
-         table.set_production({key, token_type::integer_lit}, {token_type::integer_lit});
-         table.set_production({key, token_type::str_lit}, {token_type::str_lit});
          table.set_production(
-            {key, token_type::left_paren},
-            {token_type::left_paren, grammar_type::expr, token_type::right_paren});
+            {key, token_type::minus},
+            {grammar_type::sign, action::id_decl, grammar_type::factor, action::sign_factor_decl});
+         table.set_production(
+            {key, token_type::plus},
+            {grammar_type::sign, action::id_decl, grammar_type::factor, action::sign_factor_decl});
+         table.set_production({key, token_type::id}, {grammar_type::func_or_var});
+         table.set_production({key, token_type::float_lit},
+                              {token_type::float_lit, action::float_factor_decl});
+         table.set_production({key, token_type::integer_lit},
+                              {token_type::integer_lit, action::int_factor_decl});
+         table.set_production({key, token_type::str_lit},
+                              {token_type::str_lit, action::str_factor_decl});
+         table.set_production({key, token_type::left_paren},
+                              {token_type::left_paren, action::location_decl, grammar_type::expr,
+                               action::expr_factor_decl, token_type::right_paren});
          table.set_production({key, token_type::not_op},
                               {token_type::not_op, grammar_type::factor});
          table.set_production({key, token_type::qmark},
@@ -626,12 +634,14 @@ namespace fr::grammar
                               {token_type::id_write, token_type::left_paren, grammar_type::expr,
                                token_type::right_paren, token_type::semi_colon});
          table.set_production({key, token_type::id_return},
-                              {token_type::id_return, token_type::left_paren, grammar_type::expr,
-                               token_type::right_paren, token_type::semi_colon});
+                              {token_type::id_return, action::id_decl, token_type::left_paren,
+                               grammar_type::expr, action::return_stmt, token_type::right_paren,
+                               token_type::semi_colon});
          table.set_production({key, token_type::id_break},
-                              {token_type::id_break, token_type::semi_colon});
-         table.set_production({key, token_type::id_continue},
-                              {token_type::id_continue, token_type::semi_colon});
+                              {token_type::id_break, action::break_stmt, token_type::semi_colon});
+         table.set_production(
+            {key, token_type::id_continue},
+            {token_type::id_continue, action::continue_stmt, token_type::semi_colon});
       }
 
       // <StatementList>
@@ -665,24 +675,26 @@ namespace fr::grammar
 
       // <TermTail>
       {
-         symbol_array common{grammar_type::mult_op, grammar_type::factor, grammar_type::term_tail};
-         table.set_production({grammar_type::term_tail, token_type::plus}, epsilon);
-         table.set_production({grammar_type::term_tail, token_type::minus}, epsilon);
-         table.set_production({grammar_type::term_tail, token_type::or_op}, epsilon);
-         table.set_production({grammar_type::term_tail, token_type::comma}, epsilon);
-         table.set_production({grammar_type::term_tail, token_type::right_square}, epsilon);
-         table.set_production({grammar_type::term_tail, token_type::semi_colon}, epsilon);
-         table.set_production({grammar_type::term_tail, token_type::right_paren}, epsilon);
-         table.set_production({grammar_type::term_tail, token_type::colon}, epsilon);
-         table.set_production({grammar_type::term_tail, token_type::mult}, common);
-         table.set_production({grammar_type::term_tail, token_type::div}, common);
-         table.set_production({grammar_type::term_tail, token_type::and_op}, common);
-         table.set_production({grammar_type::term_tail, token_type::equal}, epsilon);
-         table.set_production({grammar_type::term_tail, token_type::not_equal}, epsilon);
-         table.set_production({grammar_type::term_tail, token_type::less_than}, epsilon);
-         table.set_production({grammar_type::term_tail, token_type::greater_than}, epsilon);
-         table.set_production({grammar_type::term_tail, token_type::less_equal_than}, epsilon);
-         table.set_production({grammar_type::term_tail, token_type::greater_equal_than}, epsilon);
+         symbol_array common{grammar_type::mult_op, action::id_decl, grammar_type::factor,
+                             action::mult_op, grammar_type::term_tail};
+         const auto key = grammar_type::term_tail;
+         table.set_production({key, token_type::plus}, epsilon);
+         table.set_production({key, token_type::minus}, epsilon);
+         table.set_production({key, token_type::or_op}, epsilon);
+         table.set_production({key, token_type::comma}, epsilon);
+         table.set_production({key, token_type::right_square}, epsilon);
+         table.set_production({key, token_type::semi_colon}, epsilon);
+         table.set_production({key, token_type::right_paren}, epsilon);
+         table.set_production({key, token_type::colon}, epsilon);
+         table.set_production({key, token_type::mult}, common);
+         table.set_production({key, token_type::div}, common);
+         table.set_production({key, token_type::and_op}, common);
+         table.set_production({key, token_type::equal}, epsilon);
+         table.set_production({key, token_type::not_equal}, epsilon);
+         table.set_production({key, token_type::less_than}, epsilon);
+         table.set_production({key, token_type::greater_than}, epsilon);
+         table.set_production({key, token_type::less_equal_than}, epsilon);
+         table.set_production({key, token_type::greater_equal_than}, epsilon);
       }
 
       // <Type>
@@ -711,10 +723,11 @@ namespace fr::grammar
 
       // <VarDeclRep>
       {
-         symbol_array common{grammar_type::var_decl, grammar_type::var_decl_rep};
+         symbol_array common{grammar_type::var_decl, action::variable_decl,
+                             grammar_type::var_decl_rep};
          const auto key = grammar_type::var_decl_rep;
          table.set_production({key, token_type::id}, common);
-         table.set_production({key, token_type::right_brace}, epsilon);
+         table.set_production({key, token_type::right_brace}, {epsilon[0], action::epsilon});
          table.set_production({key, token_type::id_integer}, common);
          table.set_production({key, token_type::id_float}, common);
          table.set_production({key, token_type::id_string}, common);
