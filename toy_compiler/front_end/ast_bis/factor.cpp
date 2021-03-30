@@ -73,6 +73,15 @@ namespace front::ast
       make_family<expr, op>(std::move(params_decl));
    }
 
+   ternary_expr::ternary_expr(node_ptr location, node_ptr condition, node_ptr expr_0,
+                              node_ptr expr_1) :
+      expr{location->location()}
+   {
+      expr_0->make_sibling(std::move(expr_1));
+      condition->make_sibling(std::move(expr_0));
+      make_child(std::move(condition));
+   }
+
    auto integer_expr::to_string() const -> std::string
    {
       return fmt::format("integer_expr <line:{1}, col:{2}> '{0}'", lexeme(), location().line,
@@ -120,5 +129,10 @@ namespace front::ast
    auto compound_parameter_expr_decl::to_string() const -> std::string
    {
       return fmt::format("compound_parameter_expr_decl");
+   }
+
+   auto ternary_expr::to_string() const -> std::string
+   {
+      return fmt::format("ternary_expr <line:{}, col:{}>", location().line, location().column);
    }
 } // namespace front::ast

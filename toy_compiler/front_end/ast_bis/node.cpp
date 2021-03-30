@@ -552,6 +552,17 @@ namespace front::ast
                                                           std::move(end));
       }
 
+      if (action == sem::action::ternary_expr)
+      {
+         node_ptr expr_1 = pop(recs);
+         node_ptr expr_0 = pop(recs);
+         node_ptr condition = pop(recs);
+         node_ptr location = pop(recs);
+
+         return std::make_unique<ternary_expr>(std::move(location), std::move(condition),
+                                               std::move(expr_0), std::move(expr_1));
+      }
+
       if (action == sem::action::compound_stmt)
       {
          std::vector<node_ptr> nodes;

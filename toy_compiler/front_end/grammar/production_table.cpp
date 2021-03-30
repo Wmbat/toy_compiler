@@ -241,9 +241,10 @@ namespace fr::grammar
          table.set_production({key, token_type::not_op},
                               {token_type::not_op, grammar_type::factor});
          table.set_production({key, token_type::qmark},
-                              {token_type::qmark, token_type::left_square, grammar_type::expr,
-                               token_type::colon, grammar_type::expr, token_type::colon,
-                               grammar_type::expr, token_type::right_square});
+                              {token_type::qmark, action::location_decl, token_type::left_square,
+                               grammar_type::expr, token_type::colon, grammar_type::expr,
+                               token_type::colon, grammar_type::expr, token_type::right_square,
+                               action::ternary_expr});
       }
 
       // <fParams>

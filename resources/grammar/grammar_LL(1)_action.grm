@@ -47,7 +47,7 @@
 <Factor> ::= '(' (location) <Expr> ')' (PriorityExpr)
 <Factor> ::= 'not' (id) <Factor> (NotExpr)
 <Factor> ::= <Sign> (sign) <Factor> (SignExpr)
-<Factor> ::= 'qm' '[' <Expr> ':' <Expr> ':' <Expr> ']' 
+<Factor> ::= 'qm' (location) '[' <Expr> ':' <Expr> ':' <Expr> ']' (QmExpr)
 
 <FuncBody> ::= '{' <MethodBodyVar> <StatementList> (CompoundStmt)'}' 
 

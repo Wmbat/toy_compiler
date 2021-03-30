@@ -51,6 +51,7 @@ namespace front::sem
       var_expr,
       func_expr,
       compound_parameter_expr_decl,
+      ternary_expr,
       compound_array_index_access_decl,
       array_index_access_decl,
       epsilon
