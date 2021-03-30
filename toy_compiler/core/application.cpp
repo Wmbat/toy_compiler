@@ -59,15 +59,13 @@ application::application(std::span<const std::string_view> args, util::logger_wr
                              err.pos.column);
                   fmt::print(fmt::fg(fmt::color::red) | fmt::emphasis::bold, "[error]");
 
-                  if (err.type == fr::parse_error_type::missing_terminal)
+                  if (err.type == fr::parse_error_type::syntax_error)
                   {
-                     fmt::print(" Missing {}\n", err.token);
+                     fmt::print(" expected '{}'\n", err.lexeme);
                   }
 
-                  fmt::print("\n");
+                  fmt::print("{}\n", err.line);
                }
-
-               write_errors_to_file(filepath, result.errors.value());
             }
 
             write_ast_to_file(filepath, result.ast);
@@ -131,27 +129,6 @@ void application::write_ast_to_file(const std::filesystem::path& path,
          curr = pop(stack);
          curr = curr->sibling().get();
       };
-   }
-}
-void application::write_errors_to_file(const std::filesystem::path& path,
-                                       std::span<const fr::parse_error> errors) const
-{
-   auto output_path = path.parent_path();
-   output_path /= path.stem();
-   output_path += ".outsyntaxerrors";
-
-   std::ofstream output_file{output_path};
-   for (auto& err : errors)
-   {
-      fmt::print(output_file, "{}:{}.{} - ", path.c_str(), err.pos.line, err.pos.column);
-      fmt::print(output_file, "[error]");
-
-      if (err.type == fr::parse_error_type::missing_terminal)
-      {
-         fmt::print(output_file, " Missing {}\n", err.token);
-      }
-
-      fmt::print("\n");
    }
 }
 

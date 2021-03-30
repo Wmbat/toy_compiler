@@ -41,15 +41,15 @@ namespace fr
 
    enum struct parse_error_type : std::uint32_t
    {
-      missing_terminal,
+      syntax_error,
       max_size
    };
 
    struct parse_error
    {
       parse_error_type type{parse_error_type::max_size};
-      front::sem::token_type token;
       front::source_location pos{};
+      std::string lexeme;
       std::string line;
    };
 
@@ -73,3 +73,19 @@ namespace fr
    auto parse_items(std::span<const front::lex_item> items, util::logger_wrapper log = nullptr)
       -> parse_result;
 } // namespace fr
+
+template <>
+struct fmt::formatter<fr::parse_error_type>
+{
+   template <typename ParseContex>
+   constexpr auto parse(ParseContex& ctx)
+   {
+      return ctx.begin();
+   }
+
+   template <typename FormatContext>
+   auto format(fr::parse_error_type error_type, FormatContext& ctx)
+   {
+      return fmt::format_to(ctx.out(), "{}", magic_enum::enum_name(error_type));
+   }
+};

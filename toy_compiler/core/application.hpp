@@ -39,8 +39,6 @@ private:
                                   const std::string& derivation) const;
    void write_ast_to_file(const std::filesystem::path& path,
                           const front::ast::node_ptr& root) const;
-   void write_errors_to_file(const std::filesystem::path& path,
-                             std::span<const fr::parse_error> errors) const;
 
    [[nodiscard]] auto fancy_lexical_error_type(front::sem::token_type value) const -> std::string;
 

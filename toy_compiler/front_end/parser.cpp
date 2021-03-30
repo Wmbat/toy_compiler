@@ -33,8 +33,10 @@
 #include <range/v3/algorithm/find_if.hpp>
 #include <range/v3/functional/not_fn.hpp>
 #include <range/v3/range/conversion.hpp>
+#include <range/v3/view/concat.hpp>
 #include <range/v3/view/filter.hpp>
 #include <range/v3/view/reverse.hpp>
+#include <range/v3/view/take_while.hpp>
 
 #include <iostream>
 
@@ -117,21 +119,11 @@ namespace fr
                {
                   log.warning("SCANNING...");
 
-                  const auto token = get<grammar::symbol_type::terminal>(top_symbol);
-                  if (token == front::sem::token_type::semi_colon)
-                  {
-                     errors.push_back(parse_error{.type = parse_error_type::missing_terminal,
-                                                  .token = token,
-                                                  .pos = (item_it - 1)->pos,
-                                                  .line = {}});
-                  }
-                  else
-                  {
-                     errors.push_back(parse_error{.type = parse_error_type::missing_terminal,
-                                                  .token = token,
-                                                  .pos = item_it->pos,
-                                                  .line = {}});
-                  }
+                  const auto type = get<grammar::symbol_type::terminal>(top_symbol);
+                  errors.push_back(parse_error{.type = parse_error_type::syntax_error,
+                                               .pos = item_it->pos,
+                                               .lexeme = fmt::format("{}", type),
+                                               .line = {}});
 
                   while (!front::sem::is_eof(item_it->type) && item_it->type != top_symbol)
                   {
@@ -175,6 +167,12 @@ namespace fr
                      ranges::find(grammar::sets::follow, top_symbol, &grammar::production::start);
 
                   log.warning("SCANNING OF {}...", top_symbol);
+
+                  const auto type = get<grammar::symbol_type::non_terminal>(top_symbol);
+                  errors.push_back(parse_error{.type = parse_error_type::syntax_error,
+                                               .pos = item_it->pos,
+                                               .lexeme = fmt::format("{}", type),
+                                               .line = {}});
 
                   if (first_it->nullable())
                   {

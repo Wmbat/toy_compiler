@@ -274,4 +274,31 @@ namespace front::ast
       return fmt::format("main_decl <line:{}, col:{}> {}", location().line, location().column,
                          lexeme());
    }
+
+   compound_array_index_access_decl::compound_array_index_access_decl(
+      std::vector<node_ptr>&& variables)
+   {
+      make_family<array_index_access_decl>(std::move(variables));
+   }
+
+   array_index_access_decl::array_index_access_decl(node_ptr beg, node_ptr expr, node_ptr end) :
+      decl{beg->location()},
+      m_end{end->location()}
+   {
+      assert(dynamic_cast<location_decl*>(beg.get())); // NOLINT
+      assert(dynamic_cast<location_decl*>(end.get())); // NOLINT
+
+      make_child(std::move(expr));
+   }
+
+   auto compound_array_index_access_decl::to_string() const -> std::string
+   {
+      return "compound_array_index_access_decl";
+   }
+
+   auto array_index_access_decl::to_string() const -> std::string
+   {
+      return fmt::format("array_index_access_decl <line:{}, col:{}> <line:{}, col:{}>",
+                         location().line, location().column, m_end.line, m_end.column);
+   }
 }; // namespace front::ast

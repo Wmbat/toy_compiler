@@ -74,7 +74,8 @@ namespace fr::grammar
          table.set_production({key, token_type::float_lit}, common);
          table.set_production({key, token_type::str_lit}, common);
          table.set_production({key, token_type::left_paren}, common);
-         table.set_production({key, token_type::right_paren}, {token_type::epsilon});
+         table.set_production({key, token_type::right_paren},
+                              {token_type::epsilon, action::epsilon});
          table.set_production({key, token_type::not_op}, common);
          table.set_production({key, token_type::qmark}, common);
       }
@@ -84,7 +85,7 @@ namespace fr::grammar
          const auto key = grammar_type::a_params_tail;
          table.set_production({key, token_type::comma},
                               {token_type::comma, grammar_type::expr, grammar_type::a_params_tail});
-         table.set_production({key, token_type::right_paren}, epsilon);
+         table.set_production({key, token_type::right_paren}, {epsilon[0], action::epsilon});
       }
 
       // <ArithExpr>
@@ -223,20 +224,20 @@ namespace fr::grammar
          const auto key = grammar_type::factor;
          table.set_production(
             {key, token_type::minus},
-            {grammar_type::sign, action::id_decl, grammar_type::factor, action::sign_factor_decl});
+            {grammar_type::sign, action::id_decl, grammar_type::factor, action::sign_expr});
          table.set_production(
             {key, token_type::plus},
-            {grammar_type::sign, action::id_decl, grammar_type::factor, action::sign_factor_decl});
-         table.set_production({key, token_type::id}, {grammar_type::func_or_var});
+            {grammar_type::sign, action::id_decl, grammar_type::factor, action::sign_expr});
+         table.set_production({key, token_type::id},
+                              {grammar_type::func_or_var, action::func_or_var_expr});
          table.set_production({key, token_type::float_lit},
-                              {token_type::float_lit, action::float_factor_decl});
+                              {token_type::float_lit, action::float_expr});
          table.set_production({key, token_type::integer_lit},
-                              {token_type::integer_lit, action::int_factor_decl});
-         table.set_production({key, token_type::str_lit},
-                              {token_type::str_lit, action::str_factor_decl});
+                              {token_type::integer_lit, action::int_expr});
+         table.set_production({key, token_type::str_lit}, {token_type::str_lit, action::str_expr});
          table.set_production({key, token_type::left_paren},
                               {token_type::left_paren, action::location_decl, grammar_type::expr,
-                               action::expr_factor_decl, token_type::right_paren});
+                               action::priority_expr, token_type::right_paren});
          table.set_production({key, token_type::not_op},
                               {token_type::not_op, grammar_type::factor});
          table.set_production({key, token_type::qmark},
@@ -369,12 +370,13 @@ namespace fr::grammar
       // <FuncOrVar>
       {
          table.set_production({grammar_type::func_or_var, token_type::id},
-                              {token_type::id, grammar_type::func_or_var_idnest});
+                              {token_type::id, action::id_decl, grammar_type::func_or_var_idnest});
       }
 
       // <FuncOrVarIdnest>
       {
-         symbol_array common{grammar_type::indice_rep, grammar_type::func_or_var_idnest_tail};
+         symbol_array common{grammar_type::indice_rep, action::compound_array_index_access_decl,
+                             action::var_expr, grammar_type::func_or_var_idnest_tail};
 
          table.set_production({grammar_type::func_or_var_idnest, token_type::plus}, common);
          table.set_production({grammar_type::func_or_var_idnest, token_type::minus}, common);
@@ -385,7 +387,8 @@ namespace fr::grammar
          table.set_production({grammar_type::func_or_var_idnest, token_type::semi_colon}, common);
          table.set_production({grammar_type::func_or_var_idnest, token_type::left_paren},
                               {token_type::left_paren, grammar_type::a_params,
-                               token_type::right_paren, grammar_type::func_or_var_idnest_tail});
+                               token_type::right_paren, action::compound_parameter_expr_decl,
+                               action::func_expr, grammar_type::func_or_var_idnest_tail});
          table.set_production({grammar_type::func_or_var_idnest, token_type::right_paren}, common);
          table.set_production({grammar_type::func_or_var_idnest, token_type::colon}, common);
          table.set_production({grammar_type::func_or_var_idnest, token_type::period}, common);
@@ -404,32 +407,26 @@ namespace fr::grammar
 
       // <FuncOrVarIdnestTail>
       {
-         table.set_production({grammar_type::func_or_var_idnest_tail, token_type::plus}, epsilon);
-         table.set_production({grammar_type::func_or_var_idnest_tail, token_type::minus}, epsilon);
-         table.set_production({grammar_type::func_or_var_idnest_tail, token_type::or_op}, epsilon);
-         table.set_production({grammar_type::func_or_var_idnest_tail, token_type::comma}, epsilon);
-         table.set_production({grammar_type::func_or_var_idnest_tail, token_type::right_square},
-                              epsilon);
-         table.set_production({grammar_type::func_or_var_idnest_tail, token_type::semi_colon},
-                              epsilon);
-         table.set_production({grammar_type::func_or_var_idnest_tail, token_type::right_paren},
-                              epsilon);
-         table.set_production({grammar_type::func_or_var_idnest_tail, token_type::colon}, epsilon);
-         table.set_production(
-            {grammar_type::func_or_var_idnest_tail, token_type::period},
-            {token_type::period, token_type::id, grammar_type::func_or_var_idnest});
-         table.set_production({grammar_type::func_or_var_idnest_tail, token_type::mult}, epsilon);
-         table.set_production({grammar_type::func_or_var_idnest_tail, token_type::div}, epsilon);
-         table.set_production({grammar_type::func_or_var_idnest_tail, token_type::and_op}, epsilon);
-         table.set_production({grammar_type::func_or_var_idnest_tail, token_type::equal}, epsilon);
-         table.set_production({grammar_type::func_or_var_idnest_tail, token_type::not_equal},
-                              epsilon);
-         table.set_production({grammar_type::func_or_var_idnest_tail, token_type::less_than},
-                              epsilon);
-         table.set_production({grammar_type::func_or_var_idnest_tail, token_type::greater_than},
-                              epsilon);
-         table.set_production({grammar_type::func_or_var_idnest_tail, token_type::less_equal_than},
-                              epsilon);
+         const auto key = grammar_type::func_or_var_idnest_tail;
+         table.set_production({key, token_type::plus}, epsilon);
+         table.set_production({key, token_type::minus}, epsilon);
+         table.set_production({key, token_type::or_op}, epsilon);
+         table.set_production({key, token_type::comma}, epsilon);
+         table.set_production({key, token_type::right_square}, epsilon);
+         table.set_production({key, token_type::semi_colon}, epsilon);
+         table.set_production({key, token_type::right_paren}, epsilon);
+         table.set_production({key, token_type::colon}, epsilon);
+         table.set_production({key, token_type::period},
+                              {token_type::period, token_type::id, action::id_decl,
+                               grammar_type::func_or_var_idnest});
+         table.set_production({key, token_type::mult}, epsilon);
+         table.set_production({key, token_type::div}, epsilon);
+         table.set_production({key, token_type::and_op}, epsilon);
+         table.set_production({key, token_type::equal}, epsilon);
+         table.set_production({key, token_type::not_equal}, epsilon);
+         table.set_production({key, token_type::less_than}, epsilon);
+         table.set_production({key, token_type::greater_than}, epsilon);
+         table.set_production({key, token_type::less_equal_than}, epsilon);
          table.set_production(
             {grammar_type::func_or_var_idnest_tail, token_type::greater_equal_than}, epsilon);
       }
@@ -464,28 +461,30 @@ namespace fr::grammar
 
       // <IndiceRep>
       {
-         table.set_production({grammar_type::indice_rep, token_type::plus}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::minus}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::or_op}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::comma}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::left_square},
-                              {token_type::left_square, grammar_type::expr,
-                               token_type::right_square, grammar_type::indice_rep});
-         table.set_production({grammar_type::indice_rep, token_type::right_square}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::assign}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::semi_colon}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::right_paren}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::colon}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::period}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::mult}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::div}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::and_op}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::equal}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::not_equal}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::less_than}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::greater_than}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::less_equal_than}, epsilon);
-         table.set_production({grammar_type::indice_rep, token_type::greater_equal_than}, epsilon);
+         const auto key = grammar_type::indice_rep;
+         table.set_production({key, token_type::plus}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::minus}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::or_op}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::comma}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::left_square},
+                              {token_type::left_square, action::location_decl, grammar_type::expr,
+                               token_type::right_square, action::location_decl,
+                               action::array_index_access_decl, grammar_type::indice_rep});
+         table.set_production({key, token_type::right_square}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::assign}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::semi_colon}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::right_paren}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::colon}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::period}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::mult}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::div}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::and_op}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::equal}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::not_equal}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::less_than}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::greater_than}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::less_equal_than}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::greater_equal_than}, {epsilon[0], action::epsilon});
       }
 
       // <Inherits>
@@ -631,8 +630,9 @@ namespace fr::grammar
                               {token_type::id_read, token_type::left_paren, grammar_type::variable,
                                token_type::right_paren, token_type::semi_colon});
          table.set_production({key, token_type::id_write},
-                              {token_type::id_write, token_type::left_paren, grammar_type::expr,
-                               token_type::right_paren, token_type::semi_colon});
+                              {token_type::id_write, action::id_decl, token_type::left_paren,
+                               grammar_type::expr, action::write_stmt, token_type::right_paren,
+                               token_type::semi_colon});
          table.set_production({key, token_type::id_return},
                               {token_type::id_return, action::id_decl, token_type::left_paren,
                                grammar_type::expr, action::return_stmt, token_type::right_paren,

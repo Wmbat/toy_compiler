@@ -6,6 +6,12 @@ namespace front::ast
    stmt::stmt(const std::string& lexeme, const source_location& location) : node{lexeme, location}
    {}
 
+   write_stmt::write_stmt(node_ptr value, node_ptr expr) :
+      stmt{std::string{value->lexeme()}, value->location()}
+   {
+      make_child(std::move(expr));
+   }
+
    return_stmt::return_stmt(node_ptr value, node_ptr expr) :
       stmt{std::string{value->lexeme()}, value->location()}
    {
@@ -20,6 +26,10 @@ namespace front::ast
       stmt{lexeme, location}
    {}
 
+   auto write_stmt::to_string() const -> std::string
+   {
+      return fmt::format("write_stmt <line:{}, col:{}>", location().line, location().column);
+   }
    auto return_stmt::to_string() const -> std::string
    {
       return fmt::format("return_stmt <line:{}, col:{}>", location().line, location().column);

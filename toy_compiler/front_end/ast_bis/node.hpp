@@ -15,6 +15,15 @@ namespace front::ast
 
    using node_ptr = std::unique_ptr<node>;
 
+   namespace detail
+   {
+      template <typename... NodeTypes>
+      auto is_type(const node_ptr& n) -> bool
+      {
+         return (dynamic_cast<NodeTypes*>(n.get()) || ...);
+      }
+   } // namespace detail
+
    class node
    {
    public:
@@ -39,7 +48,7 @@ namespace front::ast
       [[nodiscard]] virtual auto to_string() const -> std::string = 0;
 
    protected:
-      template <typename NodeType>
+      template <typename... NodeTypes>
       void make_family(std::vector<node_ptr>&& children)
       {
          if (std::size(children) > 0)
@@ -47,8 +56,7 @@ namespace front::ast
             node* it = children.front().get();
             for (node_ptr& node : children | ranges::views::tail)
             {
-               // NOLINTNEXTLINE
-               assert(dynamic_cast<NodeType*>(it));
+               assert(detail::is_type<NodeTypes...>); // NOLINT
 
                auto temp = node.get();
                it->make_sibling(std::move(node));
@@ -69,16 +77,7 @@ namespace front::ast
 
    auto node_factory(sem::action type, const lex_item& item, std::vector<node_ptr>& recs)
       -> node_ptr;
-
-   namespace detail
-   {
-      template <typename Any>
-      auto is_type(const node_ptr& n) -> bool
-      {
-         return dynamic_cast<Any*>(n.get());
-      }
-   } // namespace detail
-};   // namespace front::ast
+}; // namespace front::ast
 
 template <>
 struct fmt::formatter<front::ast::node>

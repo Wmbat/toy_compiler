@@ -4,62 +4,93 @@
 
 namespace front::ast
 {
-   class factor_decl : public decl
+   class expr : public decl
    {
    public:
-      factor_decl() = default;
-      factor_decl(const source_location& location);
-      factor_decl(const std::string& lexeme, const source_location& location);
+      expr() = default;
+      expr(const source_location& location);
+      expr(const std::string& lexeme, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override = 0;
    };
 
-   class integer_factor_decl : public factor_decl
+   class integer_expr : public expr
    {
    public:
-      integer_factor_decl(const std::string& lexeme, const source_location& location);
+      integer_expr(const std::string& lexeme, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 
-   class float_factor_decl : public factor_decl
+   class float_expr : public expr
    {
    public:
-      float_factor_decl(const std::string& lexeme, const source_location& location);
+      float_expr(const std::string& lexeme, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 
-   class str_factor_decl : public factor_decl
+   class string_expr : public expr
    {
    public:
-      str_factor_decl(const std::string& lexeme, const source_location& location);
+      string_expr(const std::string& lexeme, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 
-   class expr_factor_decl : public factor_decl
+   class priority_expr : public expr
    {
    public:
-      expr_factor_decl(node_ptr location, node_ptr expr);
+      priority_expr(node_ptr location, node_ptr expr);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 
-   class not_factor_decl : public factor_decl
+   class not_expr : public expr
    {
    public:
-      not_factor_decl(node_ptr value, node_ptr factor);
+      not_expr(node_ptr value, node_ptr factor);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 
-   class sign_factor_decl : public factor_decl
+   class sign_expr : public expr
    {
    public:
-      sign_factor_decl(node_ptr sign, node_ptr factor);
+      sign_expr(node_ptr sign, node_ptr factor);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 
+   class func_or_var_expr : public expr
+   {
+   public:
+      func_or_var_expr(std::vector<node_ptr>&& var_or_func_decls);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
+   };
+
+   class variable_expr : public expr
+   {
+   public:
+      variable_expr(node_ptr id, node_ptr compound_array_indices);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
+   };
+
+   class function_expr : public expr
+   {
+   public:
+      function_expr(node_ptr id, node_ptr compound_input_parameter);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
+   };
+
+   class compound_parameter_expr_decl : public decl
+   {
+   public:
+      compound_parameter_expr_decl(std::vector<node_ptr>&& member_decl);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
+   };
 } // namespace front::ast

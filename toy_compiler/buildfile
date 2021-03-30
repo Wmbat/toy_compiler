@@ -1,6 +1,5 @@
 import libs = range-v3%lib{range-v3}
 import libs += monads%lib{monads}
-import libs += libcaramel%lib{caramel}
 import libs += spdlog%lib{spdlog}
 import libs += fmt%lib{fmt}
 import libs += magic_enum%lib{magic_enum}
