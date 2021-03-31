@@ -589,6 +589,27 @@ namespace front::ast
          return std::make_unique<compound_stmt>(std::vector<node_ptr>{});
       }
 
+      if (action == sem::action::if_stmt)
+      {
+         node_ptr else_block = pop(recs);
+         node_ptr then_block = pop(recs);
+         node_ptr expr = pop(recs);
+         node_ptr location = pop(recs);
+
+         return std::make_unique<if_stmt>(std::move(location), std::move(expr),
+                                          std::move(then_block), std::move(else_block));
+      }
+
+      if (action == sem::action::while_stmt)
+      {
+         node_ptr stmt_block = pop(recs);
+         node_ptr expr = pop(recs);
+         node_ptr location = pop(recs);
+
+         return std::make_unique<while_stmt>(std::move(location), std::move(expr),
+                                             std::move(stmt_block));
+      }
+
       if (action == sem::action::write_stmt)
       {
          node_ptr expr = pop(recs);
@@ -613,6 +634,11 @@ namespace front::ast
       if (action == sem::action::continue_stmt)
       {
          return std::make_unique<continue_stmt>(item.lexeme, item.pos);
+      }
+
+      if (action == sem::action::stmt_block_decl)
+      {
+         return std::make_unique<stmt_block_decl>(pop(recs));
       }
 
       if (action == sem::action::integer_literal)

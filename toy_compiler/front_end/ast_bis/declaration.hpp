@@ -220,4 +220,12 @@ namespace front::ast
    private:
       source_location m_end;
    };
+
+   class stmt_block_decl : public decl
+   {
+   public:
+      stmt_block_decl(node_ptr node);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
+   };
 } // namespace front::ast

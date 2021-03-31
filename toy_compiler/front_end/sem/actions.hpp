@@ -33,6 +33,8 @@ namespace front::sem
       compound_variable_decl,
       main_decl,
       compound_stmt,
+      if_stmt,
+      while_stmt,
       write_stmt,
       return_stmt,
       break_stmt,
@@ -54,6 +56,7 @@ namespace front::sem
       ternary_expr,
       compound_array_index_access_decl,
       array_index_access_decl,
+      stmt_block_decl,
       epsilon
    };
 };

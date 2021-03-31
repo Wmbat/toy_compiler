@@ -1,5 +1,6 @@
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
 
+#include <toy_compiler/front_end/ast_bis/compound_stmt.hpp>
 #include <toy_compiler/front_end/ast_bis/function_decl.hpp>
 
 #include <range/v3/view/tail.hpp>
@@ -301,4 +302,14 @@ namespace front::ast
       return fmt::format("array_index_access_decl <line:{}, col:{}> <line:{}, col:{}>",
                          location().line, location().column, m_end.line, m_end.column);
    }
+
+   stmt_block_decl::stmt_block_decl(node_ptr node)
+   {
+      if (node)
+      {
+         make_child(std::move(node));
+      }
+   }
+
+   auto stmt_block_decl::to_string() const -> std::string { return "stmt_block_decl"; }
 }; // namespace front::ast

@@ -124,13 +124,13 @@
 <Sign> ::= '+' 
 <Sign> ::= '-' 
 
-<StatBlock> ::= '{' <StatementList> '}' 
+<StatBlock> ::= '{' <StatementList> (CompoundStmt) '}' 
 <StatBlock> ::= <Statement>
-<StatBlock> ::= EPSILON 
+<StatBlock> ::= EPSILON (Epsilon)
 
 <Statement> ::= <FuncOrAssignStat> ';' 
-<Statement> ::= 'if' '(' <Expr> ')' 'then' <StatBlock> 'else' <StatBlock> ';' 
-<Statement> ::= 'while' '(' <Expr> ')' <StatBlock> ';' 
+<Statement> ::= 'if' (LocationDecl) '(' <Expr> ')' 'then' <StatBlock> (StmtBlockDecl) 'else' <StatBlock> (StmtBlockDecl) (IfStmt) ';' 
+<Statement> ::= 'while' (LocationDecl) '(' <Expr> ')' <StatBlock> (StmtBlockDecl) (WhileStmt) ';' 
 <Statement> ::= 'read' '(' <Variable> ')' ';' 
 <Statement> ::= 'write' '(' <Expr> ')' (WriteStmt) ';' 
 <Statement> ::= 'return' '(' <Expr> ')' (ReturnStmt) ';' 

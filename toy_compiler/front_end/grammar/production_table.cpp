@@ -597,22 +597,22 @@ namespace fr::grammar
       // <StatBlock>
       {
          symbol_array common{grammar_type::statement};
-         table.set_production({grammar_type::stat_block, token_type::id}, common);
-         table.set_production({grammar_type::stat_block, token_type::semi_colon}, epsilon);
-         table.set_production({grammar_type::stat_block, token_type::id_continue}, common);
-         table.set_production({grammar_type::stat_block, token_type::id_break}, common);
-         table.set_production({grammar_type::stat_block, token_type::id_return}, common);
-         table.set_production({grammar_type::stat_block, token_type::id_write}, common);
-         table.set_production({grammar_type::stat_block, token_type::id_read}, common);
-         table.set_production({grammar_type::stat_block, token_type::id_while}, common);
-         table.set_production({grammar_type::stat_block, token_type::id_else}, epsilon);
-         table.set_production({grammar_type::stat_block, token_type::id_if}, common);
-         table.set_production(
-            {grammar_type::stat_block, token_type::left_brace},
-            {token_type::left_brace, grammar_type::statement_list, token_type::right_brace});
-      }
 
-      ///////////////////// HERE
+         const auto key = grammar_type::stat_block;
+         table.set_production({key, token_type::id}, common);
+         table.set_production({key, token_type::semi_colon}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::id_continue}, common);
+         table.set_production({key, token_type::id_break}, common);
+         table.set_production({key, token_type::id_return}, common);
+         table.set_production({key, token_type::id_write}, common);
+         table.set_production({key, token_type::id_read}, common);
+         table.set_production({key, token_type::id_while}, common);
+         table.set_production({key, token_type::id_else}, {epsilon[0], action::epsilon});
+         table.set_production({key, token_type::id_if}, common);
+         table.set_production({key, token_type::left_brace},
+                              {token_type::left_brace, grammar_type::statement_list,
+                               token_type::right_brace, action::compound_stmt});
+      }
 
       // <Statement>
       {
@@ -620,13 +620,16 @@ namespace fr::grammar
          table.set_production({key, token_type::id},
                               {grammar_type::func_or_assign_stat, token_type::semi_colon});
          table.set_production({key, token_type::id_if},
-                              {token_type::id_if, token_type::left_paren, grammar_type::expr,
-                               token_type::right_paren, token_type::id_then, token_type::id_else,
-                               token_type::semi_colon});
+                              {token_type::id_if, action::location_decl, token_type::left_paren,
+                               grammar_type::expr, token_type::right_paren, token_type::id_then,
+                               grammar_type::stat_block, action::stmt_block_decl,
+                               token_type::id_else, grammar_type::stat_block,
+                               action::stmt_block_decl, token_type::semi_colon, action::if_stmt});
          table.set_production({key, token_type::id_while},
-                              {token_type::id_while, token_type::left_paren, grammar_type::expr,
-                               token_type::right_paren, grammar_type::stat_block,
-                               token_type::semi_colon});
+                              {token_type::id_while, action::location_decl, token_type::left_paren,
+                               grammar_type::expr, token_type::right_paren,
+                               grammar_type::stat_block, action::stmt_block_decl,
+                               action::while_stmt, token_type::semi_colon});
          table.set_production({key, token_type::id_read},
                               {token_type::id_read, token_type::left_paren, grammar_type::variable,
                                token_type::right_paren, token_type::semi_colon});

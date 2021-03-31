@@ -20,10 +20,18 @@ namespace front::ast
 
    class if_stmt : public stmt
    {
+   public:
+      if_stmt(node_ptr location, node_ptr expr, node_ptr then_block, node_ptr else_block);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
    };
 
    class while_stmt : public stmt
    {
+   public:
+      while_stmt(node_ptr loc, node_ptr expr, node_ptr stmt_block);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
    };
 
    class read_stmt : public stmt
