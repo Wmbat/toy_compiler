@@ -19,6 +19,7 @@
 
 #include <toy_compiler/core/application.hpp>
 
+#include <toy_compiler/front_end/ast/visitor/visitor.hpp>
 #include <toy_compiler/front_end/lexer.hpp>
 #include <toy_compiler/front_end/parser.hpp>
 
@@ -68,6 +69,9 @@ application::application(std::span<const std::string_view> args, util::logger_wr
                }
             }
 
+            front::ast::visitor visitor;
+            result.ast->accept(visitor);
+
             write_ast_to_file(filepath, result.ast);
             write_derivations_to_file(filepath, result.derivation);
          }
@@ -101,6 +105,30 @@ void application::write_derivations_to_file(const std::filesystem::path& path,
    std::ofstream output_file{output_path};
    fmt::print(output_file, "{}", derivation);
 }
+
+void pre_order_traversal(const front::ast::node_ptr& node, std::size_t depth,
+                         std::ofstream& output_file)
+{
+   if (!node)
+   {
+      return;
+   }
+
+   const auto name = fmt::format("- {}\n", node);
+   fmt::print(output_file, "{:>{}}", name, std::size(name) + depth * 2);
+   fmt::print("{:>{}}", name, std::size(name) + depth * 2);
+
+   for (const auto& child : node->children())
+   {
+      pre_order_traversal(child, depth + 1, output_file);
+   }
+
+   if (std::empty(node->children()))
+   {
+      pre_order_traversal({}, depth + 1, output_file);
+   }
+}
+
 void application::write_ast_to_file(const std::filesystem::path& path,
                                     const front::ast::node_ptr& root) const
 {
@@ -110,6 +138,9 @@ void application::write_ast_to_file(const std::filesystem::path& path,
 
    std::ofstream output_file{output_path};
 
+   pre_order_traversal(root, 0, output_file);
+
+   /*
    std::vector<front::ast::node*> stack;
    front::ast::node* curr = root.get();
 
@@ -122,7 +153,15 @@ void application::write_ast_to_file(const std::filesystem::path& path,
          fmt::print("{:>{}}", name, std::size(name) + std::size(stack) * 2);
 
          stack.push_back(curr);
-         curr = curr->child().get();
+
+         if (!std::empty(curr->children()))
+         {
+            curr = curr->children()[0].get();
+         }
+         else
+         {
+            curr = nullptr;
+         }
       }
       else
       {
@@ -130,6 +169,7 @@ void application::write_ast_to_file(const std::filesystem::path& path,
          curr = curr->sibling().get();
       };
    }
+   */
 }
 
 auto application::fancy_lexical_error_type(front::sem::token_type value) const -> std::string

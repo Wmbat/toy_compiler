@@ -8,9 +8,6 @@ namespace front::ast
    expr::expr(const std::string& lexeme, const source_location& location) : decl{lexeme, location}
    {}
 
-   integer_expr::integer_expr(const std::string& lexeme, const source_location& location) :
-      expr{lexeme, location}
-   {}
 
    float_expr::float_expr(const std::string& lexeme, const source_location& location) :
       expr{lexeme, location}
@@ -53,7 +50,7 @@ namespace front::ast
    variable_expr::variable_expr(node_ptr id, node_ptr compound_array_indices) :
       expr{std::string{id->lexeme()}, id->location()}
    {
-      if (compound_array_indices->child())
+      if (!std::empty(compound_array_indices->children()))
       {
          make_child(std::move(compound_array_indices));
       }
@@ -62,7 +59,7 @@ namespace front::ast
    function_expr::function_expr(node_ptr id, node_ptr compound_input_parameter) :
       expr{std::string{id->lexeme()}, id->location()}
    {
-      if (compound_input_parameter->child())
+      if (!std::empty(compound_input_parameter->children()))
       {
          make_child(std::move(compound_input_parameter));
       }
@@ -73,20 +70,20 @@ namespace front::ast
       make_family<expr, op>(std::move(params_decl));
    }
 
+   compound_var_expr_decl::compound_var_expr_decl(std::vector<node_ptr>&& var_exprs)
+   {
+      make_family<variable_expr>(std::move(var_exprs));
+   }
+
    ternary_expr::ternary_expr(node_ptr location, node_ptr condition, node_ptr expr_0,
                               node_ptr expr_1) :
       expr{location->location()}
    {
-      expr_0->make_sibling(std::move(expr_1));
-      condition->make_sibling(std::move(expr_0));
       make_child(std::move(condition));
+      make_child(std::move(expr_0));
+      make_child(std::move(expr_1));
    }
 
-   auto integer_expr::to_string() const -> std::string
-   {
-      return fmt::format("integer_expr <line:{1}, col:{2}> '{0}'", lexeme(), location().line,
-                         location().column);
-   }
    auto float_expr::to_string() const -> std::string
    {
       return fmt::format("float_expr <line:{1}, col:{2}> '{0}'", lexeme(), location().line,
@@ -130,7 +127,10 @@ namespace front::ast
    {
       return fmt::format("compound_parameter_expr_decl");
    }
-
+   auto compound_var_expr_decl::to_string() const -> std::string
+   {
+      return fmt::format("compound_var_expr_decl");
+   }
    auto ternary_expr::to_string() const -> std::string
    {
       return fmt::format("ternary_expr <line:{}, col:{}>", location().line, location().column);

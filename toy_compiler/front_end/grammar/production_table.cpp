@@ -631,7 +631,8 @@ namespace fr::grammar
                                grammar_type::stat_block, action::stmt_block_decl,
                                action::while_stmt, token_type::semi_colon});
          table.set_production({key, token_type::id_read},
-                              {token_type::id_read, token_type::left_paren, grammar_type::variable,
+                              {token_type::id_read, action::location_decl, token_type::left_paren,
+                               grammar_type::variable, action::compound_var_expr, action::read_stmt,
                                token_type::right_paren, token_type::semi_colon});
          table.set_production({key, token_type::id_write},
                               {token_type::id_write, action::id_decl, token_type::left_paren,
@@ -740,12 +741,13 @@ namespace fr::grammar
       // <Variable>
       {
          table.set_production({grammar_type::variable, token_type::id},
-                              {token_type::id, grammar_type::variable_idnest});
+                              {token_type::id, action::id_decl, grammar_type::variable_idnest});
       }
 
       // <VariableIdnest>
       {
-         symbol_array common{grammar_type::indice_rep, grammar_type::variable_idnest_tail};
+         symbol_array common{grammar_type::indice_rep, action::compound_array_index_access_decl,
+                             action::var_expr, grammar_type::variable_idnest_tail};
          table.set_production({grammar_type::variable_idnest, token_type::left_square}, common);
          table.set_production({grammar_type::variable_idnest, token_type::right_paren}, common);
          table.set_production({grammar_type::variable_idnest, token_type::period}, common);
@@ -755,8 +757,9 @@ namespace fr::grammar
       {
          const auto key = grammar_type::variable_idnest_tail;
          table.set_production({key, token_type::right_paren}, epsilon);
-         table.set_production({key, token_type::period},
-                              {token_type::period, token_type::id, grammar_type::variable_idnest});
+         table.set_production(
+            {key, token_type::period},
+            {token_type::period, token_type::id, action::id_decl, grammar_type::variable_idnest});
       }
 
       // <Visibility>

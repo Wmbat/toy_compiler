@@ -14,14 +14,6 @@ namespace front::ast
       [[nodiscard]] auto to_string() const -> std::string override = 0;
    };
 
-   class integer_expr : public expr
-   {
-   public:
-      integer_expr(const std::string& lexeme, const source_location& location);
-
-      [[nodiscard]] auto to_string() const -> std::string override;
-   };
-
    class float_expr : public expr
    {
    public:
@@ -98,6 +90,14 @@ namespace front::ast
    {
    public:
       ternary_expr(node_ptr location, node_ptr condition, node_ptr expr_0, node_ptr expr_1);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
+   };
+
+   class compound_var_expr_decl : public expr
+   {
+   public:
+      compound_var_expr_decl(std::vector<node_ptr>&& var_exprs);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };

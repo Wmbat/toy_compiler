@@ -11,6 +11,8 @@ namespace front::ast
       stmt(const source_location& location);
       stmt(const std::string& lexeme, const source_location& location);
 
+      void accept(visitor& visitor) const override;
+
       [[nodiscard]] auto to_string() const -> std::string override = 0;
    };
 
@@ -36,6 +38,10 @@ namespace front::ast
 
    class read_stmt : public stmt
    {
+   public:
+      read_stmt(node_ptr loc, node_ptr compound_var_expr);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
    };
 
    class write_stmt : public stmt

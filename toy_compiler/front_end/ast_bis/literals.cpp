@@ -11,6 +11,11 @@ namespace front::ast
       node{lexeme, location}
    {}
 
+   void literal::accept(visitor& /*visitor*/) const
+   {
+      assert(false && "Accept not implemented"); // NOLINT
+   }
+
    integer_literal::integer_literal(const std::string& lexeme, const source_location& location) :
       literal{lexeme, location}
    {}
@@ -20,4 +25,4 @@ namespace front::ast
       return fmt::format("integer_literal <line:{}, col:{}> {} '{}'", location().line,
                          location().column, "integer", lexeme());
    }
-} // namespace front::ast_bis
+} // namespace front::ast

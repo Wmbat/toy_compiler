@@ -11,20 +11,7 @@ namespace front::ast
 
    compound_function_decl::compound_function_decl(std::vector<node_ptr>&& func_decls)
    {
-      if (std::size(func_decls) > 0)
-      {
-         node* it = func_decls.front().get();
-         for (node_ptr& node : func_decls | vi::tail)
-         {
-            assert(dynamic_cast<function_decl*>(it)); // NOLINT
-
-            auto temp = node.get();
-            it->make_sibling(std::move(node));
-            it = temp;
-         }
-
-         make_child(std::move(func_decls.front()));
-      }
+      make_family<function_decl>(std::move(func_decls));
    }
 
    function_decl::function_decl(node_ptr function_head, node_ptr function_body)
@@ -32,8 +19,8 @@ namespace front::ast
       assert(dynamic_cast<function_head_decl*>(function_head.get())); // NOLINT
       assert(dynamic_cast<function_body_decl*>(function_body.get())); // NOLINT
 
-      function_head->make_sibling(std::move(function_body));
       make_child(std::move(function_head));
+      make_child(std::move(function_body));
    }
 
    function_head_decl::function_head_decl(node_ptr location, node_ptr id, node_ptr class_method,
@@ -41,15 +28,13 @@ namespace front::ast
       decl{std::string{id->lexeme()}, location->location()},
       m_return_type{return_type->lexeme()}
    {
-      if (function_param->child())
+      if (!std::empty(function_param->children()))
       {
          std::vector<std::string> params;
 
-         node* it = function_param->child().get();
-         while (it)
+         for (const node_ptr& node : function_param->children())
          {
-            params.emplace_back(dynamic_cast<variable_decl*>(it)->type());
-            it = it->sibling().get();
+            params.emplace_back(dynamic_cast<variable_decl*>(node.get())->type());
          }
 
          m_params = params;
@@ -65,24 +50,14 @@ namespace front::ast
 
    function_body_decl::function_body_decl(node_ptr variables, node_ptr statements)
    {
-      if (statements->child())
+      if (!std::empty(variables->children()))
       {
-         if (variables->child())
-         {
-            variables->make_sibling(std::move(statements));
-            make_child(std::move(variables));
-         }
-         else
-         {
-            make_child(std::move(statements));
-         }
+         make_child(std::move(variables));
       }
-      else
+
+      if (!std::empty(statements->children()))
       {
-         if (variables->child())
-         {
-            make_child(std::move(variables));
-         }
+         make_child(std::move(statements));
       }
    }
 

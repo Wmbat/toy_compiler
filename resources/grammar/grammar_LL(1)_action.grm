@@ -131,7 +131,7 @@
 <Statement> ::= <FuncOrAssignStat> ';' 
 <Statement> ::= 'if' (LocationDecl) '(' <Expr> ')' 'then' <StatBlock> (StmtBlockDecl) 'else' <StatBlock> (StmtBlockDecl) (IfStmt) ';' 
 <Statement> ::= 'while' (LocationDecl) '(' <Expr> ')' <StatBlock> (StmtBlockDecl) (WhileStmt) ';' 
-<Statement> ::= 'read' '(' <Variable> ')' ';' 
+<Statement> ::= 'read' (locationDecl) '(' <Variable> (CompoundVarExpr) ')' (ReadStmt) ';' 
 <Statement> ::= 'write' '(' <Expr> ')' (WriteStmt) ';' 
 <Statement> ::= 'return' '(' <Expr> ')' (ReturnStmt) ';' 
 <Statement> ::= 'break' (BreakStmt) ';' 
@@ -155,11 +155,11 @@
 <VarDeclRep> ::= <VarDecl> <VarDeclRep> 
 <VarDeclRep> ::= EPSILON 
 
-<Variable> ::= 'id' <VariableIdnest> 
+<Variable> ::= 'id' (IdDecl) <VariableIdnest> 
 
-<VariableIdnest> ::= <IndiceRep> <VariableIdnestTail> 
+<VariableIdnest> ::= <IndiceRep> (CompoundArrayIndexAccessDecl) (VarExpr) <VariableIdnestTail> 
 
-<VariableIdnestTail> ::= '.' 'id' <VariableIdnest> 
+<VariableIdnestTail> ::= '.' 'id' (IdDecl) <VariableIdnest> 
 <VariableIdnestTail> ::= EPSILON 
 
 <Visibility> ::= 'public' 

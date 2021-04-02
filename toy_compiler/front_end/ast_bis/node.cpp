@@ -1,5 +1,6 @@
 #include <toy_compiler/front_end/ast_bis/node.hpp>
 
+#include <toy_compiler/front_end/ast/node/integer_expr.hpp>
 #include <toy_compiler/front_end/ast_bis/compound_stmt.hpp>
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
 #include <toy_compiler/front_end/ast_bis/factor.hpp>
@@ -31,8 +32,7 @@ namespace front::ast
       m_location{location}
    {}
 
-   auto node::child() const -> const node_ptr& { return m_child; }
-   auto node::sibling() const -> const node_ptr& { return m_sibling; }
+   auto node::children() const -> const std::vector<node_ptr>& { return m_children; }
    auto node::lexeme() const -> std::string_view
    {
 
@@ -45,8 +45,7 @@ namespace front::ast
    }
    auto node::location() const -> const source_location& { return m_location; }
 
-   void node::make_sibling(node_ptr sibling) { m_sibling = std::move(sibling); }
-   void node::make_child(node_ptr child) { m_child = std::move(child); }
+   void node::make_child(node_ptr child) { m_children.push_back(std::move(child)); }
 
    auto pop(std::vector<node_ptr>& stack) -> std::unique_ptr<node>
    {
@@ -468,6 +467,21 @@ namespace front::ast
          return std::make_unique<func_or_var_expr>(std::move(nodes));
       }
 
+      if (action == sem::action::compound_var_expr)
+      {
+         std::vector place_holders = recs | vi::reverse |
+            vi::take_while(detail::is_type<variable_expr>) | vi::move | ranges::to_vector;
+
+         std::vector<node_ptr> nodes;
+         for (auto& node : place_holders | vi::reverse)
+         {
+            pop(recs);
+            nodes.push_back(std::move(node));
+         }
+
+         return std::make_unique<compound_var_expr_decl>(std::move(nodes));
+      }
+
       if (action == sem::action::func_expr)
       {
          node_ptr compound_param_expr = pop(recs);
@@ -616,6 +630,14 @@ namespace front::ast
          node_ptr id = pop(recs);
 
          return std::make_unique<write_stmt>(std::move(id), std::move(expr));
+      }
+
+      if (action == sem::action::read_stmt)
+      {
+         node_ptr compound_var = pop(recs);
+         node_ptr loc = pop(recs);
+
+         return std::make_unique<read_stmt>(std::move(loc), std::move(compound_var));
       }
 
       if (action == sem::action::return_stmt)

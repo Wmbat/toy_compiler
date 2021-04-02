@@ -3,6 +3,8 @@
 #include <toy_compiler/front_end/ast_bis/compound_stmt.hpp>
 #include <toy_compiler/front_end/ast_bis/function_decl.hpp>
 
+#include <toy_compiler/front_end/ast/visitor/visitor.hpp>
+
 #include <range/v3/view/tail.hpp>
 #include <range/v3/view/take.hpp>
 
@@ -24,9 +26,9 @@ namespace front::ast
       assert(dynamic_cast<compound_function_decl*>(compound_function.get())); // NOLINT
       assert(dynamic_cast<main_decl*>(main.get()));                           // NOLINT
 
-      compound_function->make_sibling(std::move(main));
-      compound_class->make_sibling(std::move(compound_function));
       make_child(std::move(compound_class));
+      make_child(std::move(compound_function));
+      make_child(std::move(main));
    }
 
    auto translation_unit_decl::to_string() const -> std::string { return "translation_unit_decl"; }
@@ -63,17 +65,14 @@ namespace front::ast
       assert(dynamic_cast<compound_inheritance_decl*>(compound_inheritance.get())); // NOLINT
       assert(dynamic_cast<compound_member_decl*>(compound_member.get()));           // NOLINT
 
-      if (compound_member->child())
+      if (!std::empty(compound_inheritance->children()))
       {
-         if (compound_inheritance->child())
-         {
-            compound_inheritance->make_sibling(std::move(compound_member));
-            make_child(std::move(compound_inheritance));
-         }
-         else
-         {
-            make_child(std::move(compound_member));
-         }
+         make_child(std::move(compound_inheritance));
+      }
+
+      if (!std::empty(compound_member->children()))
+      {
+         make_child(std::move(compound_member));
       }
    }
 
@@ -116,19 +115,18 @@ namespace front::ast
       {
          assert(dynamic_cast<visibility_decl*>(visibility.get())); // NOLINT
 
-         visibility->make_sibling(std::move(var_or_func));
-         make_child(std::move(visibility));
+         m_visibility = std::string{visibility->lexeme()};
       }
-      else
-      {
-         make_child(std::move(var_or_func));
-      }
+
+      make_child(std::move(var_or_func));
    }
+
+   auto member_decl::visibility() const noexcept -> std::string_view { return m_visibility; }
 
    auto member_decl::to_string() const -> std::string
    {
-      return fmt::format("{} <line:{}, col:{}>", "member_decl", child()->location().line,
-                         child()->location().column);
+      return fmt::format("member_decl <line:{}, col:{}> {}", children()[0]->location().line,
+                         children()[0]->location().column, visibility());
    }
 
    visibility_decl::visibility_decl(const std::string& name, const source_location& location) :
@@ -146,7 +144,7 @@ namespace front::ast
       m_type(type->lexeme()),
       m_id{id->lexeme()}
    {
-      if (compound_array_decl->child())
+      if (!std::empty(compound_array_decl->children()))
       {
          make_child(std::move(compound_array_decl));
       }
@@ -161,21 +159,7 @@ namespace front::ast
 
    compound_array_decl::compound_array_decl(std::vector<node_ptr>&& array_decls)
    {
-      if (std::size(array_decls) > 0)
-      {
-         node* it = array_decls.front().get();
-         for (node_ptr& node : array_decls | vi::tail)
-         {
-            // NOLINTNEXTLINE
-            assert(dynamic_cast<array_decl*>(it));
-
-            auto temp = node.get();
-            it->make_sibling(std::move(node));
-            it = temp;
-         }
-
-         make_child(std::move(array_decls.front()));
-      }
+      make_family<array_decl>(std::move(array_decls));
    }
 
    auto compound_array_decl::to_string() const -> std::string { return "compound_array_decl"; }
@@ -206,20 +190,21 @@ namespace front::ast
       decl{std::string{id->lexeme()}, location->location()},
       m_return_type{tail->lexeme()}
    {
-      if (compound_param->child())
+      if (!std::empty(compound_param->children()))
       {
-         node* it = compound_param->child().get();
-         while (it)
+         for (const node_ptr& node : compound_param->children())
          {
-            m_params.emplace_back(dynamic_cast<variable_decl*>(it)->type());
-            it = it->sibling().get();
+            m_params.emplace_back(dynamic_cast<variable_decl*>(node.get())->type());
          }
 
          make_child(std::move(compound_param));
       }
    }
 
-   auto member_function_decl::to_string() const -> std::string
+   auto member_function_decl::return_type() const -> std::string_view { return m_return_type; }
+   auto member_function_decl::params() const -> std::span<const std::string> { return m_params; }
+
+   auto member_function_decl::params_string() const -> std::string
    {
       std::string params;
       for (const auto& param : m_params)
@@ -228,28 +213,17 @@ namespace front::ast
          params += ", ";
       }
 
+      return params.substr(0, std::size(params) - 2);
+   }
+   auto member_function_decl::to_string() const -> std::string
+   {
       return fmt::format("func_decl <line:{}, col:{}> {} '{} ({})'", location().line,
-                         location().column, lexeme(), m_return_type,
-                         params.substr(0, std::size(params) - 2));
+                         location().column, lexeme(), m_return_type, params_string());
    }
 
    compound_params_decl::compound_params_decl(std::vector<node_ptr>&& param_decls)
    {
-      if (std::size(param_decls) > 0)
-      {
-         node* it = param_decls.front().get();
-         for (node_ptr& node : param_decls | vi::tail)
-         {
-            // NOLINTNEXTLINE
-            assert(dynamic_cast<variable_decl*>(it));
-
-            auto temp = node.get();
-            it->make_sibling(std::move(node));
-            it = temp;
-         }
-
-         make_child(std::move(param_decls.front()));
-      }
+      make_family<variable_decl>(std::move(param_decls));
    }
 
    auto compound_params_decl::to_string() const -> std::string { return "compound_param_decl"; }
@@ -312,4 +286,30 @@ namespace front::ast
    }
 
    auto stmt_block_decl::to_string() const -> std::string { return "stmt_block_decl"; }
+
+   void decl::accept(visitor&) const { assert(false && "Accept not implemented"); }
+
+   void translation_unit_decl::accept(visitor& visitor) const
+   {
+      children()[0]->accept(visitor);
+
+      /*
+      for (const auto& child : children())
+      {
+         child->accept(visitor);
+      }
+      */
+
+      visitor.visit(*this);
+   }
+
+   void compound_class_decl::accept(visitor& visitor) const
+   {
+      for (const auto& child : children())
+      {
+         child->accept(visitor);
+      }
+   }
+
+   void class_decl::accept(visitor& visitor) const { visitor.visit(*this); }
 }; // namespace front::ast

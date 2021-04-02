@@ -5,13 +5,14 @@
 
 #include <toy_compiler/util/strong_type.hpp>
 
-#include <range/v3/view/tail.hpp>
+#include <range/v3/view/move.hpp>
 
 #include <memory>
 
 namespace front::ast
 {
    class node;
+   class visitor;
 
    using node_ptr = std::unique_ptr<node>;
 
@@ -37,13 +38,13 @@ namespace front::ast
       auto operator=(const node& rhs) -> node& = delete;
       auto operator=(node&& rhs) -> node& = default;
 
-      [[nodiscard]] auto child() const -> const node_ptr&;
-      [[nodiscard]] auto sibling() const -> const node_ptr&;
+      [[nodiscard]] auto children() const -> const std::vector<node_ptr>&;
       [[nodiscard]] auto lexeme() const -> std::string_view;
       [[nodiscard]] auto location() const -> const source_location&;
 
-      void make_sibling(node_ptr sibling);
       void make_child(node_ptr child);
+
+      virtual void accept(visitor& visitor) const = 0;
 
       [[nodiscard]] virtual auto to_string() const -> std::string = 0;
 
@@ -51,25 +52,16 @@ namespace front::ast
       template <typename... NodeTypes>
       void make_family(std::vector<node_ptr>&& children)
       {
-         if (std::size(children) > 0)
+         for (node_ptr node : children | ranges::views::move)
          {
-            node* it = children.front().get();
-            for (node_ptr& node : children | ranges::views::tail)
-            {
-               assert(detail::is_type<NodeTypes...>); // NOLINT
+            assert(detail::is_type<NodeTypes...>); // NOLINT
 
-               auto temp = node.get();
-               it->make_sibling(std::move(node));
-               it = temp;
-            }
-
-            make_child(std::move(children.front()));
+            make_child(std::move(node));
          }
       }
 
    private:
-      node_ptr m_child;
-      node_ptr m_sibling;
+      std::vector<node_ptr> m_children;
 
       std::string m_lexeme;
       source_location m_location;

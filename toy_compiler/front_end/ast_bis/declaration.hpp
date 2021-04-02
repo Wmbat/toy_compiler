@@ -31,6 +31,8 @@ namespace front::ast
       decl(const source_location& location);
       decl(const std::string& lexeme, const source_location& location);
 
+      void accept(visitor& visitor) const override;
+
       [[nodiscard]] auto to_string() const -> std::string override = 0;
    };
 
@@ -38,6 +40,8 @@ namespace front::ast
    {
    public:
       translation_unit_decl(node_ptr compound_class, node_ptr compound_function, node_ptr main);
+
+      void accept(visitor& visitor) const override;
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
@@ -71,6 +75,8 @@ namespace front::ast
    public:
       compound_class_decl(std::vector<node_ptr>&& class_decls);
 
+      void accept(visitor& visitor) const override;
+
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 
@@ -79,6 +85,8 @@ namespace front::ast
    public:
       class_decl(node_ptr class_start, node_ptr class_name, node_ptr compound_inheritance,
                  node_ptr compound_member);
+
+      void accept(visitor& visitor) const override;
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
@@ -112,7 +120,12 @@ namespace front::ast
    public:
       member_decl(node_ptr visibility, node_ptr var_or_func);
 
+      [[nodiscard]] auto visibility() const noexcept -> std::string_view;
+
       [[nodiscard]] auto to_string() const -> std::string override;
+
+   private:
+      std::string m_visibility = "private";
    };
 
    class visibility_decl : public decl
@@ -161,9 +174,10 @@ namespace front::ast
    public:
       member_function_decl(node_ptr location, node_ptr id, node_ptr compound_params, node_ptr tail);
 
-      [[nodiscard]] auto return_type() const -> std::string;
-      [[nodiscard]] auto params() const -> std::vector<std::string>;
+      [[nodiscard]] auto return_type() const -> std::string_view;
+      [[nodiscard]] auto params() const -> std::span<const std::string>;
 
+      [[nodiscard]] auto params_string() const -> std::string;
       [[nodiscard]] auto to_string() const -> std::string override;
 
    private:
