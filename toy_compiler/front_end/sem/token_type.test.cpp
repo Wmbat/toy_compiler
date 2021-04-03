@@ -39,7 +39,7 @@ TEST_SUITE("grammar/token_type.hpp test suite")
 
       namespace vi = ranges::views;
 
-      for (auto i : vi::iota(0u, static_cast<std::uint32_t>(token_type::max_size)))
+      for (auto i : vi::iota(0u, static_cast<std::uint32_t>(token_type::e_max_size)))
       {
          if (i >= 54 && i <= 58)
          {

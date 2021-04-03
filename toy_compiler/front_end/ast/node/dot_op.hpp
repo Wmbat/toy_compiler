@@ -1,13 +1,13 @@
 #pragma once
 
-#include <toy_compiler/front_end/ast_bis/factor.hpp>
+#include <toy_compiler/front_end/ast/node/op.hpp>
 
 namespace front::ast
 {
-   class sign_expr : public expr
+   class dot_op : public op
    {
    public:
-      sign_expr(node_ptr sign, node_ptr factor);
+      dot_op(node_ptr caller, node_ptr id, node_ptr callee);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };

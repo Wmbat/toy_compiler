@@ -1,46 +1,12 @@
 #include <toy_compiler/front_end/ast_bis/factor.hpp>
 
-#include <toy_compiler/front_end/ast_bis/operator.hpp>
+#include <toy_compiler/front_end/ast/node/op.hpp>
 
 namespace front::ast
 {
    expr::expr(const source_location& location) : decl{location} {}
    expr::expr(const std::string& lexeme, const source_location& location) : decl{lexeme, location}
    {}
-
-
-   float_expr::float_expr(const std::string& lexeme, const source_location& location) :
-      expr{lexeme, location}
-   {}
-
-   string_expr::string_expr(const std::string& lexeme, const source_location& location) :
-      expr{lexeme, location}
-   {}
-
-   priority_expr::priority_expr(node_ptr location, node_ptr expr_in) : expr{location->location()}
-   {
-      assert(dynamic_cast<location_decl*>(location.get())); // NOLINT
-      // NOLINTNEXTLINE
-      assert(dynamic_cast<expr*>(expr_in.get()) || dynamic_cast<op*>(expr_in.get()));
-
-      make_child(std::move(expr_in));
-   }
-
-   not_expr::not_expr(node_ptr value, node_ptr factor_in) :
-      expr{std::string{value->lexeme()}, value->location()}
-   {
-      assert(dynamic_cast<id_decl*>(value.get())); // NOLINT
-      // NOLINTNEXTLINE
-      assert(dynamic_cast<expr*>(factor_in.get()) || dynamic_cast<mult_op*>(factor_in.get()));
-
-      make_child(std::move(factor_in));
-   }
-
-   sign_expr::sign_expr(node_ptr sign, node_ptr factor_in) :
-      expr{std::string{sign->lexeme()}, sign->location()}
-   {
-      make_child(std::move(factor_in));
-   }
 
    func_or_var_expr::func_or_var_expr(std::vector<node_ptr>&& var_or_func_decls)
    {
@@ -84,31 +50,6 @@ namespace front::ast
       make_child(std::move(expr_1));
    }
 
-   auto float_expr::to_string() const -> std::string
-   {
-      return fmt::format("float_expr <line:{1}, col:{2}> '{0}'", lexeme(), location().line,
-                         location().column);
-   }
-   auto string_expr::to_string() const -> std::string
-   {
-      return fmt::format("str_expr <line:{1}, col:{2}> '{0}'", lexeme(), location().line,
-                         location().column);
-   }
-   auto priority_expr::to_string() const -> std::string
-   {
-      return fmt::format("expr_factor <line:{1}, col:{2}>", lexeme(), location().line,
-                         location().column);
-   }
-   auto not_expr::to_string() const -> std::string
-   {
-      return fmt::format("not_expr <line:{1}, col:{2}> '{0}'", lexeme(), location().line,
-                         location().column);
-   }
-   auto sign_expr::to_string() const -> std::string
-   {
-      return fmt::format("sign_expr <line:{1}, col:{2}> '{0}'", lexeme(), location().line,
-                         location().column);
-   }
    auto func_or_var_expr::to_string() const -> std::string
    {
       return fmt::format("func_or_var_expr");

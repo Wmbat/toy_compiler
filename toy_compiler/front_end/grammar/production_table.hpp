@@ -31,7 +31,7 @@ namespace fr::grammar
     */
    class production_table
    {
-      static constexpr std::size_t width = static_cast<std::size_t>(front::sem::token_type::max_size);
+      static constexpr std::size_t width = static_cast<std::size_t>(front::sem::token_type::e_max_size);
       static constexpr std::size_t height =
          static_cast<std::size_t>(front::sem::grammar_type::max_size);
 

@@ -48,7 +48,7 @@ namespace front
       -> std::tuple<std::string_view, std::uint32_t, std::uint32_t>;
    auto check_for_newlines(const lex_item& tok) -> std::uint32_t
    {
-      if (tok.type == sem::token_type::block_cmt)
+      if (tok.type == sem::token_type::e_block_cmt)
       {
          return static_cast<std::uint32_t>(ranges::count(tok.lexeme, '\n'));
       }
@@ -57,22 +57,22 @@ namespace front
    }
    auto cleanup_lexeme(const lex_item& tok) -> std::string
    {
-      if (tok.type == sem::token_type::block_cmt)
+      if (tok.type == sem::token_type::e_block_cmt)
       {
          return to_literal(tok.lexeme);
       }
 
-      if (tok.type == sem::token_type::line_cmt)
+      if (tok.type == sem::token_type::e_line_cmt)
       {
          return to_literal(tok.lexeme);
       }
 
-      if (tok.type == sem::token_type::invalid_cmt)
+      if (tok.type == sem::token_type::e_invalid_cmt)
       {
          return to_literal(tok.lexeme);
       }
 
-      if (tok.type == sem::token_type::str_lit)
+      if (tok.type == sem::token_type::e_str_lit)
       {
          return tok.lexeme.substr(1, std::size(tok.lexeme) - 2);
       }
@@ -132,7 +132,7 @@ namespace front
 
       log.info("tokenization of file \"{}\" completed", path.c_str());
 
-      tokens.push_back(lex_item{.type = sem::token_type::eof, .lexeme = "$"});
+      tokens.push_back(lex_item{.type = sem::token_type::e_eof, .lexeme = "$"});
 
       return tokens;
    }
@@ -150,7 +150,7 @@ namespace front
                  .pos = pos};
       }
 
-      return {.type = sem::token_type::id, .lexeme = lexeme, .pos = pos};
+      return {.type = sem::token_type::e_id, .lexeme = lexeme, .pos = pos};
    }
 
    auto lex_braces(const std::string_view data, source_location pos) -> lex_item
@@ -159,30 +159,30 @@ namespace front
 
       if (lexeme == sem::open_curly)
       {
-         return {.type = sem::token_type::left_brace, .lexeme = {lexeme}, .pos = pos};
+         return {.type = sem::token_type::e_left_brace, .lexeme = {lexeme}, .pos = pos};
       }
       if (lexeme == sem::close_curly)
       {
-         return {.type = sem::token_type::right_brace, .lexeme = {lexeme}, .pos = pos};
+         return {.type = sem::token_type::e_right_brace, .lexeme = {lexeme}, .pos = pos};
       }
       if (lexeme == sem::open_square)
       {
-         return {.type = sem::token_type::left_square, .lexeme = {lexeme}, .pos = pos};
+         return {.type = sem::token_type::e_left_square, .lexeme = {lexeme}, .pos = pos};
       }
       if (lexeme == sem::close_square)
       {
-         return {.type = sem::token_type::right_square, .lexeme = {lexeme}, .pos = pos};
+         return {.type = sem::token_type::e_right_square, .lexeme = {lexeme}, .pos = pos};
       }
       if (lexeme == sem::open_parenth)
       {
-         return {.type = sem::token_type::left_paren, .lexeme = {lexeme}, .pos = pos};
+         return {.type = sem::token_type::e_left_paren, .lexeme = {lexeme}, .pos = pos};
       }
       if (lexeme == sem::close_parenth)
       {
-         return {.type = sem::token_type::right_paren, .lexeme = {lexeme}, .pos = pos};
+         return {.type = sem::token_type::e_right_paren, .lexeme = {lexeme}, .pos = pos};
       }
 
-      return {.type = sem::token_type::invalid_char, .lexeme = {lexeme}, .pos = pos};
+      return {.type = sem::token_type::e_invalid_char, .lexeme = {lexeme}, .pos = pos};
    }
 
    auto lex_comments(const std::string_view data, source_location pos) -> lex_item;
@@ -229,7 +229,7 @@ namespace front
          return lex_operator(data, pos);
       }
 
-      return {.type = sem::token_type::invalid_char, .lexeme = {first}, .pos = pos};
+      return {.type = sem::token_type::e_invalid_char, .lexeme = {first}, .pos = pos};
    }
 
    auto newline_counter(const std::string_view data) -> std::uint32_t
@@ -302,7 +302,7 @@ namespace front
          }
       }
 
-      return {.type = sem::token_type::integer_lit, .lexeme = {first}, .pos = pos};
+      return {.type = sem::token_type::e_integer_lit, .lexeme = {first}, .pos = pos};
    }
    auto handle_leading_nonzero(const std::string_view data, source_location pos) -> lex_item
    {
@@ -317,12 +317,12 @@ namespace front
                  .pos = float_token.pos};
       }
 
-      return {.type = sem::token_type::integer_lit, .lexeme = lexeme, .pos = pos};
+      return {.type = sem::token_type::e_integer_lit, .lexeme = lexeme, .pos = pos};
    }
    auto handle_scientific_notation(const std::string_view data, source_location pos) -> lex_item
    {
       const auto convert = [](const lex_item& tok) {
-         return tok.type != sem::token_type::invalid_num ? sem::token_type::float_lit : tok.type;
+         return tok.type != sem::token_type::e_invalid_num ? sem::token_type::e_float_lit : tok.type;
       };
 
       const auto first = data.at(0);
@@ -341,7 +341,7 @@ namespace front
             return {.type = convert(integer), .lexeme = first + integer.lexeme, .pos = pos};
          }
 
-         return {.type = sem::token_type::invalid_num, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::e_invalid_num, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '0')
@@ -356,7 +356,7 @@ namespace front
          return {.type = convert(integer), .lexeme = integer.lexeme, .pos = pos};
       }
 
-      return {.type = sem::token_type::invalid_num, .lexeme = {first}, .pos = pos};
+      return {.type = sem::token_type::e_invalid_num, .lexeme = {first}, .pos = pos};
    }
    auto handle_fraction_nonzero(const std::string_view data, source_location pos) -> lex_item
    {
@@ -374,12 +374,12 @@ namespace front
       const auto last = std::end(lexeme) - 1;
       if (*last == '0')
       {
-         return {.type = sem::token_type::float_lit,
+         return {.type = sem::token_type::e_float_lit,
                  .lexeme = "." + std::string{std::begin(lexeme), last},
                  .pos = pos};
       }
 
-      return {.type = sem::token_type::float_lit, .lexeme = "." + lexeme, .pos = pos};
+      return {.type = sem::token_type::e_float_lit, .lexeme = "." + lexeme, .pos = pos};
    }
    auto handle_fraction_leading_zero(const std::string_view data, source_location pos) -> lex_item
    {
@@ -403,7 +403,7 @@ namespace front
          }
       }
 
-      return {.type = sem::token_type::float_lit, .lexeme = ".0", .pos = pos};
+      return {.type = sem::token_type::e_float_lit, .lexeme = ".0", .pos = pos};
    }
    auto handle_fraction(const std::string_view data, source_location pos) -> lex_item
    {
@@ -423,7 +423,7 @@ namespace front
          }
       }
 
-      return {.type = sem::token_type::invalid_num, .lexeme = {period}, .pos = pos};
+      return {.type = sem::token_type::e_invalid_num, .lexeme = {period}, .pos = pos};
    }
 
    /////////////// COMMENTS //////////////////
@@ -436,15 +436,15 @@ namespace front
          const auto str_pos = data.find("*/");
          if (str_pos != std::string_view::npos)
          {
-            return {.type = sem::token_type::block_cmt,
+            return {.type = sem::token_type::e_block_cmt,
                     .lexeme = std::string{data.substr(0, str_pos + 2)},
                     .pos = pos};
          }
 
-         return {.type = sem::token_type::invalid_cmt, .lexeme = std::string{data}, .pos = pos};
+         return {.type = sem::token_type::e_invalid_cmt, .lexeme = std::string{data}, .pos = pos};
       }
 
-      return {.type = sem::token_type::line_cmt,
+      return {.type = sem::token_type::e_line_cmt,
               .lexeme = std::string{data.substr(0, data.find_first_of('\n'))},
               .pos = pos};
    }
@@ -457,12 +457,12 @@ namespace front
 
       if (std::size(lexeme) >= 2)
       {
-         return {.type = sem::token_type::double_colon,
+         return {.type = sem::token_type::e_double_colon,
                  .lexeme = {std::begin(lexeme), std::begin(lexeme) + 2},
                  .pos = pos};
       }
 
-      return {.type = sem::token_type::colon, .lexeme = std::string{lexeme}, .pos = pos};
+      return {.type = sem::token_type::e_colon, .lexeme = std::string{lexeme}, .pos = pos};
    }
 
    auto lex_punctuation(const std::string_view data, source_location pos) -> lex_item
@@ -474,17 +474,17 @@ namespace front
 
       if (first == sem::period)
       {
-         return {.type = sem::token_type::period, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::e_dot, .lexeme = {first}, .pos = pos};
       }
 
       if (first == sem::comma)
       {
-         return {.type = sem::token_type::comma, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::e_comma, .lexeme = {first}, .pos = pos};
       }
 
       if (first == sem::semi_colon)
       {
-         return {.type = sem::token_type::semi_colon, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::e_semi_colon, .lexeme = {first}, .pos = pos};
       }
 
       if (first == sem::colon)
@@ -492,7 +492,7 @@ namespace front
          return handle_colon(data, pos);
       }
 
-      return {.type = sem::token_type::invalid_char, .lexeme{first}, .pos = pos};
+      return {.type = sem::token_type::e_invalid_char, .lexeme{first}, .pos = pos};
    }
 
    /////////// STRING TOKENIZATION //////////////
@@ -507,12 +507,12 @@ namespace front
 
       if (std::size(lexeme) == std::size(data))
       {
-         return {.type = sem::token_type::str_lit,
+         return {.type = sem::token_type::e_str_lit,
                  .lexeme = '\"' + std::string{data} + '\"',
                  .pos = pos};
       }
 
-      return {.type = sem::token_type::invalid_str,
+      return {.type = sem::token_type::e_invalid_str,
               .lexeme = '\"' + std::string{data} + '\"',
               .pos = pos};
    }
@@ -530,7 +530,7 @@ namespace front
          return handle_terminated_string(data.substr(1, next_quotation_mark), pos);
       }
 
-      return {.type = sem::token_type::invalid_str,
+      return {.type = sem::token_type::e_invalid_str,
               .lexeme = std::string{data.substr(0, next_newline + 1)},
               .pos = pos};
    }
@@ -543,41 +543,41 @@ namespace front
       {
          if (data.at(1) == '=')
          {
-            return {.type = sem::token_type::less_equal_than,
+            return {.type = sem::token_type::e_less_equal_than,
                     .lexeme = std::string{data.substr(0, 2)},
                     .pos = pos};
          }
 
          if (data.at(1) == '>')
          {
-            return {.type = sem::token_type::not_equal,
+            return {.type = sem::token_type::e_not_equal,
                     .lexeme = std::string{data.substr(0, 2)},
                     .pos = pos};
          }
       }
 
-      return {.type = sem::token_type::less_than, .lexeme = {data.at(0)}, .pos = pos};
+      return {.type = sem::token_type::e_less_than, .lexeme = {data.at(0)}, .pos = pos};
    }
    auto handle_leading_greater_than(const std::string_view data, source_location pos) -> lex_item
    {
       if (std::size(data) > 1 && data.at(1) == '=')
       {
-         return {.type = sem::token_type::greater_equal_than,
+         return {.type = sem::token_type::e_greater_equal_than,
                  .lexeme = std::string{data.substr(0, 2)},
                  .pos = pos};
       }
 
-      return {.type = sem::token_type::greater_than, .lexeme = {data.at(0)}, .pos = pos};
+      return {.type = sem::token_type::e_greater_thane, .lexeme = {data.at(0)}, .pos = pos};
    }
    auto handle_leading_equal(const std::string_view data, source_location pos) -> lex_item
    {
       if (std::size(data) > 1 && data.at(1) == '=')
       {
          return {
-            .type = sem::token_type::equal, .lexeme = std::string{data.substr(0, 2)}, .pos = pos};
+            .type = sem::token_type::e_equal, .lexeme = std::string{data.substr(0, 2)}, .pos = pos};
       }
 
-      return {.type = sem::token_type::assign, .lexeme = {data.at(0)}, .pos = pos};
+      return {.type = sem::token_type::e_assign, .lexeme = {data.at(0)}, .pos = pos};
    }
 
    auto lex_operator(const std::string_view data, source_location pos) -> lex_item
@@ -585,42 +585,42 @@ namespace front
       const auto first = data.at(0);
       if (first == '+')
       {
-         return {.type = sem::token_type::plus, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::e_plus, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '-')
       {
-         return {.type = sem::token_type::minus, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::e_minus, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '*')
       {
-         return {.type = sem::token_type::mult, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::e_mult, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '/')
       {
-         return {.type = sem::token_type::div, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::e_div, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '|')
       {
-         return {.type = sem::token_type::or_op, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::e_or, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '&')
       {
-         return {.type = sem::token_type::and_op, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::e_and, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '!')
       {
-         return {.type = sem::token_type::not_op, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::e_not, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '?')
       {
-         return {.type = sem::token_type::qmark, .lexeme = {first}, .pos = pos};
+         return {.type = sem::token_type::e_qmark, .lexeme = {first}, .pos = pos};
       }
 
       if (first == '<')

@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <fmt/core.h>
+
 #include <compare>
 #include <cstdint>
 #include <limits>
@@ -43,3 +45,19 @@ namespace front
          -> std::strong_ordering = default;
    };
 } // namespace front
+
+template <>
+struct fmt::formatter<front::source_location>
+{
+   template <typename ParseContex>
+   constexpr auto parse(ParseContex& ctx)
+   {
+      return ctx.begin();
+   }
+
+   template <typename FormatContext>
+   auto format(const front::source_location& pos, FormatContext& ctx)
+   {
+      return fmt::format_to(ctx.out(), "<line:{}, col:{}>", pos.line, pos.column);
+   }
+};

@@ -109,7 +109,8 @@ namespace front::ast
 
    auto compound_member_decl::to_string() const -> std::string { return "compound_member_decl"; }
 
-   member_decl::member_decl(node_ptr visibility, node_ptr var_or_func)
+   member_decl::member_decl(node_ptr visibility, node_ptr var_or_func) :
+      decl{visibility->location()}
    {
       if (visibility != nullptr)
       {
@@ -125,8 +126,7 @@ namespace front::ast
 
    auto member_decl::to_string() const -> std::string
    {
-      return fmt::format("member_decl <line:{}, col:{}> {}", children()[0]->location().line,
-                         children()[0]->location().column, visibility());
+      return fmt::format("member_decl {} {}", location(), visibility());
    }
 
    visibility_decl::visibility_decl(const std::string& name, const source_location& location) :
@@ -140,9 +140,8 @@ namespace front::ast
    }
 
    variable_decl::variable_decl(node_ptr type, node_ptr id, node_ptr compound_array_decl) :
-      decl{type->location()},
-      m_type(type->lexeme()),
-      m_id{id->lexeme()}
+      decl{std::string{id->lexeme()}, type->location()},
+      m_type(type->lexeme())
    {
       if (!std::empty(compound_array_decl->children()))
       {
@@ -154,7 +153,7 @@ namespace front::ast
    auto variable_decl::to_string() const -> std::string
    {
       return fmt::format("variable_decl <line:{}, col:{}> {} '{}'", location().line,
-                         location().column, m_id, m_type);
+                         location().column, lexeme(), m_type);
    }
 
    compound_array_decl::compound_array_decl(std::vector<node_ptr>&& array_decls)
@@ -287,7 +286,10 @@ namespace front::ast
 
    auto stmt_block_decl::to_string() const -> std::string { return "stmt_block_decl"; }
 
-   void decl::accept(visitor&) const { assert(false && "Accept not implemented"); }
+   void decl::accept(visitor&) const
+   {
+      assert(false && "Accept not implemented"); // NOLINT
+   }
 
    void translation_unit_decl::accept(visitor& visitor) const
    {
@@ -300,7 +302,7 @@ namespace front::ast
       }
       */
 
-      visitor.visit(*this);
+      std::visit(visitor, node_variant{this});
    }
 
    void compound_class_decl::accept(visitor& visitor) const
@@ -311,5 +313,5 @@ namespace front::ast
       }
    }
 
-   void class_decl::accept(visitor& visitor) const { visitor.visit(*this); }
+   void class_decl::accept(visitor& visitor) const { std::visit(visitor, node_variant{this}); }
 }; // namespace front::ast

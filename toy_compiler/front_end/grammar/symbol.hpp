@@ -107,7 +107,7 @@ namespace fr::grammar
       /**
        * @brief Construct a default **terminal** `grammar::symbol`
        */
-      static constexpr auto terminal() -> symbol { return {front::sem::token_type::max_size}; }
+      static constexpr auto terminal() -> symbol { return {front::sem::token_type::e_max_size}; }
       /**
        * @brief Construct a default **non_terminal** `grammar::symbol`
        */

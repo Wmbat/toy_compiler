@@ -58,9 +58,9 @@ application::application(std::span<const std::string_view> args, util::logger_wr
                {
                   fmt::print(fmt::emphasis::bold, "{}:{}.{} - ", filepath.c_str(), err.pos.line,
                              err.pos.column);
-                  fmt::print(fmt::fg(fmt::color::red) | fmt::emphasis::bold, "[error]");
+                  fmt::print(fmt::fg(fmt::color::red) | fmt::emphasis::bold, "[{}]", err.type);
 
-                  if (err.type == fr::parse_error_type::syntax_error)
+                  if (err.type == front::parse_error_type::e_syntax_error)
                   {
                      fmt::print(" expected '{}'\n", err.lexeme);
                   }
@@ -71,6 +71,24 @@ application::application(std::span<const std::string_view> args, util::logger_wr
 
             front::ast::visitor visitor;
             result.ast->accept(visitor);
+
+            for (const auto& err : visitor.get_errors())
+            {
+               fmt::print(fmt::emphasis::bold, "{}:{}.{} - ", filepath.c_str(), err.pos.line,
+                          err.pos.column);
+               if (err.type == front::parse_error_type::e_semantic_error)
+               {
+                  fmt::print(fmt::fg(fmt::color::red) | fmt::emphasis::bold, "[{}] ", err.type);
+               }
+               else
+               {
+                  fmt::print(fmt::fg(fmt::color::yellow) | fmt::emphasis::bold, "[{}] ", err.type);
+               }
+
+               fmt::print("{}\n", err.lexeme);
+
+               fmt::print("{}\n", err.line);
+            }
 
             write_ast_to_file(filepath, result.ast);
             write_derivations_to_file(filepath, result.derivation);
@@ -179,22 +197,22 @@ auto application::fancy_lexical_error_type(front::sem::token_type value) const -
 
    using namespace front::sem;
 
-   if (value == token_type::invalid_char)
+   if (value == token_type::e_invalid_char)
    {
       return "invalid character";
    }
 
-   if (value == token_type::invalid_id)
+   if (value == token_type::e_invalid_id)
    {
       return "invalid identifier";
    }
 
-   if (value == token_type::invalid_num)
+   if (value == token_type::e_invalid_num)
    {
       return "invalid number literal";
    }
 
-   if (value == token_type::invalid_str)
+   if (value == token_type::e_invalid_str)
    {
       return "invalid string literal";
    }

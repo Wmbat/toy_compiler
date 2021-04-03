@@ -1,5 +1,7 @@
 #pragma once
 
+#include <magic_enum.hpp>
+
 #include <range/v3/range/conversion.hpp>
 #include <range/v3/view/map.hpp>
 #include <range/v3/view/transform.hpp>
@@ -122,6 +124,22 @@ namespace front::ast
       std::unordered_map<std::string, symbol> m_symbols;
    };
 } // namespace front::ast
+
+template <>
+struct fmt::formatter<front::ast::symbol_type>
+{
+   template <typename ParseContex>
+   constexpr auto parse(ParseContex& ctx)
+   {
+      return ctx.begin();
+   }
+
+   template <typename FormatContext>
+   auto format(front::ast::symbol_type s, FormatContext& ctx)
+   {
+      return fmt::format_to(ctx.out(), "{}", magic_enum::enum_name(s).substr(2));
+   }
+};
 
 template <>
 struct fmt::formatter<front::ast::symbol>

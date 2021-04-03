@@ -21,6 +21,7 @@
 
 #include <toy_compiler/front_end/ast_bis/node.hpp>
 #include <toy_compiler/front_end/lexer.hpp>
+#include <toy_compiler/front_end/parse_error.hpp>
 #include <toy_compiler/util/logger.hpp>
 
 #include <monads/maybe.hpp>
@@ -39,20 +40,6 @@ namespace fr
       error
    };
 
-   enum struct parse_error_type : std::uint32_t
-   {
-      syntax_error,
-      max_size
-   };
-
-   struct parse_error
-   {
-      parse_error_type type{parse_error_type::max_size};
-      front::source_location pos{};
-      std::string lexeme;
-      std::string line;
-   };
-
    /**
     * @brief
     */
@@ -61,7 +48,7 @@ namespace fr
       parse_status value = parse_status::success;
       front::ast::node_ptr ast = nullptr;
       std::string derivation;
-      monad::maybe<std::vector<parse_error>> errors = {};
+      monad::maybe<std::vector<front::parse_error>> errors = {};
    };
 
    /**
@@ -73,19 +60,3 @@ namespace fr
    auto parse_items(std::span<const front::lex_item> items, util::logger_wrapper log = nullptr)
       -> parse_result;
 } // namespace fr
-
-template <>
-struct fmt::formatter<fr::parse_error_type>
-{
-   template <typename ParseContex>
-   constexpr auto parse(ParseContex& ctx)
-   {
-      return ctx.begin();
-   }
-
-   template <typename FormatContext>
-   auto format(fr::parse_error_type error_type, FormatContext& ctx)
-   {
-      return fmt::format_to(ctx.out(), "{}", magic_enum::enum_name(error_type));
-   }
-};

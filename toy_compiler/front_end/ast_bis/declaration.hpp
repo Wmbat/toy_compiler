@@ -147,7 +147,6 @@ namespace front::ast
 
    private:
       std::string m_type;
-      std::string m_id;
    };
 
    class compound_array_decl : public decl

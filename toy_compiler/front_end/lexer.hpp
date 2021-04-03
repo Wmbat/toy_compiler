@@ -54,22 +54,6 @@ namespace front
       -> monad::maybe<std::vector<front::lex_item>>;
 } // namespace front
 
-template <>
-struct fmt::formatter<front::source_location>
-{
-   template <typename ParseContex>
-   constexpr auto parse(ParseContex& ctx)
-   {
-      return ctx.begin();
-   }
-
-   template <typename FormatContext>
-   auto format(const front::source_location& pos, FormatContext& ctx)
-   {
-      return fmt::format_to(ctx.out(), "({}:{})", pos.line, pos.column);
-   }
-};
-
 /**
  * @brief A specialization for using the `fr::lex_item` struct in the **fmt** & **spdlog** libraries
  */

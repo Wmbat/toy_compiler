@@ -1,12 +1,23 @@
 #include <toy_compiler/front_end/ast_bis/node.hpp>
 
+#include <toy_compiler/front_end/ast/node/add_op.hpp>
+#include <toy_compiler/front_end/ast/node/assign_op.hpp>
+#include <toy_compiler/front_end/ast/node/dot_decl.hpp>
+#include <toy_compiler/front_end/ast/node/dot_op.hpp>
+#include <toy_compiler/front_end/ast/node/float_expr.hpp>
 #include <toy_compiler/front_end/ast/node/integer_expr.hpp>
+#include <toy_compiler/front_end/ast/node/mult_op.hpp>
+#include <toy_compiler/front_end/ast/node/not_expr.hpp>
+#include <toy_compiler/front_end/ast/node/op.hpp>
+#include <toy_compiler/front_end/ast/node/priority_expr.hpp>
+#include <toy_compiler/front_end/ast/node/rel_op.hpp>
+#include <toy_compiler/front_end/ast/node/sign_expr.hpp>
+#include <toy_compiler/front_end/ast/node/string_expr.hpp>
 #include <toy_compiler/front_end/ast_bis/compound_stmt.hpp>
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
 #include <toy_compiler/front_end/ast_bis/factor.hpp>
 #include <toy_compiler/front_end/ast_bis/function_decl.hpp>
 #include <toy_compiler/front_end/ast_bis/literals.hpp>
-#include <toy_compiler/front_end/ast_bis/operator.hpp>
 #include <toy_compiler/front_end/ast_bis/statement.hpp>
 
 #include <fmt/color.h>
@@ -76,6 +87,11 @@ namespace front::ast
       if (action == sem::action::id_decl)
       {
          return std::make_unique<id_decl>(item.lexeme, item.pos);
+      }
+
+      if (action == sem::action::e_dot_decl)
+      {
+         return std::make_unique<dot_decl>(item.lexeme, item.pos);
       }
 
       if (action == sem::action::type_decl)
@@ -377,7 +393,7 @@ namespace front::ast
          return std::make_unique<mult_op>(std::move(term_0), std::move(id), std::move(term_1));
       }
 
-      if (action == sem::action::add_op)
+      if (action == sem::action::e_add_op)
       {
          node_ptr factor_1 = pop(recs);
          node_ptr id = pop(recs);
@@ -385,7 +401,22 @@ namespace front::ast
 
          assert(dynamic_cast<id_decl*>(id.get())); // NOLINT
 
-         return std::make_unique<mult_op>(std::move(factor_0), std::move(id), std::move(factor_1));
+         return std::make_unique<add_op>(std::move(factor_0), std::move(id), std::move(factor_1));
+      }
+
+      if (action == sem::action::e_dot_op)
+      {
+         node_ptr expr_1 = pop(recs);
+
+         if (dynamic_cast<dot_decl*>(recs.back().get()))
+         {
+            node_ptr dot = pop(recs);
+            node_ptr expr_0 = pop(recs);
+
+            return std::make_unique<dot_op>(std::move(expr_0), std::move(dot), std::move(expr_1));
+         }
+
+         return expr_1;
       }
 
       if (action == sem::action::mult_op)
@@ -454,8 +485,8 @@ namespace front::ast
 
       if (action == sem::action::func_or_var_expr)
       {
-         std::vector place_holders = recs | vi::reverse | vi::take_while(detail::is_type<expr>) |
-            vi::move | ranges::to_vector;
+         std::vector place_holders = recs | vi::reverse |
+            vi::take_while(detail::is_type<expr, dot_op>) | vi::move | ranges::to_vector;
 
          std::vector<node_ptr> nodes;
          for (auto& node : place_holders | vi::reverse)

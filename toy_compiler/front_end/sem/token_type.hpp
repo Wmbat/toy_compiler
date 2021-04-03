@@ -35,66 +35,66 @@ namespace front::sem
     */
    enum struct token_type : std::uint32_t
    {
-      epsilon,
-      id,
-      id_if,
-      id_then,
-      id_else,
-      id_integer,
-      id_float,
-      id_string,
-      id_void,
-      id_public,
-      id_private,
-      id_func,
-      id_var,
-      id_class,
-      id_while,
-      id_read,
-      id_write,
-      id_return,
-      id_main,
-      id_inherits,
-      id_break,
-      id_continue,
-      integer_lit,
-      float_lit,
-      str_lit,
-      period,
-      comma,
-      colon,
-      double_colon,
-      semi_colon,
-      plus,
-      minus,
-      mult,
-      div,
-      assign,
-      or_op,
-      and_op,
-      not_op,
-      qmark,
-      equal,
-      less_than,
-      less_equal_than,
-      greater_than,
-      greater_equal_than,
-      not_equal,
-      left_brace,
-      right_brace,
-      left_square,
-      right_square,
-      left_paren,
-      right_paren,
-      line_cmt,
-      block_cmt,
-      eof,
-      invalid_char,
-      invalid_id,
-      invalid_num,
-      invalid_str,
-      invalid_cmt,
-      max_size
+      e_epsilon,
+      e_id,
+      e_if,
+      e_then,
+      e_else,
+      e_integer,
+      e_float,
+      e_string,
+      e_void,
+      e_public,
+      e_private,
+      e_func,
+      e_var,
+      e_class,
+      e_while,
+      e_read,
+      e_write,
+      e_return,
+      e_main,
+      e_inherits,
+      e_break,
+      e_continue,
+      e_integer_lit,
+      e_float_lit,
+      e_str_lit,
+      e_dot,
+      e_comma,
+      e_colon,
+      e_double_colon,
+      e_semi_colon,
+      e_plus,
+      e_minus,
+      e_mult,
+      e_div,
+      e_assign,
+      e_or,
+      e_and,
+      e_not,
+      e_qmark,
+      e_equal,
+      e_less_than,
+      e_less_equal_than,
+      e_greater_thane,
+      e_greater_equal_than,
+      e_not_equal,
+      e_left_brace,
+      e_right_brace,
+      e_left_square,
+      e_right_square,
+      e_left_paren,
+      e_right_paren,
+      e_line_cmt,
+      e_block_cmt,
+      e_eof,
+      e_invalid_char,
+      e_invalid_id,
+      e_invalid_num,
+      e_invalid_str,
+      e_invalid_cmt,
+      e_max_size
    };
 
    /**
@@ -107,12 +107,12 @@ namespace front::sem
     */
    constexpr auto is_token_invalid(token_type value) -> bool
    {
-      return (value == token_type::invalid_char) || (value == token_type::invalid_id) ||
-         (value == token_type::invalid_num) || (value == token_type::invalid_cmt) ||
-         (value == token_type::invalid_str);
+      return (value == token_type::e_invalid_char) || (value == token_type::e_invalid_id) ||
+         (value == token_type::e_invalid_num) || (value == token_type::e_invalid_cmt) ||
+         (value == token_type::e_invalid_str);
    }
 
-   constexpr auto is_eof(token_type value) -> bool { return token_type::eof == value; }
+   constexpr auto is_eof(token_type value) -> bool { return token_type::e_eof == value; }
 
    constexpr char period = '.';
    constexpr char comma = ',';
@@ -142,6 +142,6 @@ struct fmt::formatter<front::sem::token_type>
    template <typename FormatContext>
    auto format(front::sem::token_type t, FormatContext& ctx)
    {
-      return fmt::format_to(ctx.out(), "{}", magic_enum::enum_name(t));
+      return fmt::format_to(ctx.out(), "{}", magic_enum::enum_name(t).substr(2));
    }
 };

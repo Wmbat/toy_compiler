@@ -46,7 +46,7 @@ TEST_SUITE("grammar/symbol.hpp test suite")
       constexpr auto stop = symbol::stop();
 
       CHECK(terminal.type() == symbol_type::terminal);
-      CHECK(get<symbol_type::terminal>(terminal) == token_type::max_size);
+      CHECK(get<symbol_type::terminal>(terminal) == token_type::e_max_size);
       CHECK(non_terminal.type() == symbol_type::non_terminal);
       CHECK(get<symbol_type::non_terminal>(non_terminal) == grammar_type::max_size);
       CHECK(start.type() == symbol_type::non_terminal);
@@ -58,7 +58,7 @@ TEST_SUITE("grammar/symbol.hpp test suite")
    {
       SUBCASE("token_type")
       {
-         const auto token_size = static_cast<std::uint32_t>(token_type::max_size);
+         const auto token_size = static_cast<std::uint32_t>(token_type::e_max_size);
 
          for (token_type type : vi::iota(0u, token_size) | vi::transform(to<token_type>))
          {
@@ -89,7 +89,7 @@ TEST_SUITE("grammar/symbol.hpp test suite")
          symbol s1_prime{grammar_type::add_op};
          CHECK(s1 == s1_prime);
 
-         symbol s2{token_type::max_size};
+         symbol s2{token_type::e_max_size};
          CHECK(s2 == symbol::terminal());
 
          CHECK(s2 != s1);
@@ -98,13 +98,13 @@ TEST_SUITE("grammar/symbol.hpp test suite")
       {
          using ranges::views::iota;
 
-         for (std::uint32_t i : iota(0u, static_cast<std::uint32_t>(token_type::max_size)))
+         for (std::uint32_t i : iota(0u, static_cast<std::uint32_t>(token_type::e_max_size)))
          {
             symbol s{static_cast<token_type>(i)};
             CHECK(s == static_cast<token_type>(i));
          }
 
-         for (std::uint32_t i : iota(1u, static_cast<std::uint32_t>(token_type::max_size)))
+         for (std::uint32_t i : iota(1u, static_cast<std::uint32_t>(token_type::e_max_size)))
          {
             symbol s{static_cast<token_type>(i)};
             CHECK_FALSE(s == static_cast<token_type>(i - 1));
@@ -129,7 +129,7 @@ TEST_SUITE("grammar/symbol.hpp test suite")
    }
    TEST_CASE("get()")
    {
-      const auto token_size = static_cast<std::uint32_t>(token_type::max_size);
+      const auto token_size = static_cast<std::uint32_t>(token_type::e_max_size);
       const auto grammar_size = static_cast<std::uint32_t>(grammar_type::max_size);
 
       for (token_type type : vi::iota(0u, token_size) | vi::transform(to<token_type>))
@@ -163,7 +163,7 @@ TEST_SUITE("grammar/symbol.hpp test suite")
       {
          using ranges::views::iota;
 
-         for (std::uint32_t i : iota(0u, static_cast<std::uint32_t>(token_type::max_size)))
+         for (std::uint32_t i : iota(0u, static_cast<std::uint32_t>(token_type::e_max_size)))
          {
             symbol s{static_cast<token_type>(i)};
             CHECK(is_terminal(s));
@@ -184,7 +184,7 @@ TEST_SUITE("grammar/symbol.hpp test suite")
       {
          using ranges::views::iota;
 
-         for (std::uint32_t i : iota(0u, static_cast<std::uint32_t>(token_type::max_size)))
+         for (std::uint32_t i : iota(0u, static_cast<std::uint32_t>(token_type::e_max_size)))
          {
             symbol s{static_cast<token_type>(i)};
             CHECK_FALSE(is_non_terminal(s));
@@ -205,7 +205,7 @@ TEST_SUITE("grammar/symbol.hpp test suite")
       {
          using ranges::views::iota;
 
-         for (std::uint32_t i : iota(0u, static_cast<std::uint32_t>(token_type::max_size)))
+         for (std::uint32_t i : iota(0u, static_cast<std::uint32_t>(token_type::e_max_size)))
          {
             symbol s{static_cast<token_type>(i)};
             CHECK_FALSE(is_stop(s));
@@ -252,7 +252,7 @@ TEST_SUITE("grammar/symbol.hpp test suite")
 
       namespace vi = ranges::views;
 
-      const auto token_size = static_cast<std::uint32_t>(token_type::max_size);
+      const auto token_size = static_cast<std::uint32_t>(token_type::e_max_size);
       const auto grammar_size = static_cast<std::uint32_t>(grammar_type::max_size);
 
       for (token_type type : vi::iota(0u, token_size) | vi::transform(to<token_type>))

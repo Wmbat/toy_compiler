@@ -14,46 +14,6 @@ namespace front::ast
       [[nodiscard]] auto to_string() const -> std::string override = 0;
    };
 
-   class float_expr : public expr
-   {
-   public:
-      float_expr(const std::string& lexeme, const source_location& location);
-
-      [[nodiscard]] auto to_string() const -> std::string override;
-   };
-
-   class string_expr : public expr
-   {
-   public:
-      string_expr(const std::string& lexeme, const source_location& location);
-
-      [[nodiscard]] auto to_string() const -> std::string override;
-   };
-
-   class priority_expr : public expr
-   {
-   public:
-      priority_expr(node_ptr location, node_ptr expr);
-
-      [[nodiscard]] auto to_string() const -> std::string override;
-   };
-
-   class not_expr : public expr
-   {
-   public:
-      not_expr(node_ptr value, node_ptr factor);
-
-      [[nodiscard]] auto to_string() const -> std::string override;
-   };
-
-   class sign_expr : public expr
-   {
-   public:
-      sign_expr(node_ptr sign, node_ptr factor);
-
-      [[nodiscard]] auto to_string() const -> std::string override;
-   };
-
    class func_or_var_expr : public expr
    {
    public:

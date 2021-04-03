@@ -50,10 +50,10 @@ TEST_SUITE("Lexer test suite")
 
          for (auto& token : std::span(std::begin(data), 22))
          {
-            CHECK(token.type == front::sem::token_type::id);
+            CHECK(token.type == front::sem::token_type::e_id);
          }
 
-         CHECK(data.at(22).type == front::sem::token_type::eof);
+         CHECK(data.at(22).type == front::sem::token_type::e_eof);
       }
       SUBCASE("invalid")
       {
@@ -64,29 +64,29 @@ TEST_SUITE("Lexer test suite")
          auto data = maybe.value();
 
          CHECK(std::size(data) == 13);
-         CHECK(data.at(0).type == front::sem::token_type::invalid_char);
+         CHECK(data.at(0).type == front::sem::token_type::e_invalid_char);
          CHECK(data.at(0).pos.line == 1);
-         CHECK(data.at(1).type == front::sem::token_type::id);
+         CHECK(data.at(1).type == front::sem::token_type::e_id);
          CHECK(data.at(1).pos.line == 1);
-         CHECK(data.at(2).type == front::sem::token_type::id);
+         CHECK(data.at(2).type == front::sem::token_type::e_id);
          CHECK(data.at(2).pos.line == 1);
-         CHECK(data.at(3).type == front::sem::token_type::id);
+         CHECK(data.at(3).type == front::sem::token_type::e_id);
          CHECK(data.at(3).pos.line == 1);
-         CHECK(data.at(4).type == front::sem::token_type::id);
+         CHECK(data.at(4).type == front::sem::token_type::e_id);
          CHECK(data.at(4).pos.line == 1);
-         CHECK(data.at(5).type == front::sem::token_type::id);
+         CHECK(data.at(5).type == front::sem::token_type::e_id);
          CHECK(data.at(6).pos.line == 1);
-         CHECK(data.at(6).type == front::sem::token_type::id);
+         CHECK(data.at(6).type == front::sem::token_type::e_id);
          CHECK(data.at(6).pos.line == 1);
-         CHECK(data.at(7).type == front::sem::token_type::invalid_char);
+         CHECK(data.at(7).type == front::sem::token_type::e_invalid_char);
          CHECK(data.at(7).pos.line == 1);
-         CHECK(data.at(8).type == front::sem::token_type::id);
+         CHECK(data.at(8).type == front::sem::token_type::e_id);
          CHECK(data.at(8).pos.line == 1);
-         CHECK(data.at(9).type == front::sem::token_type::invalid_char);
+         CHECK(data.at(9).type == front::sem::token_type::e_invalid_char);
          CHECK(data.at(9).pos.line == 1);
-         CHECK(data.at(10).type == front::sem::token_type::invalid_char);
+         CHECK(data.at(10).type == front::sem::token_type::e_invalid_char);
          CHECK(data.at(10).pos.line == 2);
-         CHECK(data.at(11).type == front::sem::token_type::id);
+         CHECK(data.at(11).type == front::sem::token_type::e_id);
          CHECK(data.at(11).pos.line == 2);
       }
    }
@@ -100,28 +100,28 @@ TEST_SUITE("Lexer test suite")
 
          auto data = maybe.value();
 
-         CHECK(data.at(0).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(1).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(2).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(3).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(4).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(5).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(6).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(7).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(8).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(9).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(10).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(11).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(12).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(13).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(14).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(15).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(16).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(17).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(18).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(19).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(20).type == front::sem::token_type::integer_lit);
-         CHECK(data.at(21).type == front::sem::token_type::id);
+         CHECK(data.at(0).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(1).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(2).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(3).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(4).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(5).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(6).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(7).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(8).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(9).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(10).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(11).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(12).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(13).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(14).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(15).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(16).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(17).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(18).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(19).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(20).type == front::sem::token_type::e_integer_lit);
+         CHECK(data.at(21).type == front::sem::token_type::e_id);
       }
    }
    TEST_CASE("float test")
@@ -136,7 +136,7 @@ TEST_SUITE("Lexer test suite")
 
          for (std::uint32_t index = 1; auto& tok : std::span(std::begin(data), std::end(data) - 1))
          {
-            CHECK(tok.type == front::sem::token_type::float_lit);
+            CHECK(tok.type == front::sem::token_type::e_float_lit);
             CHECK(tok.pos.line == index++);
          }
       }
@@ -201,7 +201,7 @@ TEST_SUITE("Lexer test suite")
 
          for (auto& tok : std::span{std::begin(data), std::end(data) - 1})
          {
-            CHECK(tok.type == front::sem::token_type::str_lit);
+            CHECK(tok.type == front::sem::token_type::e_str_lit);
          }
       }
       SUBCASE("invalid")
@@ -216,7 +216,7 @@ TEST_SUITE("Lexer test suite")
 
          for (auto& tok : std::span{std::begin(data), std::end(data) - 1})
          {
-            CHECK(tok.type == front::sem::token_type::invalid_str);
+            CHECK(tok.type == front::sem::token_type::e_invalid_str);
          }
       }
    }
@@ -305,10 +305,10 @@ TEST_SUITE("Lexer test suite")
 
          const auto data = maybe.value();
 
-         CHECK((std::begin(data) + 0)->type == front::sem::token_type::line_cmt);
-         CHECK((std::begin(data) + 1)->type == front::sem::token_type::block_cmt);
-         CHECK((std::begin(data) + 2)->type == front::sem::token_type::block_cmt);
-         CHECK((std::begin(data) + 3)->type == front::sem::token_type::block_cmt);
+         CHECK((std::begin(data) + 0)->type == front::sem::token_type::e_line_cmt);
+         CHECK((std::begin(data) + 1)->type == front::sem::token_type::e_block_cmt);
+         CHECK((std::begin(data) + 2)->type == front::sem::token_type::e_block_cmt);
+         CHECK((std::begin(data) + 3)->type == front::sem::token_type::e_block_cmt);
          CHECK((std::begin(data) + 3)->pos.line == 7);
       }
       SUBCASE("invalid")
@@ -318,7 +318,7 @@ TEST_SUITE("Lexer test suite")
 
          const auto data = maybe.value();
 
-         CHECK(std::begin(data)->type == front::sem::token_type::invalid_cmt);
+         CHECK(std::begin(data)->type == front::sem::token_type::e_invalid_cmt);
       }
    }
    TEST_CASE("invalid characters")
@@ -331,28 +331,28 @@ TEST_SUITE("Lexer test suite")
 
       CHECK(*(std::begin(data) + 0) ==
             front::lex_item{
-               .type = front::sem::token_type::invalid_char, .lexeme = "@", .pos = {1, 1}});
+               .type = front::sem::token_type::e_invalid_char, .lexeme = "@", .pos = {1, 1}});
       CHECK(*(std::begin(data) + 1) ==
             front::lex_item{
-               .type = front::sem::token_type::invalid_char, .lexeme = "#", .pos = {1, 3}});
+               .type = front::sem::token_type::e_invalid_char, .lexeme = "#", .pos = {1, 3}});
       CHECK(*(std::begin(data) + 2) ==
             front::lex_item{
-               .type = front::sem::token_type::invalid_char, .lexeme = "$", .pos = {1, 5}});
+               .type = front::sem::token_type::e_invalid_char, .lexeme = "$", .pos = {1, 5}});
       CHECK(*(std::begin(data) + 3) ==
             front::lex_item{
-               .type = front::sem::token_type::invalid_char, .lexeme = "'", .pos = {1, 7}});
+               .type = front::sem::token_type::e_invalid_char, .lexeme = "'", .pos = {1, 7}});
       CHECK(*(std::begin(data) + 4) ==
             front::lex_item{
-               .type = front::sem::token_type::invalid_char, .lexeme = "\\", .pos = {1, 9}});
+               .type = front::sem::token_type::e_invalid_char, .lexeme = "\\", .pos = {1, 9}});
       CHECK(*(std::begin(data) + 5) ==
             front::lex_item{
-               .type = front::sem::token_type::invalid_char, .lexeme = "~", .pos = {1, 11}});
+               .type = front::sem::token_type::e_invalid_char, .lexeme = "~", .pos = {1, 11}});
    }
    TEST_CASE("fmt::formatter - front::lex_item")
    {
       using namespace front;
 
-      lex_item tok{.type = front::sem::token_type::integer_lit, .lexeme = "hello", .pos = {10, 10}};
+      lex_item tok{.type = front::sem::token_type::e_integer_lit, .lexeme = "hello", .pos = {10, 10}};
 
       CHECK(fmt::format("{}", tok) ==
             fmt::format("[.type = {}, .lexeme = {}, .position = ({}:{})]", tok.type, tok.lexeme,

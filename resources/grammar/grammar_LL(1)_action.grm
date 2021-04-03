@@ -61,12 +61,12 @@
 
 <FuncHead> ::= 'func' 'id' <ClassMethod> '(' <FParams> ')' ':' <FuncDeclTail> 
 
-<FuncOrAssignStat> ::= 'id' <FuncOrAssignStatIdnest> 
+<FuncOrAssignStat> ::= 'id' (IdDecl) <FuncOrAssignStatIdnest> 
 
-<FuncOrAssignStatIdnest> ::= <IndiceRep> <FuncOrAssignStatIdnestVarTail> 
-<FuncOrAssignStatIdnest> ::= '(' <AParams> ')' <FuncOrAssignStatIdnestFuncTail> 
+<FuncOrAssignStatIdnest> ::= <IndiceRep> (CompoundArrayIndexAccessDecl) (VarExpr) <FuncOrAssignStatIdnestVarTail> 
+<FuncOrAssignStatIdnest> ::= '(' <AParams> ')' (CompoundParameterExprDecl) (FuncExpr) <FuncOrAssignStatIdnestFuncTail> 
 
-<FuncOrAssignStatIdnestFuncTail> ::= '.' 'id' <FuncStatTail> 
+<FuncOrAssignStatIdnestFuncTail> ::= '.' (DotDecl) 'id' (IdDecl) <FuncStatTail> 
 <FuncOrAssignStatIdnestFuncTail> ::= EPSILON 
 
 <FuncOrAssignStatIdnestVarTail> ::= '.' 'id' <FuncOrAssignStatIdnest> 
@@ -74,10 +74,10 @@
 
 <FuncOrVar> ::= 'id' (IdDecl) <FuncOrVarIdnest> 
 
-<FuncOrVarIdnest> ::= <IndiceRep> (CompoundArrayIndexAccessDecl) (VarExpr) <FuncOrVarIdnestTail> 
-<FuncOrVarIdnest> ::= '(' <AParams> ')' (CompoundParameterExprDecl) (FuncExpr) <FuncOrVarIdnestTail> 
+<FuncOrVarIdnest> ::= <IndiceRep> (CompoundArrayIndexAccessDecl) (VarExpr) (DotOp) <FuncOrVarIdnestTail> 
+<FuncOrVarIdnest> ::= '(' <AParams> ')' (CompoundParameterExprDecl) (FuncExpr) (DotOp) <FuncOrVarIdnestTail> 
 
-<FuncOrVarIdnestTail> ::= '.' 'id' (IdDecl) <FuncOrVarIdnest> 
+<FuncOrVarIdnestTail> ::= '.' (IdDecl) 'id' (IdDecl) <FuncOrVarIdnest> 
 <FuncOrVarIdnestTail> ::= EPSILON 
 
 <FuncStatTail> ::= <IndiceRep> '.' 'id' <FuncStatTail> 

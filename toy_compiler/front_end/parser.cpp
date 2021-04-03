@@ -48,7 +48,7 @@ namespace fr
    auto is_comment(const front::lex_item& item) -> bool;
    auto is_epsilon(const grammar::symbol& s) -> bool
    {
-      return s == front::sem::token_type::epsilon;
+      return s == front::sem::token_type::e_epsilon;
    }
    auto pop(std::vector<grammar::symbol>& stack) -> grammar::symbol
    {
@@ -74,7 +74,7 @@ namespace fr
    {
       static const auto table = fr::grammar::construct_production_table();
 
-      std::vector<parse_error> errors;
+      std::vector<front::parse_error> errors;
       std::vector<front::ast::node_ptr> nodes;
       std::vector<grammar::symbol> stack;
       stack.push_back(grammar::symbol::stop());
@@ -120,10 +120,11 @@ namespace fr
                   log.warning("SCANNING...");
 
                   const auto type = get<grammar::symbol_type::terminal>(top_symbol);
-                  errors.push_back(parse_error{.type = parse_error_type::syntax_error,
-                                               .pos = item_it->pos,
-                                               .lexeme = fmt::format("{}", type),
-                                               .line = {}});
+                  errors.push_back(
+                     front::parse_error{.type = front::parse_error_type::e_syntax_error,
+                                        .pos = item_it->pos,
+                                        .lexeme = fmt::format("{}", type),
+                                        .line = {}});
 
                   while (!front::sem::is_eof(item_it->type) && item_it->type != top_symbol)
                   {
@@ -169,10 +170,11 @@ namespace fr
                   log.warning("SCANNING OF {}...", top_symbol);
 
                   const auto type = get<grammar::symbol_type::non_terminal>(top_symbol);
-                  errors.push_back(parse_error{.type = parse_error_type::syntax_error,
-                                               .pos = item_it->pos,
-                                               .lexeme = fmt::format("{}", type),
-                                               .line = {}});
+                  errors.push_back(
+                     front::parse_error{.type = front::parse_error_type::e_syntax_error,
+                                        .pos = item_it->pos,
+                                        .lexeme = fmt::format("{}", type),
+                                        .line = {}});
 
                   if (first_it->nullable())
                   {
@@ -240,7 +242,7 @@ namespace fr
    auto is_comment(const front::lex_item& item) -> bool
    {
       using namespace grammar;
-      return (item.type == front::sem::token_type::block_cmt) ||
-         (item.type == front::sem::token_type::line_cmt);
+      return (item.type == front::sem::token_type::e_block_cmt) ||
+         (item.type == front::sem::token_type::e_line_cmt);
    }
 } // namespace fr
