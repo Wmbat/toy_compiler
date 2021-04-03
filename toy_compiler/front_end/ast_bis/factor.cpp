@@ -8,11 +8,6 @@ namespace front::ast
    expr::expr(const std::string& lexeme, const source_location& location) : decl{lexeme, location}
    {}
 
-   func_or_var_expr::func_or_var_expr(std::vector<node_ptr>&& var_or_func_decls)
-   {
-      make_family<expr>(std::move(var_or_func_decls));
-   }
-
    variable_expr::variable_expr(node_ptr id, node_ptr compound_array_indices) :
       expr{std::string{id->lexeme()}, id->location()}
    {
@@ -50,10 +45,6 @@ namespace front::ast
       make_child(std::move(expr_1));
    }
 
-   auto func_or_var_expr::to_string() const -> std::string
-   {
-      return fmt::format("func_or_var_expr");
-   }
    auto variable_expr::to_string() const -> std::string
    {
       return fmt::format("variable_expr <line:{1}, col:{2}> '{0}'", lexeme(), location().line,

@@ -14,14 +14,6 @@ namespace front::ast
       [[nodiscard]] auto to_string() const -> std::string override = 0;
    };
 
-   class func_or_var_expr : public expr
-   {
-   public:
-      func_or_var_expr(std::vector<node_ptr>&& var_or_func_decls);
-
-      [[nodiscard]] auto to_string() const -> std::string override;
-   };
-
    class variable_expr : public expr
    {
    public:

@@ -54,7 +54,6 @@ namespace front::sem
       str_expr,
       not_expr,
       sign_expr,
-      func_or_var_expr,
       var_expr,
       func_expr,
       compound_parameter_expr_decl,

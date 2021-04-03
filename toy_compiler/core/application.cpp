@@ -134,7 +134,7 @@ void pre_order_traversal(const front::ast::node_ptr& node, std::size_t depth,
 
    const auto name = fmt::format("- {}\n", node);
    fmt::print(output_file, "{:>{}}", name, std::size(name) + depth * 2);
-   fmt::print("{:>{}}", name, std::size(name) + depth * 2);
+   // fmt::print("{:>{}}", name, std::size(name) + depth * 2);
 
    for (const auto& child : node->children())
    {
@@ -157,37 +157,6 @@ void application::write_ast_to_file(const std::filesystem::path& path,
    std::ofstream output_file{output_path};
 
    pre_order_traversal(root, 0, output_file);
-
-   /*
-   std::vector<front::ast::node*> stack;
-   front::ast::node* curr = root.get();
-
-   while (!std::empty(stack) || curr)
-   {
-      if (curr)
-      {
-         const auto name = fmt::format("- {}\n", *curr);
-         fmt::print(output_file, "{:>{}}", name, std::size(name) + std::size(stack) * 2);
-         fmt::print("{:>{}}", name, std::size(name) + std::size(stack) * 2);
-
-         stack.push_back(curr);
-
-         if (!std::empty(curr->children()))
-         {
-            curr = curr->children()[0].get();
-         }
-         else
-         {
-            curr = nullptr;
-         }
-      }
-      else
-      {
-         curr = pop(stack);
-         curr = curr->sibling().get();
-      };
-   }
-   */
 }
 
 auto application::fancy_lexical_error_type(front::sem::token_type value) const -> std::string
