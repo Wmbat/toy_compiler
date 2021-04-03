@@ -1,6 +1,6 @@
 #include <toy_compiler/front_end/ast_bis/function_decl.hpp>
 
-#include <toy_compiler/front_end/ast_bis/compound_stmt.hpp>
+#include <toy_compiler/front_end/ast/node/compound_stmt.hpp>
 
 #include <range/v3/view/tail.hpp>
 #include <utility>

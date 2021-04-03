@@ -1,0 +1,14 @@
+#pragma once
+
+#include <toy_compiler/front_end/ast_bis/statement.hpp>
+
+namespace front::ast
+{
+   class func_or_assign_stmt : public stmt
+   {
+   public:
+      func_or_assign_stmt(std::vector<node_ptr>&& var_or_func_decls);
+
+      [[nodiscard]] auto to_string() const -> std::string override;
+   };
+} // namespace front::ast

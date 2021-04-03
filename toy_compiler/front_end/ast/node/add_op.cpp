@@ -11,6 +11,6 @@ namespace front::ast
 
    auto add_op::to_string() const -> std::string
    {
-      return fmt::format("operator {} {}", lexeme(), location());
+      return fmt::format("operator{} {}", lexeme(), location());
    }
 } // namespace front::ast

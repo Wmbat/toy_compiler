@@ -1,4 +1,4 @@
-#include <toy_compiler/front_end/ast_bis/compound_stmt.hpp>
+#include <toy_compiler/front_end/ast/node/compound_stmt.hpp>
 
 namespace front::ast
 {

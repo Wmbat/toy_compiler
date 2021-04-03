@@ -54,14 +54,6 @@ namespace front::ast
       make_child(std::move(expr));
    }
 
-   break_stmt::break_stmt(const std::string& lexeme, const source_location& location) :
-      stmt{lexeme, location}
-   {}
-
-   continue_stmt::continue_stmt(const std::string& lexeme, const source_location& location) :
-      stmt{lexeme, location}
-   {}
-
    auto if_stmt::to_string() const -> std::string
    {
       return fmt::format("if_stmt <line:{}, col:{}>", location().line, location().column);
@@ -81,13 +73,5 @@ namespace front::ast
    auto return_stmt::to_string() const -> std::string
    {
       return fmt::format("return_stmt <line:{}, col:{}>", location().line, location().column);
-   }
-   auto break_stmt::to_string() const -> std::string
-   {
-      return fmt::format("break_stmt <line:{}, col:{}>", location().line, location().column);
-   }
-   auto continue_stmt::to_string() const -> std::string
-   {
-      return fmt::format("continue_stmt <line:{}, col:{}>", location().line, location().column);
    }
 } // namespace front::ast

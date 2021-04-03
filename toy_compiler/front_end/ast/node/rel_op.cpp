@@ -11,7 +11,7 @@ namespace front::ast
 
    auto rel_op::to_string() const -> std::string
    {
-      return fmt::format("operator {} <line:{}, col:{}>", lexeme(), location().line,
+      return fmt::format("operator{} <line:{}, col:{}>", lexeme(), location().line,
                          location().column);
    }
 

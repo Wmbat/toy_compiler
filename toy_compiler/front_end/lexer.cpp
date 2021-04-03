@@ -48,6 +48,11 @@ namespace front
       -> std::tuple<std::string_view, std::uint32_t, std::uint32_t>;
    auto check_for_newlines(const lex_item& tok) -> std::uint32_t
    {
+      if (tok.type == sem::token_type::e_line_cmt)
+      {
+         return 1;
+      }
+
       if (tok.type == sem::token_type::e_block_cmt)
       {
          return static_cast<std::uint32_t>(ranges::count(tok.lexeme, '\n'));
@@ -143,7 +148,7 @@ namespace front
 
       if (const auto* it = ranges::find(keywords, lexeme); it != std::end(keywords))
       {
-         std::string adjusted = "id_";
+         std::string adjusted = "e_";
          adjusted.append(*it);
          return {.type = magic_enum::enum_cast<sem::token_type>(adjusted).value(),
                  .lexeme = lexeme,
@@ -322,7 +327,8 @@ namespace front
    auto handle_scientific_notation(const std::string_view data, source_location pos) -> lex_item
    {
       const auto convert = [](const lex_item& tok) {
-         return tok.type != sem::token_type::e_invalid_num ? sem::token_type::e_float_lit : tok.type;
+         return tok.type != sem::token_type::e_invalid_num ? sem::token_type::e_float_lit
+                                                           : tok.type;
       };
 
       const auto first = data.at(0);

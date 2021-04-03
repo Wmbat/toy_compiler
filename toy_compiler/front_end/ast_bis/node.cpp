@@ -2,9 +2,13 @@
 
 #include <toy_compiler/front_end/ast/node/add_op.hpp>
 #include <toy_compiler/front_end/ast/node/assign_op.hpp>
+#include <toy_compiler/front_end/ast/node/break_stmt.hpp>
+#include <toy_compiler/front_end/ast/node/compound_stmt.hpp>
+#include <toy_compiler/front_end/ast/node/continue_stmt.hpp>
 #include <toy_compiler/front_end/ast/node/dot_decl.hpp>
 #include <toy_compiler/front_end/ast/node/dot_op.hpp>
 #include <toy_compiler/front_end/ast/node/float_expr.hpp>
+#include <toy_compiler/front_end/ast/node/func_or_assign_stmt.hpp>
 #include <toy_compiler/front_end/ast/node/integer_expr.hpp>
 #include <toy_compiler/front_end/ast/node/mult_op.hpp>
 #include <toy_compiler/front_end/ast/node/not_expr.hpp>
@@ -13,7 +17,6 @@
 #include <toy_compiler/front_end/ast/node/rel_op.hpp>
 #include <toy_compiler/front_end/ast/node/sign_expr.hpp>
 #include <toy_compiler/front_end/ast/node/string_expr.hpp>
-#include <toy_compiler/front_end/ast_bis/compound_stmt.hpp>
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
 #include <toy_compiler/front_end/ast_bis/factor.hpp>
 #include <toy_compiler/front_end/ast_bis/function_decl.hpp>
@@ -382,7 +385,7 @@ namespace front::ast
          return std::make_unique<main_decl>(std::move(id), std::move(func_body));
       }
 
-      if (action == sem::action::rel_op)
+      if (action == sem::action::e_rel_op)
       {
          node_ptr term_1 = pop(recs);
          node_ptr id = pop(recs);
@@ -419,7 +422,7 @@ namespace front::ast
          return expr_1;
       }
 
-      if (action == sem::action::mult_op)
+      if (action == sem::action::e_mult_op)
       {
          node_ptr factor_1 = pop(recs);
          node_ptr id = pop(recs);
@@ -430,6 +433,22 @@ namespace front::ast
          assert(dynamic_cast<expr*>(factor_1.get())); // NOLINT
 
          return std::make_unique<mult_op>(std::move(factor_0), std::move(id), std::move(factor_1));
+      }
+
+      if (action == sem::action::e_assign_op)
+      {
+         node_ptr value_1 = pop(recs);
+         node_ptr id = pop(recs);
+         node_ptr value_0 = pop(recs);
+
+         const bool val_0_check = detail::is_type<expr, op>(value_0);
+         const bool val_1_check = detail::is_type<expr, op>(value_1);
+
+         assert(val_0_check);                      // NOLINT
+         assert(val_1_check);                      // NOLINT
+         assert(dynamic_cast<id_decl*>(id.get())); // NOLINT
+
+         return std::make_unique<assign_op>(std::move(value_0), std::move(id), std::move(value_1));
       }
 
       if (action == sem::action::int_expr)
@@ -483,10 +502,10 @@ namespace front::ast
          return std::make_unique<sign_expr>(std::move(id), std::move(factor));
       }
 
-      if (action == sem::action::func_or_var_expr)
+      if (action == sem::action::e_func_or_assign_stmt)
       {
          std::vector place_holders = recs | vi::reverse |
-            vi::take_while(detail::is_type<expr, dot_op>) | vi::move | ranges::to_vector;
+            vi::take_while(detail::is_type<expr, op>) | vi::move | ranges::to_vector;
 
          std::vector<node_ptr> nodes;
          for (auto& node : place_holders | vi::reverse)
@@ -495,7 +514,7 @@ namespace front::ast
             nodes.push_back(std::move(node));
          }
 
-         return std::make_unique<func_or_var_expr>(std::move(nodes));
+         return std::make_unique<func_or_assign_stmt>(std::move(nodes));
       }
 
       if (action == sem::action::compound_var_expr)

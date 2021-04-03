@@ -18,7 +18,7 @@
 
 <AssignOp> ::= 'assign' 
 
-<AssignStatTail> ::= <AssignOp> <Expr> 
+<AssignStatTail> ::= <AssignOp> (IdDecl) <Expr> (AssignOp)
 
 <ClassDecl> ::= 'class' 'id' <Inherit> '{' <ClassDeclBody> '}' ';' <ClassDecl> 
 <ClassDecl> ::= EPSILON 
@@ -40,7 +40,7 @@
 <FParamsTail> ::= ',' <Type> 'id' <ArraySizeRept> <FParamsTail> 
 <FParamsTail> ::= EPSILON 
 
-<Factor> ::= <FuncOrVar> (FuncOrVarExpr)
+<Factor> ::= <FuncOrVar>
 <Factor> ::= 'intnum' (IntExpr)
 <Factor> ::= 'floatnum' (FloatExpr)
 <Factor> ::= 'stringlit' (StrExpr)
@@ -63,14 +63,14 @@
 
 <FuncOrAssignStat> ::= 'id' (IdDecl) <FuncOrAssignStatIdnest> 
 
-<FuncOrAssignStatIdnest> ::= <IndiceRep> (CompoundArrayIndexAccessDecl) (VarExpr) <FuncOrAssignStatIdnestVarTail> 
-<FuncOrAssignStatIdnest> ::= '(' <AParams> ')' (CompoundParameterExprDecl) (FuncExpr) <FuncOrAssignStatIdnestFuncTail> 
+<FuncOrAssignStatIdnest> ::= <IndiceRep> (CompoundArrayIndexAccessDecl) (VarExpr) (DotOp) <FuncOrAssignStatIdnestVarTail> 
+<FuncOrAssignStatIdnest> ::= '(' <AParams> ')' (CompoundParameterExprDecl) (FuncExpr) (DotOp) <FuncOrAssignStatIdnestFuncTail> 
 
 <FuncOrAssignStatIdnestFuncTail> ::= '.' (DotDecl) 'id' (IdDecl) <FuncStatTail> 
-<FuncOrAssignStatIdnestFuncTail> ::= EPSILON 
+<FuncOrAssignStatIdnestFuncTail> ::= EPSILON (FuncStmt)
 
-<FuncOrAssignStatIdnestVarTail> ::= '.' 'id' <FuncOrAssignStatIdnest> 
-<FuncOrAssignStatIdnestVarTail> ::= <AssignStatTail> 
+<FuncOrAssignStatIdnestVarTail> ::= '.' (DotDecl) 'id' (IdDecl) <FuncOrAssignStatIdnest> 
+<FuncOrAssignStatIdnestVarTail> ::= <AssignStatTail> (AssignStmt)
 
 <FuncOrVar> ::= 'id' (IdDecl) <FuncOrVarIdnest> 
 
@@ -80,11 +80,11 @@
 <FuncOrVarIdnestTail> ::= '.' (IdDecl) 'id' (IdDecl) <FuncOrVarIdnest> 
 <FuncOrVarIdnestTail> ::= EPSILON 
 
-<FuncStatTail> ::= <IndiceRep> '.' 'id' <FuncStatTail> 
-<FuncStatTail> ::= '(' <AParams> ')' <FuncStatTailIdnest> 
+<FuncStatTail> ::= <IndiceRep> (CompoundArrayIndexAccessDecl) (VarExpr) (DotOp) '.' (DotDecl) 'id' (IdDecl) <FuncStatTail> 
+<FuncStatTail> ::= '(' <AParams> ')' (CompoundParameterExprDecl) (FuncExpr) (DotOp) <FuncStatTailIdnest> 
 
-<FuncStatTailIdnest> ::= '.' 'id' <FuncStatTail> 
-<FuncStatTailIdnest> ::= EPSILON 
+<FuncStatTailIdnest> ::= '.' (DotDecl) 'id' (IdDecl) <FuncStatTail> 
+<FuncStatTailIdnest> ::= EPSILON (FunctionStmt)
 
 <Function> ::= <FuncHead> <FuncBody> 
 
