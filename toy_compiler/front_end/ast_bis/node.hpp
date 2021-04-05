@@ -3,6 +3,8 @@
 #include <toy_compiler/front_end/lexer.hpp>
 #include <toy_compiler/front_end/sem/actions.hpp>
 
+#include <toy_compiler/front_end/ast/visitor/visitor.hpp>
+
 #include <toy_compiler/util/strong_type.hpp>
 
 #include <range/v3/view/move.hpp>
@@ -12,7 +14,6 @@
 namespace front::ast
 {
    class node;
-   class visitor;
 
    using node_ptr = std::unique_ptr<node>;
 

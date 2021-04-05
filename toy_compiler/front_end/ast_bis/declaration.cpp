@@ -1,20 +1,17 @@
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
 
+#include <toy_compiler/front_end/ast/node/compound_func_decl.hpp>
 #include <toy_compiler/front_end/ast/node/compound_stmt.hpp>
-#include <toy_compiler/front_end/ast_bis/function_decl.hpp>
+#include <toy_compiler/front_end/ast/node/member_func_decl.hpp>
+#include <toy_compiler/front_end/ast/node/member_var_decl.hpp>
 
 #include <toy_compiler/front_end/ast/visitor/visitor.hpp>
-
-#include <range/v3/view/tail.hpp>
-#include <range/v3/view/take.hpp>
 
 #include <cassert>
 #include <utility>
 
 namespace front::ast
 {
-   namespace vi = ranges::views;
-
    decl::decl(const source_location& location) : node{location} {}
    decl::decl(const std::string& lexeme, const source_location& location) : node{lexeme, location}
    {}
@@ -22,9 +19,9 @@ namespace front::ast
    translation_unit_decl::translation_unit_decl(node_ptr compound_class, node_ptr compound_function,
                                                 node_ptr main)
    {
-      assert(dynamic_cast<compound_class_decl*>(compound_class.get()));       // NOLINT
-      assert(dynamic_cast<compound_function_decl*>(compound_function.get())); // NOLINT
-      assert(dynamic_cast<main_decl*>(main.get()));                           // NOLINT
+      assert(dynamic_cast<compound_class_decl*>(compound_class.get()));   // NOLINT
+      assert(dynamic_cast<compound_func_decl*>(compound_function.get())); // NOLINT
+      assert(dynamic_cast<main_decl*>(main.get()));                       // NOLINT
 
       make_child(std::move(compound_class));
       make_child(std::move(compound_function));
@@ -104,30 +101,10 @@ namespace front::ast
 
    compound_member_decl::compound_member_decl(std::vector<node_ptr>&& member_decls)
    {
-      make_family<member_decl>(std::move(member_decls));
+      make_family<member_func_decl, member_var_decl>(std::move(member_decls));
    }
 
    auto compound_member_decl::to_string() const -> std::string { return "compound_member_decl"; }
-
-   member_decl::member_decl(node_ptr visibility, node_ptr var_or_func) :
-      decl{visibility->location()}
-   {
-      if (visibility != nullptr)
-      {
-         assert(dynamic_cast<visibility_decl*>(visibility.get())); // NOLINT
-
-         m_visibility = std::string{visibility->lexeme()};
-      }
-
-      make_child(std::move(var_or_func));
-   }
-
-   auto member_decl::visibility() const noexcept -> std::string_view { return m_visibility; }
-
-   auto member_decl::to_string() const -> std::string
-   {
-      return fmt::format("member_decl {} {}", location(), visibility());
-   }
 
    visibility_decl::visibility_decl(const std::string& name, const source_location& location) :
       decl{name, location}
@@ -149,7 +126,7 @@ namespace front::ast
       }
    }
 
-   auto variable_decl::type() const -> std::string { return m_type; }
+   auto variable_decl::type() const -> std::string_view { return m_type; }
    auto variable_decl::to_string() const -> std::string
    {
       return fmt::format("variable_decl <line:{}, col:{}> {} '{}'", location().line,
@@ -184,42 +161,6 @@ namespace front::ast
                          location().column, m_end_loc.line, m_end_loc.column, lexeme());
    }
 
-   member_function_decl::member_function_decl(node_ptr location, node_ptr id,
-                                              node_ptr compound_param, node_ptr tail) :
-      decl{std::string{id->lexeme()}, location->location()},
-      m_return_type{tail->lexeme()}
-   {
-      if (!std::empty(compound_param->children()))
-      {
-         for (const node_ptr& node : compound_param->children())
-         {
-            m_params.emplace_back(dynamic_cast<variable_decl*>(node.get())->type());
-         }
-
-         make_child(std::move(compound_param));
-      }
-   }
-
-   auto member_function_decl::return_type() const -> std::string_view { return m_return_type; }
-   auto member_function_decl::params() const -> std::span<const std::string> { return m_params; }
-
-   auto member_function_decl::params_string() const -> std::string
-   {
-      std::string params;
-      for (const auto& param : m_params)
-      {
-         params += param;
-         params += ", ";
-      }
-
-      return params.substr(0, std::size(params) - 2);
-   }
-   auto member_function_decl::to_string() const -> std::string
-   {
-      return fmt::format("func_decl <line:{}, col:{}> {} '{} ({})'", location().line,
-                         location().column, lexeme(), m_return_type, params_string());
-   }
-
    compound_params_decl::compound_params_decl(std::vector<node_ptr>&& param_decls)
    {
       make_family<variable_decl>(std::move(param_decls));
@@ -241,6 +182,16 @@ namespace front::ast
       decl{std::string{id->lexeme()}, id->location()}
    {
       make_child(std::move(func_body));
+   }
+
+   void main_decl::accept(visitor& visitor) const
+   {
+      for (const auto& child : children())
+      {
+         child->accept(visitor);
+      }
+
+      visitor.visit(this);
    }
 
    auto main_decl::to_string() const -> std::string
@@ -293,16 +244,12 @@ namespace front::ast
 
    void translation_unit_decl::accept(visitor& visitor) const
    {
-      children()[0]->accept(visitor);
-
-      /*
       for (const auto& child : children())
       {
          child->accept(visitor);
       }
-      */
 
-      std::visit(visitor, node_variant{this});
+      visitor.visit(this);
    }
 
    void compound_class_decl::accept(visitor& visitor) const
@@ -313,5 +260,5 @@ namespace front::ast
       }
    }
 
-   void class_decl::accept(visitor& visitor) const { std::visit(visitor, node_variant{this}); }
+   void class_decl::accept(visitor& visitor) const { visitor.visit(this); }
 }; // namespace front::ast

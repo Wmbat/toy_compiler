@@ -1,5 +1,7 @@
 #pragma once
 
+#include <toy_compiler/front_end/source_location.hpp>
+
 #include <magic_enum.hpp>
 
 #include <range/v3/range/conversion.hpp>
@@ -19,11 +21,15 @@ namespace front::ast
 {
    enum struct symbol_type
    {
-      e_function,
       e_class,
       e_inheritance,
       e_member_variable,
-      e_member_function
+      e_member_function,
+      e_method,
+      e_function,
+      e_variable,
+      e_parameter,
+      e_main
    };
 
    class symbol_table;
@@ -32,13 +38,16 @@ namespace front::ast
    {
    public:
       symbol();
-      symbol(std::string name, symbol_type kind, std::string type = "",
-             std::unique_ptr<symbol_table> link = {});
+      symbol(std::string name, symbol_type kind, const source_location& location,
+             std::string type = "", std::unique_ptr<symbol_table> link = {});
 
-      auto name() const noexcept -> std::string_view; // NOLINT
-      auto type() const noexcept -> std::string_view; // NOLINT
-      auto kind() const noexcept -> symbol_type;      // NOLINT
-      auto link() const noexcept -> symbol_table*;    // NOLINT
+      auto name() const noexcept -> std::string_view;           // NOLINT
+      auto type() const noexcept -> std::string_view;           // NOLINT
+      auto kind() const noexcept -> symbol_type;                // NOLINT
+      auto link() const noexcept -> symbol_table*;              // NOLINT
+      auto location() const noexcept -> const source_location&; // NOLINT
+
+      void set_table(std::unique_ptr<symbol_table> table);
 
    private:
       std::string m_name{};
@@ -46,6 +55,8 @@ namespace front::ast
       symbol_type m_kind{};
 
       std::unique_ptr<symbol_table> m_link;
+
+      source_location m_location;
    };
 
    class symbol_table
@@ -170,7 +181,7 @@ struct fmt::formatter<front::ast::symbol_table>
    template <typename FormatContext>
    auto format(const front::ast::symbol_table& s, FormatContext& ctx)
    {
-      return fmt::format_to(ctx.out(), "symbol_table(name={}, values={})", s.name(),
-                            s.symbols() | ranges::views::values);
+      return fmt::format_to(ctx.out(), "symbol_table(\n\tname={}, \n\tvalues={})", s.name(),
+                            fmt::join(s.symbols() | ranges::views::values, "\n\t       "));
    }
 };

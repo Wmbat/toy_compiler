@@ -7,18 +7,22 @@
 
 namespace front::ast
 {
-   symbol::symbol(std::string name, symbol_type kind, std::string type,
-                  std::unique_ptr<symbol_table> link) :
+   symbol::symbol(std::string name, symbol_type kind, const source_location& location,
+                  std::string type, std::unique_ptr<symbol_table> link) :
       m_name{std::move(name)},
       m_type{std::move(type)},
       m_kind{kind},
-      m_link{std::move(link)}
+      m_link{std::move(link)},
+      m_location{location}
    {}
 
    auto symbol::name() const noexcept -> std::string_view { return m_name; }
    auto symbol::type() const noexcept -> std::string_view { return m_type; }
    auto symbol::kind() const noexcept -> symbol_type { return m_kind; }
    auto symbol::link() const noexcept -> symbol_table* { return m_link.get(); }
+   auto symbol::location() const noexcept -> const source_location& { return m_location; }
+
+   void symbol::set_table(std::unique_ptr<symbol_table> table) { m_link = std::move(table); }
 
    symbol_table::lookup_kv_result::lookup_kv_result(const std::string* p_key, symbol* p_val) :
       m_key{p_key},

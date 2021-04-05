@@ -19,8 +19,9 @@
 
 #pragma once
 
-#include "toy_compiler/front_end/source_location.hpp"
 #include <toy_compiler/front_end/ast_bis/node.hpp>
+
+#include <toy_compiler/front_end/source_location.hpp>
 
 namespace front::ast
 {
@@ -115,19 +116,6 @@ namespace front::ast
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 
-   class member_decl : public decl
-   {
-   public:
-      member_decl(node_ptr visibility, node_ptr var_or_func);
-
-      [[nodiscard]] auto visibility() const noexcept -> std::string_view;
-
-      [[nodiscard]] auto to_string() const -> std::string override;
-
-   private:
-      std::string m_visibility = "private";
-   };
-
    class visibility_decl : public decl
    {
    public:
@@ -141,7 +129,7 @@ namespace front::ast
    public:
       variable_decl(node_ptr type, node_ptr id, node_ptr compound_array);
 
-      [[nodiscard]] auto type() const -> std::string;
+      [[nodiscard]] auto type() const -> std::string_view;
 
       [[nodiscard]] auto to_string() const -> std::string override;
 
@@ -168,22 +156,6 @@ namespace front::ast
       source_location m_end_loc;
    };
 
-   class member_function_decl : public decl
-   {
-   public:
-      member_function_decl(node_ptr location, node_ptr id, node_ptr compound_params, node_ptr tail);
-
-      [[nodiscard]] auto return_type() const -> std::string_view;
-      [[nodiscard]] auto params() const -> std::span<const std::string>;
-
-      [[nodiscard]] auto params_string() const -> std::string;
-      [[nodiscard]] auto to_string() const -> std::string override;
-
-   private:
-      std::string m_return_type;
-      std::vector<std::string> m_params;
-   };
-
    class compound_params_decl : public decl
    {
    public:
@@ -204,6 +176,8 @@ namespace front::ast
    {
    public:
       main_decl(node_ptr location, node_ptr func_body);
+
+      void accept(visitor &visitor) const override;
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };

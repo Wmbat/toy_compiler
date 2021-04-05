@@ -20,7 +20,7 @@
 
 <AssignStatTail> ::= <AssignOp> (IdDecl) <Expr> (AssignOp)
 
-<ClassDecl> ::= 'class' 'id' <Inherit> '{' <ClassDeclBody> '}' ';' <ClassDecl> 
+<ClassDecl> ::= 'class' (LocationDecl) 'id' (IdDecl) <Inherit> '{' <ClassDeclBody> (CompoundMemberDecl) '}' ';' <ClassDecl> 
 <ClassDecl> ::= EPSILON 
 
 <ClassDeclBody> ::= <Visibility> <MemberDecl> <ClassDeclBody> 
@@ -100,8 +100,8 @@
 <IntNum> ::= 'intnum' 
 <IntNum> ::= EPSILON 
 
-<MemberDecl> ::= <FuncDecl> 
-<MemberDecl> ::= <VarDecl> 
+<MemberDecl> ::= <FuncDecl> (MemberFuncDecl)
+<MemberDecl> ::= <VarDecl> (MemberVarDecl) (MemberDecl)
 
 <MethodBodyVar> ::= 'var' '{' <VarDeclRep> '}' 
 <MethodBodyVar> ::= EPSILON 
@@ -162,8 +162,8 @@
 <VariableIdnestTail> ::= '.' 'id' (IdDecl) <VariableIdnest> 
 <VariableIdnestTail> ::= EPSILON 
 
-<Visibility> ::= 'public' 
-<Visibility> ::= 'private' 
-<Visibility> ::= EPSILON 
+<Visibility> ::= 'public' (VisibilityDecl)
+<Visibility> ::= 'private' (VisibilityDecl)
+<Visibility> ::= EPSILON (Epsilon)
 
 

@@ -19,6 +19,7 @@
 
 #include <toy_compiler/core/application.hpp>
 
+#include <toy_compiler/front_end/ast/visitor/symbol_table_visitor.hpp>
 #include <toy_compiler/front_end/ast/visitor/visitor.hpp>
 #include <toy_compiler/front_end/lexer.hpp>
 #include <toy_compiler/front_end/parser.hpp>
@@ -28,6 +29,7 @@
 #include <fmt/ranges.h>
 
 #include <range/v3/algorithm/count_if.hpp>
+#include <range/v3/view/map.hpp>
 
 #include <cassert>
 #include <fstream>
@@ -69,10 +71,15 @@ application::application(std::span<const std::string_view> args, util::logger_wr
                }
             }
 
-            front::ast::visitor visitor;
-            result.ast->accept(visitor);
+            write_ast_to_file(filepath, result.ast);
+            write_derivations_to_file(filepath, result.derivation);
 
-            for (const auto& err : visitor.get_errors())
+            front::ast::symbol_table_visitor st_visitor{};
+            result.ast->accept(st_visitor);
+
+            write_symbol_tables_to_file(filepath, st_visitor.get_root_table());
+
+            for (const auto& err : st_visitor.get_errors())
             {
                fmt::print(fmt::emphasis::bold, "{}:{}.{} - ", filepath.c_str(), err.pos.line,
                           err.pos.column);
@@ -89,9 +96,6 @@ application::application(std::span<const std::string_view> args, util::logger_wr
 
                fmt::print("{}\n", err.line);
             }
-
-            write_ast_to_file(filepath, result.ast);
-            write_derivations_to_file(filepath, result.derivation);
          }
          else
          {
@@ -157,6 +161,33 @@ void application::write_ast_to_file(const std::filesystem::path& path,
    std::ofstream output_file{output_path};
 
    pre_order_traversal(root, 0, output_file);
+}
+
+void st_pre_order_traversal(const front::ast::symbol_table* root, std::ofstream& output_file)
+{
+   if (!root)
+   {
+      return;
+   }
+
+   fmt::print(output_file, "{}\n\n", *root);
+
+   for (const auto& symbol : root->symbols() | ranges::views::values)
+   {
+      st_pre_order_traversal(symbol.link(), output_file);
+   }
+}
+
+void application::write_symbol_tables_to_file(const std::filesystem::path& path,
+                                              const front::ast::symbol_table* root) const
+{
+   auto output_path = path.parent_path();
+   output_path /= path.stem();
+   output_path += ".outsymboltables";
+
+   std::ofstream output_file{output_path};
+
+   st_pre_order_traversal(root, output_file);
 }
 
 auto application::fancy_lexical_error_type(front::sem::token_type value) const -> std::string

@@ -1,8 +1,7 @@
 #pragma once
 
 #include <toy_compiler/front_end/ast/symbol_table.hpp>
-#include <toy_compiler/front_end/ast_bis/declaration.hpp>
-#include <toy_compiler/front_end/ast_bis/function_decl.hpp>
+
 #include <toy_compiler/front_end/parse_error.hpp>
 #include <toy_compiler/util/strong_type.hpp>
 
@@ -14,22 +13,36 @@
 
 namespace front::ast
 {
-   using node_variant = std::variant<const translation_unit_decl*, const compound_class_decl*,
-                                     const class_decl*, const compound_function_decl*>;
+   class translation_unit_decl;
+   class compound_class_decl;
+   class class_decl;
+   class compound_function_decl;
+   class func_decl;
+   class func_head_decl;
+   class func_body_decl;
+   class compound_variable_decl;
+   class variable_decl;
+   class compound_stmt;
+   class main_decl;
 
    class visitor
    {
    public:
-      void operator()(const translation_unit_decl* tud);
-      void operator()(const compound_class_decl* ccd);
-      void operator()(const class_decl* cd);
-      void operator()(const compound_function_decl* cfd);
+      virtual void visit(const translation_unit_decl* tud) = 0;
+      virtual void visit(const compound_class_decl* ccd) = 0;
+      virtual void visit(const class_decl* cd) = 0;
+      virtual void visit(const compound_function_decl* cfd) = 0;
+      virtual void visit(const func_decl* fd) = 0;
+      virtual void visit(const func_head_decl*) = 0;
+      virtual void visit(const func_body_decl*) = 0;
+      virtual void visit(const compound_variable_decl*) = 0;
+      virtual void visit(const variable_decl*) = 0;
+      virtual void visit(const compound_stmt*) = 0;
+      virtual void visit(const main_decl*) = 0;
 
-      auto get_errors() const -> const std::vector<parse_error>&; // NOLINT
+      [[nodiscard]] auto get_errors() const -> const std::vector<parse_error>& { return m_errors; }
 
-   private:
-      std::vector<std::unique_ptr<symbol_table>> m_tables;
-
-      std::vector<parse_error> m_errors;
+   protected:
+      std::vector<parse_error> m_errors; // NOLINT
    };
 }; // namespace front::ast

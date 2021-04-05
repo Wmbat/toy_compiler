@@ -106,7 +106,7 @@ namespace fr::grammar
 
       // <ArithExprTail>
       {
-         symbol_array common{grammar_type::add_op, action::id_decl, grammar_type::term,
+         symbol_array common{grammar_type::add_op, action::e_id_decl, grammar_type::term,
                              action::e_add_op, grammar_type::arith_expr_tail};
          const auto key = grammar_type::arith_expr_tail;
          table.set_production({key, token_type::e_plus}, common);
@@ -130,9 +130,9 @@ namespace fr::grammar
          const auto key = grammar_type::array_size_rept;
          table.set_production({key, token_type::e_comma}, {epsilon[0], action::epsilon});
          table.set_production({key, token_type::e_left_square},
-                              {token_type::e_left_square, action::location_decl,
+                              {token_type::e_left_square, action::e_location_decl,
                                grammar_type::int_num, token_type::e_right_square,
-                               action::location_decl, action::array_decl,
+                               action::e_location_decl, action::array_decl,
                                grammar_type::array_size_rept});
          table.set_production({key, token_type::e_semi_colon}, {epsilon[0], action::epsilon});
          table.set_production({key, token_type::e_right_paren}, {epsilon[0], action::epsilon});
@@ -148,14 +148,14 @@ namespace fr::grammar
       {
          table.set_production(
             {grammar_type::assign_stat_tail, token_type::e_assign},
-            {grammar_type::assign_op, action::id_decl, grammar_type::expr, action::e_assign_op});
+            {grammar_type::assign_op, action::e_id_decl, grammar_type::expr, action::e_assign_op});
       }
 
       // <ClassDecl>
       {
          table.set_production(
             {grammar_type::class_decl, token_type::e_class},
-            {token_type::e_class, action::location_decl, token_type::e_id, action::id_decl,
+            {token_type::e_class, action::e_location_decl, token_type::e_id, action::e_id_decl,
              grammar_type::inherit, action::compound_inheritance_decl, token_type::e_left_brace,
              grammar_type::class_decl_body, action::compound_member_decl, token_type::e_right_brace,
              token_type::e_semi_colon, action::class_decl, grammar_type::class_decl});
@@ -168,7 +168,7 @@ namespace fr::grammar
       // <ClassDeclBody>
       {
          symbol_array common{grammar_type::visibility, grammar_type::member_decl,
-                             action::member_decl, grammar_type::class_decl_body};
+                             grammar_type::class_decl_body};
 
          const auto key = grammar_type::class_decl_body;
          table.set_production({key, token_type::e_id}, common);
@@ -184,7 +184,7 @@ namespace fr::grammar
       // <ClassMethod>
       {
          table.set_production({grammar_type::class_method, token_type::e_double_colon},
-                              {token_type::e_double_colon, token_type::e_id, action::id_decl});
+                              {token_type::e_double_colon, token_type::e_id, action::e_id_decl});
          table.set_production({grammar_type::class_method, token_type::e_left_paren},
                               {epsilon[0], action::epsilon});
       }
@@ -206,7 +206,7 @@ namespace fr::grammar
 
       // <ExprTail>
       {
-         symbol_array common{grammar_type::relop, action::id_decl, grammar_type::arith_expr,
+         symbol_array common{grammar_type::relop, action::e_id_decl, grammar_type::arith_expr,
                              action::e_rel_op};
          const auto key = grammar_type::expr_tail;
          table.set_production({key, token_type::e_comma}, epsilon);
@@ -227,10 +227,10 @@ namespace fr::grammar
          const auto key = grammar_type::factor;
          table.set_production(
             {key, token_type::e_minus},
-            {grammar_type::sign, action::id_decl, grammar_type::factor, action::sign_expr});
+            {grammar_type::sign, action::e_id_decl, grammar_type::factor, action::sign_expr});
          table.set_production(
             {key, token_type::e_plus},
-            {grammar_type::sign, action::id_decl, grammar_type::factor, action::sign_expr});
+            {grammar_type::sign, action::e_id_decl, grammar_type::factor, action::sign_expr});
          table.set_production({key, token_type::e_id}, {grammar_type::func_or_var});
          table.set_production({key, token_type::e_float_lit},
                               {token_type::e_float_lit, action::float_expr});
@@ -239,11 +239,11 @@ namespace fr::grammar
          table.set_production({key, token_type::e_str_lit},
                               {token_type::e_str_lit, action::str_expr});
          table.set_production({key, token_type::e_left_paren},
-                              {token_type::e_left_paren, action::location_decl, grammar_type::expr,
+                              {token_type::e_left_paren, action::e_location_decl, grammar_type::expr,
                                action::priority_expr, token_type::e_right_paren});
          table.set_production({key, token_type::e_not}, {token_type::e_not, grammar_type::factor});
          table.set_production({key, token_type::e_qmark},
-                              {token_type::e_qmark, action::location_decl,
+                              {token_type::e_qmark, action::e_location_decl,
                                token_type::e_left_square, grammar_type::expr, token_type::e_colon,
                                grammar_type::expr, token_type::e_colon, grammar_type::expr,
                                token_type::e_right_square, action::ternary_expr});
@@ -252,9 +252,9 @@ namespace fr::grammar
       // <fParams>
       {
          symbol_array common{grammar_type::type,
-                             action::type_decl,
+                             action::e_type_decl,
                              token_type::e_id,
-                             action::id_decl,
+                             action::e_id_decl,
                              grammar_type::array_size_rept,
                              action::compound_array_decl,
                              action::variable_decl,
@@ -270,8 +270,8 @@ namespace fr::grammar
       // <fParamsTail>
       {
          table.set_production({grammar_type::f_params_tail, token_type::e_comma},
-                              {token_type::e_comma, grammar_type::type, action::type_decl,
-                               token_type::e_id, action::id_decl, grammar_type::array_size_rept,
+                              {token_type::e_comma, grammar_type::type, action::e_type_decl,
+                               token_type::e_id, action::e_id_decl, grammar_type::array_size_rept,
                                action::compound_array_decl, action::variable_decl,
                                grammar_type::f_params_tail});
          table.set_production({grammar_type::f_params_tail, token_type::e_right_paren},
@@ -289,10 +289,10 @@ namespace fr::grammar
       // <FuncDecl>
       {
          table.set_production({grammar_type::func_decl, token_type::e_func},
-                              {token_type::e_func, action::location_decl, token_type::e_id,
-                               action::id_decl, token_type::e_left_paren, grammar_type::f_params,
+                              {token_type::e_func, action::e_location_decl, token_type::e_id,
+                               action::e_id_decl, token_type::e_left_paren, grammar_type::f_params,
                                action::compound_param_decl, token_type::e_right_paren,
-                               token_type::e_colon, grammar_type::func_decl_tail, action::type_decl,
+                               token_type::e_colon, grammar_type::func_decl_tail, action::e_type_decl,
                                token_type::e_semi_colon});
       }
 
@@ -314,7 +314,7 @@ namespace fr::grammar
       {
          table.set_production(
             {grammar_type::func_def, token_type::e_func},
-            {grammar_type::function, action::function_decl, grammar_type::func_def});
+            {grammar_type::function, action::e_func_decl, grammar_type::func_def});
          table.set_production({grammar_type::func_def, token_type::e_main},
                               {epsilon[0], action::epsilon});
       }
@@ -323,17 +323,17 @@ namespace fr::grammar
       {
          table.set_production(
             {grammar_type::func_head, token_type::e_func},
-            {token_type::e_func, action::location_decl, token_type::e_id, action::id_decl,
+            {token_type::e_func, action::e_location_decl, token_type::e_id, action::e_id_decl,
              grammar_type::class_method, token_type::e_left_paren, grammar_type::f_params,
              action::compound_param_decl, token_type::e_right_paren, token_type::e_colon,
-             grammar_type::func_decl_tail, action::type_decl});
+             grammar_type::func_decl_tail, action::e_type_decl});
       }
 
       // <FuncOrAssignStat>
       {
          table.set_production(
             {grammar_type::func_or_assign_stat, token_type::e_id},
-            {token_type::e_id, action::id_decl, grammar_type::func_or_assign_stat_idnest});
+            {token_type::e_id, action::e_id_decl, grammar_type::func_or_assign_stat_idnest});
       }
 
       // <FuncOrAssignStatIdnest>
@@ -359,7 +359,7 @@ namespace fr::grammar
          table.set_production({key, token_type::e_semi_colon}, epsilon);
          table.set_production({key, token_type::e_dot},
                               {token_type::e_dot, action::e_dot_decl, token_type::e_id,
-                               action::id_decl, grammar_type::func_stat_tail});
+                               action::e_id_decl, grammar_type::func_stat_tail});
       }
 
       // <FuncOrAssignStatIdnestVarTail>
@@ -368,14 +368,14 @@ namespace fr::grammar
          table.set_production({key, token_type::e_assign}, {grammar_type::assign_stat_tail});
          table.set_production({key, token_type::e_dot},
                               {token_type::e_dot, action::e_dot_decl, token_type::e_id,
-                               action::id_decl, grammar_type::func_or_assign_stat_idnest});
+                               action::e_id_decl, grammar_type::func_or_assign_stat_idnest});
       }
 
       // <FuncOrVar>
       {
          table.set_production(
             {grammar_type::func_or_var, token_type::e_id},
-            {token_type::e_id, action::id_decl, grammar_type::func_or_var_idnest});
+            {token_type::e_id, action::e_id_decl, grammar_type::func_or_var_idnest});
       }
 
       // <FuncOrVarIdnest>
@@ -429,7 +429,7 @@ namespace fr::grammar
          table.set_production({key, token_type::e_colon}, epsilon);
          table.set_production({key, token_type::e_dot},
                               {token_type::e_dot, action::e_dot_decl, token_type::e_id,
-                               action::id_decl, grammar_type::func_or_var_idnest});
+                               action::e_id_decl, grammar_type::func_or_var_idnest});
          table.set_production({key, token_type::e_mult}, epsilon);
          table.set_production({key, token_type::e_div}, epsilon);
          table.set_production({key, token_type::e_and}, epsilon);
@@ -448,7 +448,7 @@ namespace fr::grammar
          table.set_production({key, token_type::e_left_square},
                               {grammar_type::indice_rep, action::compound_array_index_access_decl,
                                action::var_expr, action::e_dot_op, token_type::e_dot,
-                               action::e_dot_decl, token_type::e_id, action::id_decl,
+                               action::e_dot_decl, token_type::e_id, action::e_id_decl,
                                grammar_type::func_stat_tail});
          table.set_production({key, token_type::e_left_paren},
                               {token_type::e_left_paren, grammar_type::a_params,
@@ -458,7 +458,7 @@ namespace fr::grammar
          table.set_production({key, token_type::e_dot},
                               {grammar_type::indice_rep, action::compound_array_index_access_decl,
                                action::var_expr, action::e_dot_op, token_type::e_dot,
-                               action::e_dot_decl, token_type::e_id, action::id_decl,
+                               action::e_dot_decl, token_type::e_id, action::e_id_decl,
                                grammar_type::func_stat_tail});
       }
 
@@ -468,14 +468,14 @@ namespace fr::grammar
                               epsilon);
          table.set_production({grammar_type::func_stat_tail_idnest, token_type::e_dot},
                               {token_type::e_dot, action::e_dot_decl, token_type::e_id,
-                               action::id_decl, grammar_type::func_stat_tail});
+                               action::e_id_decl, grammar_type::func_stat_tail});
       }
 
       // <Function>
       {
          table.set_production({grammar_type::function, token_type::e_func},
-                              {grammar_type::func_head, action::function_head_decl,
-                               grammar_type::func_body, action::function_body_decl});
+                              {grammar_type::func_head, action::e_func_head_decl,
+                               grammar_type::func_body, action::e_func_body_decl});
       }
 
       // <IndiceRep>
@@ -486,8 +486,8 @@ namespace fr::grammar
          table.set_production({key, token_type::e_or}, {epsilon[0], action::epsilon});
          table.set_production({key, token_type::e_comma}, {epsilon[0], action::epsilon});
          table.set_production({key, token_type::e_left_square},
-                              {token_type::e_left_square, action::location_decl, grammar_type::expr,
-                               token_type::e_right_square, action::location_decl,
+                              {token_type::e_left_square, action::e_location_decl, grammar_type::expr,
+                               token_type::e_right_square, action::e_location_decl,
                                action::array_index_access_decl, grammar_type::indice_rep});
          table.set_production({key, token_type::e_right_square}, {epsilon[0], action::epsilon});
          table.set_production({key, token_type::e_assign}, {epsilon[0], action::epsilon});
@@ -528,16 +528,17 @@ namespace fr::grammar
 
       // <MemberDecl>
       {
-         table.set_production({grammar_type::member_decl, token_type::e_id},
-                              {grammar_type::var_decl, action::variable_decl});
-         table.set_production({grammar_type::member_decl, token_type::e_string},
-                              {grammar_type::var_decl, action::variable_decl});
-         table.set_production({grammar_type::member_decl, token_type::e_float},
-                              {grammar_type::var_decl, action::variable_decl});
-         table.set_production({grammar_type::member_decl, token_type::e_integer},
-                              {grammar_type::var_decl, action::variable_decl});
-         table.set_production({grammar_type::member_decl, token_type::e_func},
-                              {grammar_type::func_decl, action::member_function_decl});
+         constexpr auto key = grammar_type::member_decl;
+         table.set_production({key, token_type::e_id},
+                              {grammar_type::var_decl, action::e_member_var_decl});
+         table.set_production({key, token_type::e_string},
+                              {grammar_type::var_decl, action::e_member_var_decl});
+         table.set_production({key, token_type::e_float},
+                              {grammar_type::var_decl, action::e_member_var_decl});
+         table.set_production({key, token_type::e_integer},
+                              {grammar_type::var_decl, action::e_member_var_decl});
+         table.set_production({key, token_type::e_func},
+                              {grammar_type::func_decl, action::e_member_func_decl});
       }
 
       // <MethodBodyVar>
@@ -577,8 +578,8 @@ namespace fr::grammar
       {
          symbol_array common{
             grammar_type::class_decl,       action::compound_class_decl, grammar_type::func_def,
-            action::compound_function_decl, token_type::e_main,          action::id_decl,
-            grammar_type::func_body,        action::function_body_decl,  action::main_decl};
+            action::e_compound_func_decl, token_type::e_main,          action::e_id_decl,
+            grammar_type::func_body,        action::e_func_body_decl,  action::main_decl};
          table.set_production({grammar_type::prog, token_type::e_main}, common);
          table.set_production({grammar_type::prog, token_type::e_func}, common);
          table.set_production({grammar_type::prog, token_type::e_class}, common);
@@ -607,7 +608,7 @@ namespace fr::grammar
 
       // <Start>
       {
-         symbol_array common{grammar_type::prog, action::translation_unit};
+         symbol_array common{grammar_type::prog, action::e_translation_unit};
          table.set_production({grammar_type::start, token_type::e_main}, common);
          table.set_production({grammar_type::start, token_type::e_func}, common);
          table.set_production({grammar_type::start, token_type::e_class}, common);
@@ -640,26 +641,26 @@ namespace fr::grammar
                               {grammar_type::func_or_assign_stat, action::e_func_or_assign_stmt,
                                token_type::e_semi_colon});
          table.set_production({key, token_type::e_if},
-                              {token_type::e_if, action::location_decl, token_type::e_left_paren,
+                              {token_type::e_if, action::e_location_decl, token_type::e_left_paren,
                                grammar_type::expr, token_type::e_right_paren, token_type::e_then,
                                grammar_type::stat_block, action::stmt_block_decl,
                                token_type::e_else, grammar_type::stat_block,
                                action::stmt_block_decl, token_type::e_semi_colon, action::if_stmt});
          table.set_production({key, token_type::e_while},
-                              {token_type::e_while, action::location_decl, token_type::e_left_paren,
+                              {token_type::e_while, action::e_location_decl, token_type::e_left_paren,
                                grammar_type::expr, token_type::e_right_paren,
                                grammar_type::stat_block, action::stmt_block_decl,
                                action::while_stmt, token_type::e_semi_colon});
          table.set_production({key, token_type::e_read},
-                              {token_type::e_read, action::location_decl, token_type::e_left_paren,
+                              {token_type::e_read, action::e_location_decl, token_type::e_left_paren,
                                grammar_type::variable, action::compound_var_expr, action::read_stmt,
                                token_type::e_right_paren, token_type::e_semi_colon});
          table.set_production({key, token_type::e_write},
-                              {token_type::e_write, action::id_decl, token_type::e_left_paren,
+                              {token_type::e_write, action::e_id_decl, token_type::e_left_paren,
                                grammar_type::expr, action::write_stmt, token_type::e_right_paren,
                                token_type::e_semi_colon});
          table.set_production({key, token_type::e_return},
-                              {token_type::e_return, action::id_decl, token_type::e_left_paren,
+                              {token_type::e_return, action::e_id_decl, token_type::e_left_paren,
                                grammar_type::expr, action::return_stmt, token_type::e_right_paren,
                                token_type::e_semi_colon});
          table.set_production({key, token_type::e_break},
@@ -700,7 +701,7 @@ namespace fr::grammar
 
       // <TermTail>
       {
-         symbol_array common{grammar_type::mult_op, action::id_decl, grammar_type::factor,
+         symbol_array common{grammar_type::mult_op, action::e_id_decl, grammar_type::factor,
                              action::e_mult_op, grammar_type::term_tail};
          const auto key = grammar_type::term_tail;
          table.set_production({key, token_type::e_plus}, epsilon);
@@ -733,9 +734,9 @@ namespace fr::grammar
       // <VarDecl>
       {
          symbol_array common{grammar_type::type,
-                             action::type_decl,
+                             action::e_type_decl,
                              token_type::e_id,
-                             action::id_decl,
+                             action::e_id_decl,
                              grammar_type::array_size_rept,
                              action::compound_array_decl,
                              token_type::e_semi_colon};
@@ -760,7 +761,7 @@ namespace fr::grammar
       // <Variable>
       {
          table.set_production({grammar_type::variable, token_type::e_id},
-                              {token_type::e_id, action::id_decl, grammar_type::variable_idnest});
+                              {token_type::e_id, action::e_id_decl, grammar_type::variable_idnest});
       }
 
       // <VariableIdnest>
@@ -778,7 +779,7 @@ namespace fr::grammar
          table.set_production({key, token_type::e_right_paren}, epsilon);
          table.set_production(
             {key, token_type::e_dot},
-            {token_type::e_dot, token_type::e_id, action::id_decl, grammar_type::variable_idnest});
+            {token_type::e_dot, token_type::e_id, action::e_id_decl, grammar_type::variable_idnest});
       }
 
       // <Visibility>

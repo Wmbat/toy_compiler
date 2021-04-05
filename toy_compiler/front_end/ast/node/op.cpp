@@ -9,5 +9,4 @@ namespace front::ast
    {
       assert(false && "Accept not implemented"); // NOLINT
    }
-
 } // namespace front::ast
