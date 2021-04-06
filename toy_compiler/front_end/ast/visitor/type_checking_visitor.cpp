@@ -1,4 +1,3 @@
-#include "range/v3/range/conversion.hpp"
 #include <toy_compiler/front_end/ast/visitor/type_checking_visitor.hpp>
 
 #include <toy_compiler/front_end/ast/node/assign_op.hpp>
@@ -17,6 +16,7 @@
 #include <range/v3/algorithm/count_if.hpp>
 #include <range/v3/algorithm/find.hpp>
 #include <range/v3/algorithm/find_if.hpp>
+#include <range/v3/range/conversion.hpp>
 #include <range/v3/view/filter.hpp>
 #include <range/v3/view/map.hpp>
 #include <range/v3/view/transform.hpp>
@@ -215,7 +215,7 @@ namespace front::ast
                m_errors.push_back(
                   {.type = parse_error_type::e_semantic_error,
                    .pos = var_expr->location(),
-                   .lexeme = fmt::format("identifier {} to the left of `operator.` is not a class",
+                   .lexeme = fmt::format("identifier '{}' to the left of `operator.` is not a class",
                                          var_expr->lexeme())});
             }
          }
@@ -224,7 +224,8 @@ namespace front::ast
             m_errors.push_back(
                {.type = parse_error_type::e_semantic_error,
                 .pos = var_expr->location(),
-                .lexeme = fmt::format("undeclared identifier '{}' called", var_expr->lexeme())});
+                .lexeme = fmt::format("identifier '{}' to the left of `operator.` is not a class",
+                                      var_expr->lexeme())});
          }
       }
 
