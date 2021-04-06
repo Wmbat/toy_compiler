@@ -1,0 +1,61 @@
+symbol_table(
+	name=translation unit, 
+	values=symbol(name=main, kind=main, type=, link=Yes)
+	       symbol(name=QUADRATIC, kind=class, type=, link=Yes)
+	       symbol(name=LINEAR, kind=class, type=, link=Yes)
+	       symbol(name=POLYNOMIAL, kind=class, type=, link=Yes))
+
+symbol_table(
+	name=main, 
+	values=symbol(name=counter, kind=variable, type=integer, link=No)
+	       symbol(name=f2, kind=variable, type=quadratic, link=No)
+	       symbol(name=f1, kind=variable, type=linear, link=No))
+
+symbol_table(
+	name=QUADRATIC, 
+	values=symbol(name=evaluate, kind=member_function, type=public 'float (float)', link=Yes)
+	       symbol(name=build, kind=member_function, type=public 'QUADRATIC (float, float, float)', link=Yes)
+	       symbol(name=c, kind=member_variable, type=private float, link=No)
+	       symbol(name=a, kind=member_variable, type=private float, link=No)
+	       symbol(name=b, kind=member_variable, type=private float, link=No)
+	       symbol(name=POLYNOMIAL, kind=inheritance, type=, link=No))
+
+symbol_table(
+	name=QUADRATIC::evaluate, 
+	values=symbol(name=result, kind=variable, type=float, link=No)
+	       symbol(name=x, kind=parameter, type=float, link=No))
+
+symbol_table(
+	name=QUADRATIC::build, 
+	values=symbol(name=B, kind=parameter, type=float, link=No)
+	       symbol(name=new_function, kind=variable, type=QUADRATIC, link=No)
+	       symbol(name=C, kind=parameter, type=float, link=No)
+	       symbol(name=A, kind=parameter, type=float, link=No))
+
+symbol_table(
+	name=LINEAR, 
+	values=symbol(name=evaluate, kind=member_function, type=public 'float (float)', link=Yes)
+	       symbol(name=build, kind=member_function, type=public 'LINEAR (float, float)', link=Yes)
+	       symbol(name=a, kind=member_variable, type=private float, link=No)
+	       symbol(name=b, kind=member_variable, type=private float, link=No)
+	       symbol(name=POLYNOMIAL, kind=inheritance, type=, link=No))
+
+symbol_table(
+	name=LINEAR::evaluate, 
+	values=symbol(name=result, kind=variable, type=float, link=No)
+	       symbol(name=x, kind=parameter, type=float, link=No))
+
+symbol_table(
+	name=LINEAR::build, 
+	values=symbol(name=B, kind=parameter, type=float, link=No)
+	       symbol(name=new_function, kind=variable, type=LINEAR, link=No)
+	       symbol(name=A, kind=parameter, type=float, link=No))
+
+symbol_table(
+	name=POLYNOMIAL, 
+	values=symbol(name=evaluate, kind=member_function, type=public 'float (float)', link=Yes))
+
+symbol_table(
+	name=POLYNOMIAL::evaluate, 
+	values=symbol(name=x, kind=parameter, type=float, link=No))
+

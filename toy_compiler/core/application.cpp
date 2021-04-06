@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "toy_compiler/front_end/ast/visitor/type_checking_visitor.hpp"
 #include <toy_compiler/core/application.hpp>
 
 #include <toy_compiler/front_end/ast/visitor/symbol_table_visitor.hpp>
@@ -80,6 +81,27 @@ application::application(std::span<const std::string_view> args, util::logger_wr
             write_symbol_tables_to_file(filepath, st_visitor.get_root_table());
 
             for (const auto& err : st_visitor.get_errors())
+            {
+               fmt::print(fmt::emphasis::bold, "{}:{}.{} - ", filepath.c_str(), err.pos.line,
+                          err.pos.column);
+               if (err.type == front::parse_error_type::e_semantic_error)
+               {
+                  fmt::print(fmt::fg(fmt::color::red) | fmt::emphasis::bold, "[{}] ", err.type);
+               }
+               else
+               {
+                  fmt::print(fmt::fg(fmt::color::yellow) | fmt::emphasis::bold, "[{}] ", err.type);
+               }
+
+               fmt::print("{}\n", err.lexeme);
+
+               fmt::print("{}\n", err.line);
+            }
+
+            front::ast::type_checking_visitor tc_visitor{st_visitor.get_root_table()};
+            result.ast->accept(tc_visitor);
+
+            for (const auto& err : tc_visitor.get_errors())
             {
                fmt::print(fmt::emphasis::bold, "{}:{}.{} - ", filepath.c_str(), err.pos.line,
                           err.pos.column);

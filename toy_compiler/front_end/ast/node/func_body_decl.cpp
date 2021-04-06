@@ -15,7 +15,15 @@ namespace front::ast
       }
    }
 
-   void func_body_decl::accept(visitor& visitor) const { visitor.visit(this); }
+   void func_body_decl::accept(visitor& visitor) const
+   {
+      for (const auto& child : children())
+      {
+         child->accept(visitor);
+      }
+
+      visitor.visit(this);
+   }
 
    auto func_body_decl::to_string() const -> std::string { return "func_body_decl"; }
 } // namespace front::ast

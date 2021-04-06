@@ -439,9 +439,11 @@ namespace front::ast
          node_ptr id = pop(recs);
          node_ptr factor_0 = pop(recs);
 
+         /*
          assert(dynamic_cast<expr*>(factor_0.get())); // NOLINT
          assert(dynamic_cast<id_decl*>(id.get()));    // NOLINT
          assert(dynamic_cast<expr*>(factor_1.get())); // NOLINT
+         */
 
          return std::make_unique<mult_op>(std::move(factor_0), std::move(id), std::move(factor_1));
       }

@@ -9,6 +9,8 @@ namespace front::ast
    public:
       func_or_assign_stmt(std::vector<node_ptr>&& var_or_func_decls);
 
+      void accept(visitor &visitor) const override;
+
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 } // namespace front::ast

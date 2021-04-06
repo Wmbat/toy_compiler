@@ -382,6 +382,9 @@ namespace front::ast
 
       m_tables.push_back(std::move(table));
    }
+   void symbol_table_visitor::visit(const func_or_assign_stmt*) {}
+   void symbol_table_visitor::visit(const return_stmt*) {}
+   void symbol_table_visitor::visit(const write_stmt*) {}
 
    auto symbol_table_visitor::get_root_table() const -> symbol_table*
    {

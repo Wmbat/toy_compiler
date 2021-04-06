@@ -59,7 +59,7 @@ TEST_SUITE("grammar/token_type.hpp test suite")
 
       for (auto i : magic_enum::enum_values<token_type>())
       {
-         CHECK(fmt::format("{}", i) == magic_enum::enum_name(i));
+         CHECK(fmt::format("{}", i) == magic_enum::enum_name(i).substr(2));
       }
    }
 }

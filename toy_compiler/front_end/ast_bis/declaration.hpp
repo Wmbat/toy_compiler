@@ -169,6 +169,8 @@ namespace front::ast
    public:
       compound_variable_decl(std::vector<node_ptr>&& variables);
 
+      void accept(visitor &visitor) const override;
+
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 

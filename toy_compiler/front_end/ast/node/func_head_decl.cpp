@@ -68,7 +68,7 @@ namespace front::ast
       if (m_class)
       {
          return fmt::format("func_head_decl <line:{}, col:{}> {}::{} '{} ({})'", location().line,
-                            location().column, m_class.value(), lexeme(), m_return_type,
+                            location().column, lexeme(), m_class.value(), m_return_type,
                             params.substr(0, std::size(params) - 2));
       }
       else

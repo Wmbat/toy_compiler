@@ -1,0 +1,348 @@
+- translation_unit_decl
+  - compound_class_decl
+    - class_decl <line:3, col:0> 'POLYNOMIAL'
+      - compound_member_decl
+        - member_func_decl <line:4, col:9> evaluate 'public float (float)'
+          - compound_param_decl
+            - variable_decl <line:4, col:23> x 'float'
+        - member_func_decl <line:5, col:9> evaluate2 'public float (float)'
+          - compound_param_decl
+            - variable_decl <line:5, col:24> x 'float'
+    - class_decl <line:8, col:1> 'POLYNOMIAL'
+      - compound_member_decl
+        - member_func_decl <line:10, col:7> evaluate 'public float (float)'
+          - compound_param_decl
+            - variable_decl <line:10, col:21> x 'float'
+        - member_func_decl <line:11, col:16> evaluate 'public integer (integer)'
+          - compound_param_decl
+            - variable_decl <line:11, col:30> x 'integer'
+    - class_decl <line:14, col:1> 'LINEAR'
+      - compound_inheritance_decl
+        - inheritance_decl <line:14, col:23> 'POLYNOMIAL'
+      - compound_member_decl
+        - member_var_decl <line:15, col:10> a 'private float'
+        - member_var_decl <line:16, col:10> b 'private float'
+        - member_var_decl <line:17, col:10> b 'private integer'
+        - member_func_decl <line:20, col:7> build 'public LINEAR (float, float)'
+          - compound_param_decl
+            - variable_decl <line:20, col:18> A 'float'
+            - variable_decl <line:20, col:27> B 'float'
+        - member_func_decl <line:21, col:9> evaluate 'public float (float)'
+          - compound_param_decl
+            - variable_decl <line:21, col:23> x 'float'
+    - class_decl <line:25, col:1> 'QUADRATIC'
+      - compound_inheritance_decl
+        - inheritance_decl <line:25, col:26> 'POLYNOMIAL'
+      - compound_member_decl
+        - member_var_decl <line:26, col:10> a 'private float'
+        - member_var_decl <line:28, col:8> b 'private float'
+        - member_var_decl <line:30, col:8> c 'private float'
+        - member_func_decl <line:32, col:9> build 'public QUADRATIC (float, float, float)'
+          - compound_param_decl
+            - variable_decl <line:32, col:20> A 'float'
+            - variable_decl <line:32, col:29> B 'float'
+            - variable_decl <line:32, col:38> C 'float'
+        - member_func_decl <line:33, col:9> evaluate 'public float (float)'
+          - compound_param_decl
+            - variable_decl <line:33, col:23> x 'float'
+    - class_decl <line:37, col:1> 'C'
+      - compound_inheritance_decl
+        - inheritance_decl <line:37, col:18> 'E'
+      - compound_member_decl
+        - member_var_decl <line:38, col:10> a 'private integer'
+    - class_decl <line:41, col:1> 'D'
+      - compound_inheritance_decl
+        - inheritance_decl <line:41, col:18> 'C'
+      - compound_member_decl
+        - member_var_decl <line:42, col:10> b 'private integer'
+    - class_decl <line:45, col:1> 'E'
+      - compound_inheritance_decl
+        - inheritance_decl <line:45, col:18> 'D'
+      - compound_member_decl
+        - member_var_decl <line:47, col:8> c 'private integer'
+  - compound_func_decl
+    - func_decl
+      - func_head_decl <line:53, col:0> POLYNOMIAL::evaluate 'float (float)'
+        - compound_param_decl
+          - variable_decl <line:53, col:26> x 'float'
+      - func_body_decl
+        - compound_stmt
+          - return_stmt <line:55, col:3>
+            - integer_expr <line:55, col:11> '0'
+    - func_decl
+      - func_head_decl <line:58, col:1> LINEAR::evaluate 'float (float)'
+        - compound_param_decl
+          - variable_decl <line:58, col:23> x 'float'
+      - func_body_decl
+        - compound_variable_decl
+          - variable_decl <line:62, col:5> result 'float'
+        - compound_stmt
+          - func_or_assign_stmt
+            - operator= <line:64, col:10>
+              - variable_expr <line:64, col:3> 'result'
+              - float_expr <line:64, col:12> '0.0'
+          - func_or_assign_stmt
+            - operator= <line:65, col:10>
+              - variable_expr <line:65, col:3> 'result'
+              - operator+ <line:65, col:18>
+                - operator* <line:65, col:14>
+                  - variable_expr <line:65, col:12> 'a'
+                  - variable_expr <line:65, col:16> 'x'
+                - variable_expr <line:65, col:20> 'b'
+          - return_stmt <line:66, col:3>
+            - variable_expr <line:66, col:11> 'result'
+    - func_decl
+      - func_head_decl <line:69, col:1> QUADRATIC::evaluate 'float (float)'
+        - compound_param_decl
+          - variable_decl <line:69, col:26> x 'float'
+      - func_body_decl
+        - compound_variable_decl
+          - variable_decl <line:73, col:5> result 'float'
+        - compound_stmt
+          - func_or_assign_stmt
+            - operator= <line:77, col:7>
+              - variable_expr <line:77, col:0> 'result'
+              - variable_expr <line:77, col:9> 'a'
+          - func_or_assign_stmt
+            - operator= <line:78, col:10>
+              - variable_expr <line:78, col:3> 'result'
+              - operator+ <line:78, col:23>
+                - operator* <line:78, col:19>
+                  - variable_expr <line:78, col:12> 'result'
+                  - variable_expr <line:78, col:21> 'x'
+                - variable_expr <line:78, col:25> 'b'
+          - func_or_assign_stmt
+            - operator= <line:79, col:10>
+              - variable_expr <line:79, col:3> 'result'
+              - operator+ <line:79, col:23>
+                - operator* <line:79, col:19>
+                  - variable_expr <line:79, col:12> 'result'
+                  - variable_expr <line:79, col:21> 'x'
+                - variable_expr <line:79, col:25> 'c'
+          - return_stmt <line:80, col:3>
+            - variable_expr <line:80, col:11> 'result'
+    - func_decl
+      - func_head_decl <line:83, col:1> LINEAR::build 'LINEAR (float, float)'
+        - compound_param_decl
+          - variable_decl <line:83, col:20> A 'float'
+          - variable_decl <line:83, col:29> B 'float'
+      - func_body_decl
+        - compound_variable_decl
+          - variable_decl <line:87, col:5> new_function 'LINEAR'
+        - compound_stmt
+          - func_or_assign_stmt
+            - operator= <line:89, col:18>
+              - operator. <line:89, col:15>
+                - variable_expr <line:89, col:3> 'new_function'
+                - variable_expr <line:89, col:16> 'a'
+              - variable_expr <line:89, col:20> 'A'
+          - func_or_assign_stmt
+            - operator= <line:90, col:18>
+              - operator. <line:90, col:15>
+                - variable_expr <line:90, col:3> 'new_function'
+                - variable_expr <line:90, col:16> 'b'
+              - variable_expr <line:90, col:20> 'B'
+          - return_stmt <line:91, col:3>
+            - variable_expr <line:91, col:11> 'new_function'
+    - func_decl
+      - func_head_decl <line:94, col:1> QUADRATIC::build 'QUADRATIC (float, float, float)'
+        - compound_param_decl
+          - variable_decl <line:94, col:23> A 'float'
+          - variable_decl <line:94, col:32> B 'float'
+          - variable_decl <line:94, col:41> C 'float'
+      - func_body_decl
+        - compound_variable_decl
+          - variable_decl <line:98, col:5> new_function 'QUADRATIC'
+        - compound_stmt
+          - func_or_assign_stmt
+            - operator= <line:100, col:18>
+              - operator. <line:100, col:15>
+                - variable_expr <line:100, col:3> 'new_function'
+                - variable_expr <line:100, col:16> 'a'
+              - operator+ <line:100, col:22>
+                - variable_expr <line:100, col:20> 'A'
+                - operator* <line:100, col:26>
+                  - variable_expr <line:100, col:24> 'B'
+                  - float_expr <line:100, col:28> '3.1'
+          - func_or_assign_stmt
+            - operator= <line:102, col:15>
+              - operator. <line:102, col:12>
+                - variable_expr <line:102, col:0> 'new_function'
+                - variable_expr <line:102, col:13> 'b'
+              - variable_expr <line:102, col:17> 'B'
+          - func_or_assign_stmt
+            - operator= <line:103, col:18>
+              - operator. <line:103, col:15>
+                - variable_expr <line:103, col:3> 'new_function'
+                - variable_expr <line:103, col:16> 'c'
+              - str_expr <line:103, col:20> 'string'
+          - return_stmt <line:105, col:0>
+            - integer_expr <line:105, col:8> '1'
+    - func_decl
+      - func_head_decl <line:109, col:1> QUADRATIC::build2 'QUADRATIC (float, float, float)'
+        - compound_param_decl
+          - variable_decl <line:109, col:24> A 'float'
+          - variable_decl <line:109, col:33> B 'float'
+          - variable_decl <line:109, col:42> C 'float'
+      - func_body_decl
+        - compound_variable_decl
+          - variable_decl <line:114, col:5> new_function 'QUADRATIC'
+        - compound_stmt
+          - func_or_assign_stmt
+            - operator= <line:116, col:18>
+              - operator. <line:116, col:15>
+                - variable_expr <line:116, col:3> 'new_function'
+                - variable_expr <line:116, col:16> 'a'
+              - variable_expr <line:116, col:20> 'A'
+          - func_or_assign_stmt
+            - operator= <line:117, col:18>
+              - operator. <line:117, col:15>
+                - variable_expr <line:117, col:3> 'new_function'
+                - variable_expr <line:117, col:16> 'b'
+              - variable_expr <line:117, col:20> 'B'
+          - func_or_assign_stmt
+            - operator= <line:118, col:18>
+              - operator. <line:118, col:15>
+                - variable_expr <line:118, col:3> 'new_function'
+                - variable_expr <line:118, col:16> 'c'
+              - variable_expr <line:118, col:20> 'C'
+          - return_stmt <line:119, col:3>
+            - variable_expr <line:119, col:11> 'new_function'
+    - func_decl
+      - func_head_decl <line:122, col:1> f 'void (integer)'
+        - compound_param_decl
+          - variable_decl <line:122, col:8> i 'integer'
+      - func_body_decl
+    - func_decl
+      - func_head_decl <line:123, col:1> f 'void (integer)'
+        - compound_param_decl
+          - variable_decl <line:123, col:8> i 'integer'
+      - func_body_decl
+    - func_decl
+      - func_head_decl <line:125, col:0> f 'integer (integer, integer)'
+        - compound_param_decl
+          - variable_decl <line:125, col:7> i 'integer'
+          - variable_decl <line:125, col:18> i 'integer'
+      - func_body_decl
+    - func_decl
+      - func_head_decl <line:128, col:0> f3 'integer (integer[2][3])'
+        - compound_param_decl
+          - variable_decl <line:128, col:8> p1 'integer'
+            - compound_array_decl
+              - array_decl <line:128, col:18> <line:128, col:20> '[2]'
+              - array_decl <line:128, col:21> <line:128, col:23> '[3]'
+      - func_body_decl
+  - main_decl <line:133, col:0> main
+    - func_body_decl
+      - compound_variable_decl
+        - variable_decl <line:137, col:5> a 'A'
+        - variable_decl <line:139, col:0> c 'C'
+        - variable_decl <line:140, col:5> f1 'linear'
+        - variable_decl <line:141, col:5> f2 'quadratic'
+        - variable_decl <line:142, col:5> counter 'integer'
+        - variable_decl <line:143, col:5> counter 'float'
+        - variable_decl <line:145, col:0> i 'integer'
+          - compound_array_decl
+            - array_decl <line:145, col:9> <line:145, col:11> '[2]'
+            - array_decl <line:145, col:12> <line:145, col:14> '[3]'
+        - variable_decl <line:146, col:5> j 'integer'
+          - compound_array_decl
+            - array_decl <line:146, col:14> <line:146, col:16> '[1]'
+            - array_decl <line:146, col:17> <line:146, col:19> '[2]'
+            - array_decl <line:146, col:20> <line:146, col:22> '[3]'
+      - compound_stmt
+        - func_or_assign_stmt
+          - operator= <line:148, col:6>
+            - variable_expr <line:148, col:3> 'f1'
+            - operator. <line:148, col:10>
+              - variable_expr <line:148, col:8> 'f1'
+              - function_expr <line:148, col:11> 'build'
+                - compound_parameter_expr_decl
+                  - integer_expr <line:148, col:17> '2'
+                  - float_expr <line:148, col:20> '3.5'
+        - func_or_assign_stmt
+          - operator= <line:149, col:6>
+            - variable_expr <line:149, col:3> 'f2'
+            - operator. <line:149, col:10>
+              - variable_expr <line:149, col:8> 'f2'
+              - function_expr <line:149, col:11> 'build'
+                - compound_parameter_expr_decl
+                  - sign_expr <line:149, col:17> '-'
+                    - float_expr <line:149, col:18> '2.0'
+                  - float_expr <line:149, col:23> '1.0'
+                  - float_expr <line:149, col:28> '0.0'
+        - func_or_assign_stmt
+          - operator= <line:150, col:7>
+            - operator. <line:150, col:4>
+              - variable_expr <line:150, col:3> 'c'
+              - variable_expr <line:150, col:5> 'b'
+            - integer_expr <line:150, col:9> '1'
+        - func_or_assign_stmt
+          - operator= <line:152, col:8>
+            - variable_expr <line:152, col:0> 'counter'
+            - operator. <line:152, col:11>
+              - variable_expr <line:152, col:10> 'c'
+              - function_expr <line:152, col:12> 'f'
+        - func_or_assign_stmt
+          - function_expr <line:154, col:0> 'undefined'
+        - func_or_assign_stmt
+          - operator= <line:156, col:8>
+            - variable_expr <line:156, col:0> 'counter'
+            - variable_expr <line:156, col:10> 'a'
+        - func_or_assign_stmt
+          - function_expr <line:158, col:0> 'f'
+            - compound_parameter_expr_decl
+              - integer_expr <line:158, col:2> '1'
+              - integer_expr <line:158, col:4> '1'
+              - integer_expr <line:158, col:6> '1'
+        - func_or_assign_stmt
+          - function_expr <line:160, col:0> 'f'
+            - compound_parameter_expr_decl
+              - float_expr <line:160, col:2> '1.2'
+              - integer_expr <line:160, col:6> '1'
+        - func_or_assign_stmt
+          - operator= <line:162, col:5>
+            - variable_expr <line:162, col:0> 'i'
+              - compound_array_index_access_decl
+                - array_index_access_decl <line:162, col:1> <line:162, col:3>
+                  - integer_expr <line:162, col:2> '2'
+            - integer_expr <line:162, col:7> '1'
+        - func_or_assign_stmt
+          - operator= <line:164, col:16>
+            - variable_expr <line:164, col:0> 'i'
+              - compound_array_index_access_decl
+                - array_index_access_decl <line:164, col:1> <line:164, col:9>
+                  - str_expr <line:164, col:2> 'hello'
+                - array_index_access_decl <line:164, col:10> <line:164, col:14>
+                  - float_expr <line:164, col:11> '1.3'
+            - integer_expr <line:164, col:18> '2'
+        - func_or_assign_stmt
+          - function_expr <line:166, col:0> 'f3'
+            - compound_parameter_expr_decl
+              - variable_expr <line:166, col:3> 'j'
+        - func_or_assign_stmt
+          - operator= <line:168, col:10>
+            - operator. <line:168, col:7>
+              - variable_expr <line:168, col:0> 'counter'
+              - variable_expr <line:168, col:8> 'x'
+            - integer_expr <line:168, col:12> '1'
+        - while_stmt <line:170, col:0>
+          - operator<= <line:170, col:14>
+            - variable_expr <line:170, col:6> 'counter'
+            - integer_expr <line:170, col:17> '10'
+          - stmt_block_decl
+            - compound_stmt
+              - write_stmt <line:172, col:5>
+                - variable_expr <line:172, col:11> 'counter'
+              - write_stmt <line:173, col:5>
+                - operator. <line:173, col:13>
+                  - variable_expr <line:173, col:11> 'f1'
+                  - function_expr <line:173, col:14> 'evaluate'
+                    - compound_parameter_expr_decl
+                      - variable_expr <line:173, col:23> 'counter'
+              - write_stmt <line:174, col:5>
+                - operator. <line:174, col:13>
+                  - variable_expr <line:174, col:11> 'f2'
+                  - function_expr <line:174, col:14> 'evaluate'
+                    - compound_parameter_expr_decl
+                      - variable_expr <line:174, col:23> 'counter'

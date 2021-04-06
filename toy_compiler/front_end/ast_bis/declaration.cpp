@@ -173,6 +173,8 @@ namespace front::ast
       make_family<variable_decl>(std::move(variables));
    }
 
+   void compound_variable_decl::accept(visitor&) const {}
+
    auto compound_variable_decl::to_string() const -> std::string
    {
       return fmt::format("compound_variable_decl");

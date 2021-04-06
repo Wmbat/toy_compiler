@@ -26,6 +26,9 @@ namespace front::ast
       void visit(const variable_decl*) override;
       void visit(const compound_stmt*) override;
       void visit(const main_decl*) override;
+      void visit(const func_or_assign_stmt*) override;
+      void visit(const return_stmt*) override;
+      void visit(const write_stmt*) override;
 
       [[nodiscard]] auto get_root_table() const -> symbol_table*;
 

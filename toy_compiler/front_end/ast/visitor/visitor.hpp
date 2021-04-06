@@ -23,6 +23,9 @@ namespace front::ast
    class compound_variable_decl;
    class variable_decl;
    class compound_stmt;
+   class func_or_assign_stmt;
+   class return_stmt;
+   class write_stmt;
    class main_decl;
 
    class visitor
@@ -39,6 +42,9 @@ namespace front::ast
       virtual void visit(const variable_decl*) = 0;
       virtual void visit(const compound_stmt*) = 0;
       virtual void visit(const main_decl*) = 0;
+      virtual void visit(const func_or_assign_stmt*) = 0;
+      virtual void visit(const return_stmt*) = 0;
+      virtual void visit(const write_stmt*) = 0;
 
       [[nodiscard]] auto get_errors() const -> const std::vector<parse_error>& { return m_errors; }
 

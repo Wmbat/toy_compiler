@@ -309,7 +309,7 @@ TEST_SUITE("Lexer test suite")
          CHECK((std::begin(data) + 1)->type == front::sem::token_type::e_block_cmt);
          CHECK((std::begin(data) + 2)->type == front::sem::token_type::e_block_cmt);
          CHECK((std::begin(data) + 3)->type == front::sem::token_type::e_block_cmt);
-         CHECK((std::begin(data) + 3)->pos.line == 7);
+         CHECK((std::begin(data) + 3)->pos.line == 8);
       }
       SUBCASE("invalid")
       {
@@ -352,10 +352,11 @@ TEST_SUITE("Lexer test suite")
    {
       using namespace front;
 
-      lex_item tok{.type = front::sem::token_type::e_integer_lit, .lexeme = "hello", .pos = {10, 10}};
+      lex_item tok{
+         .type = front::sem::token_type::e_integer_lit, .lexeme = "hello", .pos = {10, 10}};
 
       CHECK(fmt::format("{}", tok) ==
-            fmt::format("[.type = {}, .lexeme = {}, .position = ({}:{})]", tok.type, tok.lexeme,
+            fmt::format("[.type = {}, .lexeme = {}, .position = <line:{}, col:{}>]", tok.type, tok.lexeme,
                         tok.pos.line, tok.pos.column));
    }
 }

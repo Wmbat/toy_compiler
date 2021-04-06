@@ -10,10 +10,7 @@ namespace front::ast
    stmt::stmt(const std::string& lexeme, const source_location& location) : node{lexeme, location}
    {}
 
-   void stmt::accept(visitor& /*visitor*/) const
-   {
-      assert(false && "Accept not implementd"); // NOLINT
-   }
+   void stmt::accept(visitor& /*visitor*/) const {}
 
    if_stmt::if_stmt(node_ptr loc, node_ptr expr, node_ptr then_block, node_ptr else_block) :
       stmt{loc->location()}

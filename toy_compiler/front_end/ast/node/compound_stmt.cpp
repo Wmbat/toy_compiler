@@ -7,5 +7,15 @@ namespace front::ast
       make_family<stmt>(std::move(statements));
    }
 
+   void compound_stmt::accept(visitor& visitor) const
+   {
+      for (const auto& child : children())
+      {
+         child->accept(visitor);
+      }
+
+      visitor.visit(this);
+   }
+
    auto compound_stmt::to_string() const -> std::string { return "compound_stmt"; }
 } // namespace front::ast
