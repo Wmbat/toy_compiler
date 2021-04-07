@@ -1,6 +1,6 @@
 #pragma once
 
-#include <toy_compiler/front_end/ast/symbol_table.hpp>
+#include <toy_compiler/front_end/ast/visitor/symbol_table.hpp>
 
 #include <toy_compiler/front_end/parse_error.hpp>
 #include <toy_compiler/util/strong_type.hpp>

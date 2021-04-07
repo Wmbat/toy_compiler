@@ -83,6 +83,7 @@ main
     quadratic f2;
     integer counter;
   }
+
   f1 = f1.build(2, 3.5);
   f2 = f2.build(-2.0, 1.0, 0.0);
   counter = 1;

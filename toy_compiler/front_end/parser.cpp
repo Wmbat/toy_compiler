@@ -19,7 +19,6 @@
 
 #include <toy_compiler/front_end/parser.hpp>
 
-#include <toy_compiler/front_end/ast_bis/node.hpp>
 #include <toy_compiler/front_end/grammar/production.hpp>
 #include <toy_compiler/front_end/grammar/production_table.hpp>
 #include <toy_compiler/front_end/grammar/symbol.hpp>

@@ -1,6 +1,7 @@
 #include <toy_compiler/front_end/ast/node/not_expr.hpp>
 
-#include <toy_compiler/front_end/ast/node/mult_op.hpp>
+#include <toy_compiler/front_end/ast/decl/id_decl.hpp>
+#include <toy_compiler/front_end/ast/op/mult_op.hpp>
 
 namespace front::ast
 {

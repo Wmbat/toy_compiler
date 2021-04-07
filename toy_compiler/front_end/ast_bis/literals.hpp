@@ -1,6 +1,6 @@
 #pragma once
 
-#include <toy_compiler/front_end/ast_bis/node.hpp>
+#include <toy_compiler/front_end/ast/node/node.hpp>
 
 namespace front::ast
 {

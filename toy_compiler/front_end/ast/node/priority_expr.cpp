@@ -1,6 +1,7 @@
 #include <toy_compiler/front_end/ast/node/priority_expr.hpp>
 
-#include <toy_compiler/front_end/ast/node/op.hpp>
+#include <toy_compiler/front_end/ast/decl/location_decl.hpp>
+#include <toy_compiler/front_end/ast/op/op.hpp>
 
 namespace front::ast
 {

@@ -1,14 +1,16 @@
 #include <toy_compiler/front_end/ast/visitor/type_checking_visitor.hpp>
 
-#include <toy_compiler/front_end/ast/node/assign_op.hpp>
-#include <toy_compiler/front_end/ast/node/dot_op.hpp>
-#include <toy_compiler/front_end/ast/node/func_body_decl.hpp>
-#include <toy_compiler/front_end/ast/node/func_decl.hpp>
-#include <toy_compiler/front_end/ast/node/func_head_decl.hpp>
-#include <toy_compiler/front_end/ast/node/func_or_assign_stmt.hpp>
-#include <toy_compiler/front_end/ast/node/member_func_decl.hpp>
-#include <toy_compiler/front_end/ast/node/member_var_decl.hpp>
-#include <toy_compiler/front_end/ast/node/mult_op.hpp>
+#include <toy_compiler/front_end/ast/decl/func_body_decl.hpp>
+#include <toy_compiler/front_end/ast/decl/func_decl.hpp>
+#include <toy_compiler/front_end/ast/decl/func_head_decl.hpp>
+#include <toy_compiler/front_end/ast/decl/member_func_decl.hpp>
+#include <toy_compiler/front_end/ast/decl/member_var_decl.hpp>
+#include <toy_compiler/front_end/ast/expr/var_expr.hpp>
+#include <toy_compiler/front_end/ast/expr/func_expr.hpp>
+#include <toy_compiler/front_end/ast/op/assign_op.hpp>
+#include <toy_compiler/front_end/ast/op/dot_op.hpp>
+#include <toy_compiler/front_end/ast/op/mult_op.hpp>
+#include <toy_compiler/front_end/ast/stmt/func_or_assign_stmt.hpp>
 #include <toy_compiler/front_end/ast_bis/factor.hpp>
 
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
@@ -212,11 +214,11 @@ namespace front::ast
          {
             if (res.val().kind() != symbol_type::e_class)
             {
-               m_errors.push_back(
-                  {.type = parse_error_type::e_semantic_error,
-                   .pos = var_expr->location(),
-                   .lexeme = fmt::format("identifier '{}' to the left of `operator.` is not a class",
-                                         var_expr->lexeme())});
+               m_errors.push_back({.type = parse_error_type::e_semantic_error,
+                                   .pos = var_expr->location(),
+                                   .lexeme = fmt::format(
+                                      "identifier '{}' to the left of `operator.` is not a class",
+                                      var_expr->lexeme())});
             }
          }
          else

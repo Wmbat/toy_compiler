@@ -1,10 +1,12 @@
 #include <toy_compiler/front_end/ast/visitor/symbol_table_visitor.hpp>
 
-#include <toy_compiler/front_end/ast/node/func_body_decl.hpp>
-#include <toy_compiler/front_end/ast/node/func_decl.hpp>
-#include <toy_compiler/front_end/ast/node/func_head_decl.hpp>
-#include <toy_compiler/front_end/ast/node/member_func_decl.hpp>
-#include <toy_compiler/front_end/ast/node/member_var_decl.hpp>
+#include <toy_compiler/front_end/ast/decl/class_decl.hpp>
+#include <toy_compiler/front_end/ast/decl/func_body_decl.hpp>
+#include <toy_compiler/front_end/ast/decl/func_decl.hpp>
+#include <toy_compiler/front_end/ast/decl/func_head_decl.hpp>
+#include <toy_compiler/front_end/ast/decl/member_func_decl.hpp>
+#include <toy_compiler/front_end/ast/decl/member_var_decl.hpp>
+#include <toy_compiler/front_end/ast/decl/translation_unit_decl.hpp>
 
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
 

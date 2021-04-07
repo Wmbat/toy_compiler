@@ -1,5 +1,7 @@
 #pragma once
 
+#include <toy_compiler/util/crtp.hpp>
+
 #include <concepts>
 #include <cstdint>
 #include <type_traits>
@@ -71,21 +73,8 @@ namespace util
    };
    // clang-format on
 
-   namespace detail
-   {
-      template <typename any_, template <typename> class crtp_type_>
-      struct crtp
-      {
-         constexpr auto underlying() -> any_& { return static_cast<any_&>(*this); }
-         constexpr auto underlying() const -> any_ const&
-         {
-            return static_cast<any_ const&>(*this);
-         }
-      };
-   } // namespace detail
-
    template <typename any_>
-   struct pre_incrementable : detail::crtp<any_, pre_incrementable>
+   struct pre_incrementable : crtp<any_, pre_incrementable>
    {
       constexpr auto operator++() -> any_&
       {
@@ -95,7 +84,7 @@ namespace util
    };
 
    template <typename any_>
-   struct post_incrementable : detail::crtp<any_, post_incrementable>
+   struct post_incrementable : crtp<any_, post_incrementable>
    {
       constexpr auto operator++(int) -> any_ { return this->underlying().value()++; }
    };
@@ -108,7 +97,7 @@ namespace util
    };
 
    template <typename any_>
-   struct pre_decrementable : detail::crtp<any_, pre_decrementable>
+   struct pre_decrementable : crtp<any_, pre_decrementable>
    {
       constexpr auto operator--() -> any_&
       {
@@ -118,7 +107,7 @@ namespace util
    };
 
    template <typename any_>
-   struct post_decrementable : detail::crtp<any_, post_decrementable>
+   struct post_decrementable : crtp<any_, post_decrementable>
    {
       constexpr auto operator--(int) -> any_ { return this->underlying().value()--; }
    };
@@ -131,7 +120,7 @@ namespace util
    };
 
    template <typename any_>
-   struct binary_addable : detail::crtp<any_, binary_addable>
+   struct binary_addable : crtp<any_, binary_addable>
    {
       constexpr auto operator+(const any_& rhs) const
       {
@@ -146,7 +135,7 @@ namespace util
    };
 
    template <typename any_>
-   struct unary_addable : detail::crtp<any_, unary_addable>
+   struct unary_addable : crtp<any_, unary_addable>
    {
       constexpr auto operator+() const { return any_{+this->undelying().value()}; }
    };
@@ -159,7 +148,7 @@ namespace util
    };
 
    template <typename any_>
-   struct binary_subtractable : detail::crtp<any_, binary_subtractable>
+   struct binary_subtractable : crtp<any_, binary_subtractable>
    {
       constexpr auto operator-(const any_& rhs) const
       {
@@ -174,7 +163,7 @@ namespace util
    };
 
    template <typename any_>
-   struct unary_subtractable : detail::crtp<any_, unary_subtractable>
+   struct unary_subtractable : crtp<any_, unary_subtractable>
    {
       constexpr auto operator-() const { return any_{-this->undelying().value()}; }
    };
@@ -187,7 +176,7 @@ namespace util
    };
 
    template <typename any_>
-   struct multiplicable : detail::crtp<any_, multiplicable>
+   struct multiplicable : crtp<any_, multiplicable>
    {
       auto operator*(const any_& rhs) const -> any_
       {
@@ -201,7 +190,7 @@ namespace util
    };
 
    template <typename any_>
-   struct divisible : detail::crtp<any_, divisible>
+   struct divisible : crtp<any_, divisible>
    {
       auto operator/(const any_& other) const -> any_
       {
@@ -215,7 +204,7 @@ namespace util
    };
 
    template <typename any_>
-   struct modulable : detail::crtp<any_, modulable>
+   struct modulable : crtp<any_, modulable>
    {
       auto operator%(const any_& rhs) const -> any_
       {
@@ -229,7 +218,7 @@ namespace util
    };
 
    template <typename any_>
-   struct equatable : detail::crtp<any_, equatable>
+   struct equatable : crtp<any_, equatable>
    {
       friend auto operator==(const any_& lhs, const any_& rhs) -> bool
       {
