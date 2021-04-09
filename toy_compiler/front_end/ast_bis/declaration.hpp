@@ -19,28 +19,12 @@
 
 #pragma once
 
-#include <toy_compiler/front_end/ast/decl/decl.hpp>
+#include <toy_compiler/munster/ast/decl/decl.hpp>
 
 #include <toy_compiler/front_end/source_location.hpp>
 
-namespace front::ast
+namespace munster::ast
 {
-   class compound_inheritance_decl : public decl
-   {
-   public:
-      compound_inheritance_decl(std::vector<node_ptr>&& class_decls);
-
-      [[nodiscard]] auto to_string() const -> std::string override;
-   };
-
-   class inheritance_decl : public decl
-   {
-   public:
-      inheritance_decl(const std::string& name, const source_location& location);
-
-      [[nodiscard]] auto to_string() const -> std::string override;
-   };
-
    class compound_member_decl : public decl
    {
    public:
@@ -52,7 +36,7 @@ namespace front::ast
    class visibility_decl : public decl
    {
    public:
-      visibility_decl(const std::string& name, const source_location& location);
+      visibility_decl(const std::string& name, const front::source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
@@ -86,7 +70,7 @@ namespace front::ast
       [[nodiscard]] auto to_string() const -> std::string override;
 
    private:
-      source_location m_end_loc;
+      front::source_location m_end_loc;
    };
 
    class compound_params_decl : public decl
@@ -102,7 +86,7 @@ namespace front::ast
    public:
       compound_variable_decl(std::vector<node_ptr>&& variables);
 
-      void accept(visitor& visitor) const override;
+      void accept(visitor_variant& visitor) const override;
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
@@ -112,7 +96,7 @@ namespace front::ast
    public:
       main_decl(node_ptr location, node_ptr func_body);
 
-      void accept(visitor& visitor) const override;
+      void accept(visitor_variant& visitor) const override;
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
@@ -140,7 +124,7 @@ namespace front::ast
       [[nodiscard]] auto to_string() const -> std::string override;
 
    private:
-      source_location m_end;
+      front::source_location m_end;
    };
 
    class stmt_block_decl : public decl
@@ -153,4 +137,4 @@ namespace front::ast
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
-} // namespace front::ast
+} // namespace munster::ast

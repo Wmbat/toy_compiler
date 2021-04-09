@@ -38,9 +38,9 @@ private:
    void write_derivations_to_file(const std::filesystem::path& path,
                                   const std::string& derivation) const;
    void write_ast_to_file(const std::filesystem::path& path,
-                          const front::ast::node_ptr& root) const;
+                          const munster::ast::node_ptr& root) const;
    void write_symbol_tables_to_file(const std::filesystem::path& path,
-                                    const front::ast::symbol_table* root) const;
+                                    const munster::symbol_table* root) const;
 
    [[nodiscard]] auto fancy_lexical_error_type(front::sem::token_type value) const -> std::string;
 

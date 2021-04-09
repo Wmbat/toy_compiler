@@ -74,7 +74,7 @@ namespace fr
       static const auto table = fr::grammar::construct_production_table();
 
       std::vector<front::parse_error> errors;
-      std::vector<front::ast::node_ptr> nodes;
+      std::vector<munster::ast::node_ptr> nodes;
       std::vector<grammar::symbol> stack;
       stack.push_back(grammar::symbol::stop());
       stack.push_back(grammar::symbol::start());
@@ -205,11 +205,11 @@ namespace fr
             stack.pop_back();
             if (item_it != std::begin(items))
             {
-               nodes.push_back(front::ast::node_factory(type, *(item_it - 1), nodes));
+               nodes.push_back(munster::ast::node_factory(type, *(item_it - 1), nodes));
             }
             else
             {
-               nodes.push_back(front::ast::node_factory(type, {}, nodes));
+               nodes.push_back(munster::ast::node_factory(type, {}, nodes));
             }
          }
 

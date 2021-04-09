@@ -1,34 +1,25 @@
 #pragma once
 
-#include <toy_compiler/munster/ast/decl/class_decl_list.hpp>
-#include <toy_compiler/munster/ast/decl/func_decl_list.hpp>
-#include <toy_compiler/munster/ast/node_context.hpp>
+#include <toy_compiler/munster/ast/decl/decl.hpp>
 
-#include <toy_compiler/front_end/ast/visitor/element_intf.hpp>
-
-#include <fmt/core.h>
+#include <toy_compiler/munster/ast/decl/compound_class_decl.hpp>
 
 namespace munster::ast
 {
-   class translation_unit_decl :
-      public node_context<class_decl_list, func_decl_list>,
-      public front::ast::element_intf<translation_unit_decl>
+   /*
+   assert(dynamic_cast<compound_class_decl*>(compound_class.get()));   // NOLINT
+   assert(dynamic_cast<compound_func_decl*>(compound_function.get())); // NOLINT
+   assert(dynamic_cast<main_decl*>(main.get()));                       // NOLINT
+   */
+
+   class translation_unit_decl : public decl
    {
    public:
-      translation_unit_decl(class_decl_list&& class_list, func_decl_list&& func_list)
-      {
-         make_child(class_list);
-         make_child(func_list);
-      }
+      translation_unit_decl(compound_class_decl::ptr compound_class, node_ptr compound_function,
+                            node_ptr main);
+
+      void accept(visitor_variant& visitor) const override;
+
+      [[nodiscard]] auto to_string() const -> std::string override;
    };
 } // namespace munster::ast
-
-template <>
-struct fmt::formatter<munster::ast::translation_unit_decl> : fmt::formatter<fmt::string_view>
-{
-   template <typename FormatContext>
-   auto format(const munster::ast::translation_unit_decl&, FormatContext& ctx)
-   {
-      return fmt::format_to(ctx.out(), "translation_unit_decl");
-   }
-};

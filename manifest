@@ -14,6 +14,7 @@ depends: * bpkg >= 0.13.0
 
 depends: range-v3 ^0.11.0
 depends: monads ^0.1.1-a.5
+depends: patterns ^0.3.0
 depends: magic_enum ^0.7.2
 depends: spdlog ^1.8.2
 depends: fmt ^7.1.3

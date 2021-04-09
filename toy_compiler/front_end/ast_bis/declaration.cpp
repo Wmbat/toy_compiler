@@ -1,37 +1,17 @@
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
 
-#include <toy_compiler/front_end/ast/decl/compound_func_decl.hpp>
-#include <toy_compiler/front_end/ast/decl/member_func_decl.hpp>
-#include <toy_compiler/front_end/ast/decl/member_var_decl.hpp>
-#include <toy_compiler/front_end/ast/stmt/compound_stmt.hpp>
+#include <toy_compiler/munster/ast/decl/compound_func_decl.hpp>
+#include <toy_compiler/munster/ast/decl/member_func_decl.hpp>
+#include <toy_compiler/munster/ast/decl/member_var_decl.hpp>
+#include <toy_compiler/munster/ast/stmt/compound_stmt.hpp>
 
-#include <toy_compiler/front_end/ast/visitor/visitor.hpp>
+#include <toy_compiler/munster/visitor/visitor.hpp>
 
 #include <cassert>
 #include <utility>
 
-namespace front::ast
+namespace munster::ast
 {
-   compound_inheritance_decl::compound_inheritance_decl(std::vector<node_ptr>&& inheritance_decls)
-   {
-      make_family<inheritance_decl>(std::move(inheritance_decls));
-   }
-
-   auto compound_inheritance_decl::to_string() const -> std::string
-   {
-      return "compound_inheritance_decl";
-   }
-
-   inheritance_decl::inheritance_decl(const std::string& name, const source_location& location) :
-      decl{name, location}
-   {}
-
-   auto inheritance_decl::to_string() const -> std::string
-   {
-      return fmt::format("{} <line:{}, col:{}> '{}'", "inheritance_decl", location().line,
-                         location().column, lexeme());
-   }
-
    compound_member_decl::compound_member_decl(std::vector<node_ptr>&& member_decls)
    {
       make_family<member_func_decl, member_var_decl>(std::move(member_decls));
@@ -39,7 +19,8 @@ namespace front::ast
 
    auto compound_member_decl::to_string() const -> std::string { return "compound_member_decl"; }
 
-   visibility_decl::visibility_decl(const std::string& name, const source_location& location) :
+   visibility_decl::visibility_decl(const std::string& name,
+                                    const front::source_location& location) :
       decl{name, location}
    {}
 
@@ -106,7 +87,7 @@ namespace front::ast
       make_family<variable_decl>(std::move(variables));
    }
 
-   void compound_variable_decl::accept(visitor&) const {}
+   void compound_variable_decl::accept(visitor_variant&) const {}
 
    auto compound_variable_decl::to_string() const -> std::string
    {
@@ -119,14 +100,18 @@ namespace front::ast
       make_child(std::move(func_body));
    }
 
-   void main_decl::accept(visitor& visitor) const
+   void main_decl::accept(visitor_variant& visitor) const
    {
       for (const auto& child : children())
       {
          child->accept(visitor);
       }
 
-      visitor.visit(this);
+      std::visit(
+         [this](auto& visitor) {
+            visitor.visit(*this);
+         },
+         visitor);
    }
 
    auto main_decl::to_string() const -> std::string
@@ -174,4 +159,4 @@ namespace front::ast
 
    auto stmt_block_decl::to_string() const -> std::string { return "stmt_block_decl"; }
 
-}; // namespace front::ast
+}; // namespace munster::ast

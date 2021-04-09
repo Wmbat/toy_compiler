@@ -17,13 +17,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "toy_compiler/front_end/ast/visitor/type_checking_visitor.hpp"
 #include <toy_compiler/core/application.hpp>
 
-#include <toy_compiler/front_end/ast/visitor/symbol_table_visitor.hpp>
-#include <toy_compiler/front_end/ast/visitor/visitor.hpp>
 #include <toy_compiler/front_end/lexer.hpp>
 #include <toy_compiler/front_end/parser.hpp>
+#include <toy_compiler/munster/visitor/ast/symbol_table_visitor.hpp>
+#include <toy_compiler/munster/visitor/semantic_checking/type_checking_visitor.hpp>
+#include <toy_compiler/munster/visitor/visitor.hpp>
 
 #include <fmt/color.h>
 #include <fmt/ostream.h>
@@ -32,16 +32,39 @@
 #include <range/v3/algorithm/count_if.hpp>
 #include <range/v3/view/map.hpp>
 
+#include <mpark/patterns.hpp>
+
 #include <cassert>
 #include <fstream>
 
 namespace fs = std::filesystem;
 
-auto pop(std::vector<front::ast::node*>& stack) -> front::ast::node*
+auto pop(std::vector<munster::ast::node*>& stack) -> munster::ast::node*
 {
    auto temp = *(std::end(stack) - 1);
    stack.pop_back();
    return temp;
+}
+
+void print_errors(std::span<const front::parse_error> errors, const std::filesystem::path& filepath)
+{
+   for (const auto& err : errors)
+   {
+      fmt::print(fmt::emphasis::bold, "{}:{}.{} - ", filepath.c_str(), err.pos.line,
+                 err.pos.column);
+      if (err.type == front::parse_error_type::e_semantic_error)
+      {
+         fmt::print(fmt::fg(fmt::color::red) | fmt::emphasis::bold, "[{}] ", err.type);
+      }
+      else
+      {
+         fmt::print(fmt::fg(fmt::color::yellow) | fmt::emphasis::bold, "[{}] ", err.type);
+      }
+
+      fmt::print("{}\n", err.lexeme);
+
+      fmt::print("{}\n", err.line);
+   }
 }
 
 application::application(std::span<const std::string_view> args, util::logger_wrapper log) :
@@ -75,48 +98,28 @@ application::application(std::span<const std::string_view> args, util::logger_wr
             write_ast_to_file(filepath, result.ast);
             write_derivations_to_file(filepath, result.derivation);
 
-            front::ast::symbol_table_visitor st_visitor{};
-            result.ast->accept(st_visitor);
-
-            write_symbol_tables_to_file(filepath, st_visitor.get_root_table());
-
-            for (const auto& err : st_visitor.get_errors())
             {
-               fmt::print(fmt::emphasis::bold, "{}:{}.{} - ", filepath.c_str(), err.pos.line,
-                          err.pos.column);
-               if (err.type == front::parse_error_type::e_semantic_error)
-               {
-                  fmt::print(fmt::fg(fmt::color::red) | fmt::emphasis::bold, "[{}] ", err.type);
-               }
-               else
-               {
-                  fmt::print(fmt::fg(fmt::color::yellow) | fmt::emphasis::bold, "[{}] ", err.type);
-               }
+               using namespace mpark::patterns;
+               using namespace munster;
 
-               fmt::print("{}\n", err.lexeme);
+               munster::ast::visitor_variant st_variant{symbol_table_visitor{}};
+               result.ast->accept(st_variant);
 
-               fmt::print("{}\n", err.line);
-            }
+               auto* root_table = match(st_variant)(
+                  pattern(as<symbol_table_visitor>(arg)) = [&](symbol_table_visitor& vis) {
+                     write_symbol_tables_to_file(filepath, vis.get_root_table());
+                     print_errors(vis.get_errors(), filepath);
 
-            front::ast::type_checking_visitor tc_visitor{st_visitor.get_root_table()};
-            result.ast->accept(tc_visitor);
+                     return vis.get_root_table();
+                  });
 
-            for (const auto& err : tc_visitor.get_errors())
-            {
-               fmt::print(fmt::emphasis::bold, "{}:{}.{} - ", filepath.c_str(), err.pos.line,
-                          err.pos.column);
-               if (err.type == front::parse_error_type::e_semantic_error)
-               {
-                  fmt::print(fmt::fg(fmt::color::red) | fmt::emphasis::bold, "[{}] ", err.type);
-               }
-               else
-               {
-                  fmt::print(fmt::fg(fmt::color::yellow) | fmt::emphasis::bold, "[{}] ", err.type);
-               }
+               munster::ast::visitor_variant tc_variant{type_checking_visitor{root_table}};
+               result.ast->accept(tc_variant);
 
-               fmt::print("{}\n", err.lexeme);
-
-               fmt::print("{}\n", err.line);
+               match(tc_variant)(
+                  pattern(as<type_checking_visitor>(arg)) = [&](type_checking_visitor& vis) {
+                     print_errors(vis.get_errors(), filepath);
+                  });
             }
          }
          else
@@ -150,7 +153,7 @@ void application::write_derivations_to_file(const std::filesystem::path& path,
    fmt::print(output_file, "{}", derivation);
 }
 
-void pre_order_traversal(const front::ast::node_ptr& node, std::size_t depth,
+void pre_order_traversal(const munster::ast::node_ptr& node, std::size_t depth,
                          std::ofstream& output_file)
 {
    if (!node)
@@ -174,7 +177,7 @@ void pre_order_traversal(const front::ast::node_ptr& node, std::size_t depth,
 }
 
 void application::write_ast_to_file(const std::filesystem::path& path,
-                                    const front::ast::node_ptr& root) const
+                                    const munster::ast::node_ptr& root) const
 {
    auto output_path = path.parent_path();
    output_path /= path.stem();
@@ -185,7 +188,7 @@ void application::write_ast_to_file(const std::filesystem::path& path,
    pre_order_traversal(root, 0, output_file);
 }
 
-void st_pre_order_traversal(const front::ast::symbol_table* root, std::ofstream& output_file)
+void st_pre_order_traversal(const munster::symbol_table* root, std::ofstream& output_file)
 {
    if (!root)
    {
@@ -201,7 +204,7 @@ void st_pre_order_traversal(const front::ast::symbol_table* root, std::ofstream&
 }
 
 void application::write_symbol_tables_to_file(const std::filesystem::path& path,
-                                              const front::ast::symbol_table* root) const
+                                              const munster::symbol_table* root) const
 {
    auto output_path = path.parent_path();
    output_path /= path.stem();

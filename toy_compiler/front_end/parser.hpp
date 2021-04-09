@@ -19,10 +19,9 @@
 
 #pragma once
 
-#include <toy_compiler/front_end/ast/node/node_factory.hpp>
 #include <toy_compiler/front_end/lexer.hpp>
 #include <toy_compiler/front_end/parse_error.hpp>
-#include <toy_compiler/munster/ast/decl/translation_unit_decl.hpp>
+#include <toy_compiler/munster/ast/node_factory.hpp>
 #include <toy_compiler/util/logger.hpp>
 
 #include <monads/maybe.hpp>
@@ -47,7 +46,7 @@ namespace fr
    struct [[nodiscard]] parse_result
    {
       parse_status value = parse_status::success;
-      front::ast::node_ptr ast = nullptr;
+      munster::ast::node_ptr ast = nullptr;
       std::string derivation;
       monad::maybe<std::vector<front::parse_error>> errors = {};
    };
