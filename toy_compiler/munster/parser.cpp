@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <toy_compiler/front_end/parser.hpp>
+#include <toy_compiler/munster/parser.hpp>
 
 #include <toy_compiler/munster/grammar/production.hpp>
 #include <toy_compiler/munster/grammar/production_table.hpp>
@@ -70,7 +70,7 @@ namespace munster
    {
       static const auto table = grammar::construct_production_table();
 
-      std::vector<front::parse_error> errors;
+      std::vector<parse_error> errors;
       std::vector<munster::ast::node_ptr> nodes;
       std::vector<grammar::symbol> stack;
       stack.push_back(grammar::symbol::stop());
@@ -116,11 +116,10 @@ namespace munster
                   log.warning("SCANNING...");
 
                   const auto type = get<grammar::symbol_type::terminal>(top_symbol);
-                  errors.push_back(
-                     front::parse_error{.type = front::parse_error_type::e_syntax_error,
-                                        .pos = item_it->pos,
-                                        .lexeme = fmt::format("{}", type),
-                                        .line = {}});
+                  errors.push_back(parse_error{.type = parse_error_type::e_syntax_error,
+                                               .pos = item_it->pos,
+                                               .lexeme = fmt::format("{}", type),
+                                               .line = {}});
 
                   while (!grammar::is_eof(item_it->type) && item_it->type != top_symbol)
                   {
@@ -165,11 +164,10 @@ namespace munster
                   log.warning("SCANNING OF {}...", top_symbol);
 
                   const auto type = get<grammar::symbol_type::non_terminal>(top_symbol);
-                  errors.push_back(
-                     front::parse_error{.type = front::parse_error_type::e_syntax_error,
-                                        .pos = item_it->pos,
-                                        .lexeme = fmt::format("{}", type),
-                                        .line = {}});
+                  errors.push_back(parse_error{.type = parse_error_type::e_syntax_error,
+                                               .pos = item_it->pos,
+                                               .lexeme = fmt::format("{}", type),
+                                               .line = {}});
 
                   if (first_it->nullable())
                   {
@@ -223,7 +221,7 @@ namespace munster
       return {.value = parse_status::success,
               .ast = std::move(nodes.back()),
               .derivation = final_derivations,
-              .errors = monad::none};
+              .errors = std::nullopt};
    }
 
    auto parse_items(std::span<const lex_item> items, util::logger_wrapper log) -> parse_result

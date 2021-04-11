@@ -6,7 +6,7 @@ using namespace mpark::patterns;
 
 namespace munster::ast
 {
-   string_expr::string_expr(const std::string& lexeme, const front::source_location& location) :
+   string_expr::string_expr(const std::string& lexeme, const source_location& location) :
       expr{lexeme, location}
    {}
 

@@ -6,8 +6,8 @@
 
 namespace munster::ast
 {
-   literal::literal(const front::source_location& location) : node{location} {}
-   literal::literal(const std::string& lexeme, const front::source_location& location) :
+   literal::literal(const source_location& location) : node{location} {}
+   literal::literal(const std::string& lexeme, const source_location& location) :
       node{lexeme, location}
    {}
 

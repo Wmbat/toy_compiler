@@ -8,7 +8,7 @@
 
 namespace munster
 {
-   symbol::symbol(std::string name, symbol_type kind, const front::source_location& location,
+   symbol::symbol(std::string name, symbol_type kind, const source_location& location,
                   std::string type, std::unique_ptr<symbol_table> link) :
       m_name{std::move(name)},
       m_type{std::move(type)},
@@ -21,7 +21,7 @@ namespace munster
    auto symbol::type() const noexcept -> std::string_view { return m_type; }
    auto symbol::kind() const noexcept -> symbol_type { return m_kind; }
    auto symbol::link() const noexcept -> symbol_table* { return m_link.get(); }
-   auto symbol::location() const noexcept -> const front::source_location& { return m_location; }
+   auto symbol::location() const noexcept -> const source_location& { return m_location; }
 
    void symbol::set_table(std::unique_ptr<symbol_table> table) { m_link = std::move(table); }
 

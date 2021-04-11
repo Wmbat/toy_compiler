@@ -6,7 +6,7 @@ using namespace mpark::patterns;
 
 namespace munster::ast
 {
-   integer_expr::integer_expr(const std::string& lexeme, const front::source_location& location) :
+   integer_expr::integer_expr(const std::string& lexeme, const source_location& location) :
       expr{lexeme, location}
    {}
 

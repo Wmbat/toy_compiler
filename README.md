@@ -24,7 +24,3 @@ toy_compiler is a project compiler from my `COMP 442: Compiler Design` class in 
 * [spdlog - 1.6.1](https://github.com/gabime/spdlog)
 * [magic_enum](https://github.com/Neargye/magic_enum)
 * [doctest (for unit tests)](https://github.com/onqtam/doctest)
-
-## TODO
-
-* [ ]: support overloading of methods as warnings

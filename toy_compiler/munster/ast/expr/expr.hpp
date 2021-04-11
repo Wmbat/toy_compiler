@@ -8,10 +8,10 @@ namespace munster::ast
    {
    public:
       expr() = default;
-      expr(const front::source_location& location);
-      expr(const std::string& lexeme, const front::source_location& location);
+      expr(const source_location& location);
+      expr(const std::string& lexeme, const source_location& location);
 
-      void accept(visitor_variant &visitor) const override;
+      void accept(visitor_variant& visitor) const override;
 
       [[nodiscard]] auto to_string() const -> std::string override = 0;
    };

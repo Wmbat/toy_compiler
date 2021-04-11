@@ -19,7 +19,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <toy_compiler/front_end/lexer.hpp>
+#include <toy_compiler/munster/lexer.hpp>
 
 #include <fmt/ranges.h>
 
@@ -142,8 +142,6 @@ TEST_SUITE("Lexer test suite")
       }
       SUBCASE("weird")
       {
-         using namespace front;
-
          auto maybe = munster::lex_file("lexer/float_invalid.txt");
 
          REQUIRE(maybe);

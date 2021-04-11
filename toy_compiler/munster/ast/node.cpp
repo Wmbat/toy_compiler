@@ -2,8 +2,8 @@
 
 namespace munster::ast
 {
-   node::node(const front::source_location& location) : m_location{location} {}
-   node::node(std::string lexeme, const front::source_location& location) :
+   node::node(const source_location& location) : m_location{location} {}
+   node::node(std::string lexeme, const source_location& location) :
       m_lexeme{std::move(lexeme)},
       m_location{location}
    {}
@@ -18,7 +18,7 @@ namespace munster::ast
 
       return {};
    }
-   auto node::location() const -> const front::source_location& { return m_location; }
+   auto node::location() const -> const source_location& { return m_location; }
 
    void node::make_child(node_ptr child) { m_children.push_back(std::move(child)); }
 } // namespace munster::ast

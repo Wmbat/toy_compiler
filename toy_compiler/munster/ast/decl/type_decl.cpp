@@ -2,7 +2,7 @@
 
 namespace munster::ast
 {
-   type_decl::type_decl(const std::string& name, const front::source_location& location) :
+   type_decl::type_decl(const std::string& name, const source_location& location) :
       decl{name, location}
    {}
 

@@ -59,11 +59,11 @@ namespace munster
 
          if (!result.is_inserted())
          {
-            const front::parse_error err{
-               .type = front::parse_error_type::e_semantic_error,
-               .pos = value->location(),
-               .lexeme = fmt::format("class '{}' already defined on line {}", value->lexeme(),
-                                     result.val().location().line)};
+            const parse_error err{.type = parse_error_type::e_semantic_error,
+                                  .pos = value->location(),
+                                  .lexeme =
+                                     fmt::format("class '{}' already defined on line {}",
+                                                 value->lexeme(), result.val().location().line)};
             m_errors.push_back(err);
          }
       }
@@ -92,7 +92,7 @@ namespace munster
 
             if (!result.is_inserted())
             {
-               m_errors.push_back({.type = front::parse_error_type::e_semantic_error,
+               m_errors.push_back({.type = parse_error_type::e_semantic_error,
                                    .pos = func_head->location(),
                                    .lexeme = fmt::format("function '{}' already defined on line {}",
                                                          name, result.val().location().line)});
@@ -113,7 +113,7 @@ namespace munster
 
          if (!result.is_inserted())
          {
-            m_errors.push_back({.type = front::parse_error_type::e_semantic_error,
+            m_errors.push_back({.type = parse_error_type::e_semantic_error,
                                 .pos = main_func->location(),
                                 .lexeme = fmt::format("function '{}' already defined on line {}",
                                                       name, result.val().location().line)});
@@ -121,7 +121,7 @@ namespace munster
       }
       else
       {
-         m_errors.push_back({.type = front::parse_error_type::e_semantic_error,
+         m_errors.push_back({.type = parse_error_type::e_semantic_error,
                              .pos = main_func->location(),
                              .lexeme = fmt::format("missing '{}' function", name)});
       }
@@ -161,11 +161,11 @@ namespace munster
 
             if (auto result = table->insert(key, std::move(sym)); !result.is_inserted())
             {
-               const front::parse_error err{
-                  .type = front::parse_error_type::e_semantic_error,
-                  .pos = location,
-                  .lexeme = fmt::format("inheritance declaration '{}' already defined", name,
-                                        result.val().location().line)};
+               const parse_error err{.type = parse_error_type::e_semantic_error,
+                                     .pos = location,
+                                     .lexeme =
+                                        fmt::format("inheritance declaration '{}' already defined",
+                                                    name, result.val().location().line)};
                m_errors.push_back(err);
             }
          }
@@ -179,8 +179,8 @@ namespace munster
 
          if (!result.is_inserted())
          {
-            const front::parse_error err{
-               .type = front::parse_error_type::e_semantic_error,
+            const parse_error err{
+               .type = parse_error_type::e_semantic_error,
                .pos = location,
                .lexeme =
                   fmt::format("variable '{}' already defined in class '{}'", name, table_name)};
@@ -198,8 +198,8 @@ namespace munster
 
          if (auto result = table->insert(key, std::move(sym)); !result.is_inserted())
          {
-            const front::parse_error err{
-               .type = front::parse_error_type::e_semantic_error,
+            const parse_error err{
+               .type = parse_error_type::e_semantic_error,
                .pos = location,
                .lexeme = fmt::format("function '{}' of type {} already defined in class '{}'", name,
                                      type, table_name)};
@@ -210,8 +210,8 @@ namespace munster
             const auto dup = duplicates_counter.insert({name, 1});
             if (dup.second == false)
             {
-               const front::parse_error err{
-                  .type = front::parse_error_type::e_semantic_warning,
+               const parse_error err{
+                  .type = parse_error_type::e_semantic_warning,
                   .pos = location,
                   .lexeme =
                      fmt::format("function '{}' of type {} defined in class '{}' is an overload",
@@ -306,8 +306,8 @@ namespace munster
 
             if (!result.is_inserted())
             {
-               const front::parse_error err{
-                  .type = front::parse_error_type::e_semantic_error,
+               const parse_error err{
+                  .type = parse_error_type::e_semantic_error,
                   .pos = result.val().location(),
                   .lexeme = fmt::format("Parameter '{}' already declared in function '{}'",
                                         result.val().name(), table->name())};
@@ -333,8 +333,8 @@ namespace munster
 
                if (!result.is_inserted())
                {
-                  const front::parse_error err{
-                     .type = front::parse_error_type::e_semantic_error,
+                  const parse_error err{
+                     .type = parse_error_type::e_semantic_error,
                      .pos = var->location(),
                      .lexeme = fmt::format("variable '{}' already declared on line '{}'",
                                            var->lexeme(), var->location().line)};
@@ -363,7 +363,7 @@ namespace munster
             }
             else
             {
-               m_errors.push_back({.type = front::parse_error_type::e_semantic_error,
+               m_errors.push_back({.type = parse_error_type::e_semantic_error,
                                    .pos = head->location(),
                                    .lexeme = fmt::format("function '{}' not declared in class '{}'",
                                                          class_name, head->lexeme())});
@@ -371,7 +371,7 @@ namespace munster
          }
          else
          {
-            m_errors.push_back({.type = front::parse_error_type::e_semantic_error,
+            m_errors.push_back({.type = parse_error_type::e_semantic_error,
                                 .pos = head->location(),
                                 .lexeme = fmt::format("class '{}' not declared for function '{}'",
                                                       head->lexeme(), class_name)});
@@ -407,8 +407,8 @@ namespace munster
 
                if (!result.is_inserted())
                {
-                  const front::parse_error err{
-                     .type = front::parse_error_type::e_semantic_error,
+                  const parse_error err{
+                     .type = parse_error_type::e_semantic_error,
                      .pos = var->location(),
                      .lexeme = fmt::format("variable '{}' already declared on line '{}'",
                                            var->lexeme(), var->location().line)};

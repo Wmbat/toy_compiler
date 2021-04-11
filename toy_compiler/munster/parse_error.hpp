@@ -1,6 +1,6 @@
 #pragma once
 
-#include <toy_compiler/front_end/source_location.hpp>
+#include <toy_compiler/munster/source_location.hpp>
 
 #include <fmt/core.h>
 
@@ -8,7 +8,7 @@
 
 #include <string>
 
-namespace front
+namespace munster
 {
    enum struct parse_error_type : std::uint32_t
    {
@@ -21,14 +21,14 @@ namespace front
    struct parse_error
    {
       parse_error_type type{parse_error_type::e_max_size};
-      front::source_location pos{};
+      source_location pos{};
       std::string lexeme;
       std::string line;
    };
-} // namespace front
+} // namespace munster
 
 template <>
-struct fmt::formatter<front::parse_error_type>
+struct fmt::formatter<munster::parse_error_type>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -37,7 +37,7 @@ struct fmt::formatter<front::parse_error_type>
    }
 
    template <typename FormatContext>
-   auto format(front::parse_error_type error_type, FormatContext& ctx)
+   auto format(munster::parse_error_type error_type, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "{}", magic_enum::enum_name(error_type).substr(2));
    }

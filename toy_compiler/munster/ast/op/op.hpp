@@ -8,8 +8,8 @@ namespace munster::ast
    {
    public:
       op() = default;
-      op(const front::source_location& location);
-      op(const std::string& lexeme, const front::source_location& location);
+      op(const source_location& location);
+      op(const std::string& lexeme, const source_location& location);
 
       void accept(visitor_variant& visitor) const override;
 

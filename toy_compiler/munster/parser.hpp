@@ -19,10 +19,10 @@
 
 #pragma once
 
-#include <toy_compiler/front_end/lexer.hpp>
-#include <toy_compiler/front_end/parse_error.hpp>
 #include <toy_compiler/munster/ast/node.hpp>
 #include <toy_compiler/munster/ast/node_factory.hpp>
+#include <toy_compiler/munster/lexer.hpp>
+#include <toy_compiler/munster/parse_error.hpp>
 #include <toy_compiler/util/logger.hpp>
 
 #include <monads/maybe.hpp>
@@ -49,7 +49,7 @@ namespace munster
       parse_status value = parse_status::success;
       ast::node_ptr ast = nullptr;
       std::string derivation;
-      monad::maybe<std::vector<front::parse_error>> errors = {};
+      std::optional<std::vector<parse_error>> errors = {};
    };
 
    /**

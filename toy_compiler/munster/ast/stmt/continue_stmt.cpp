@@ -2,7 +2,7 @@
 
 namespace munster::ast
 {
-   continue_stmt::continue_stmt(const std::string& lexeme, const front::source_location& location) :
+   continue_stmt::continue_stmt(const std::string& lexeme, const source_location& location) :
       stmt{lexeme, location}
    {}
 

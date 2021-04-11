@@ -1,7 +1,7 @@
 #pragma once
 
-#include <toy_compiler/front_end/lexer.hpp>
 #include <toy_compiler/munster/grammar/actions.hpp>
+#include <toy_compiler/munster/lexer.hpp>
 #include <toy_compiler/munster/visitor/ast/symbol_table_visitor.hpp>
 #include <toy_compiler/munster/visitor/semantic_checking/type_checking_visitor.hpp>
 #include <toy_compiler/munster/visitor/visitor.hpp>
@@ -46,8 +46,8 @@ namespace munster::ast
    {
    public:
       node() = default;
-      node(const front::source_location& location);
-      node(std::string lexeme, const front::source_location& location);
+      node(const source_location& location);
+      node(std::string lexeme, const source_location& location);
       node(const node& rhs) = delete;
       node(node&& rhs) = default;
       virtual ~node() = default;
@@ -57,7 +57,7 @@ namespace munster::ast
 
       [[nodiscard]] auto children() const -> const std::vector<node_ptr>&;
       [[nodiscard]] auto lexeme() const -> std::string_view;
-      [[nodiscard]] auto location() const -> const front::source_location&;
+      [[nodiscard]] auto location() const -> const source_location&;
 
       void make_child(node_ptr child);
 
@@ -99,7 +99,7 @@ namespace munster::ast
       std::vector<node_ptr> m_children;
 
       std::string m_lexeme;
-      front::source_location m_location;
+      source_location m_location;
    };
 }; // namespace munster::ast
 

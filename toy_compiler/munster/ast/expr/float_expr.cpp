@@ -6,7 +6,7 @@ using namespace mpark::patterns;
 
 namespace munster::ast
 {
-   float_expr::float_expr(const std::string& lexeme, const front::source_location& location) :
+   float_expr::float_expr(const std::string& lexeme, const source_location& location) :
       expr{lexeme, location}
    {}
 

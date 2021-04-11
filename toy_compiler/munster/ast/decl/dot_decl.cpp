@@ -2,7 +2,7 @@
 
 namespace munster::ast
 {
-   dot_decl::dot_decl(const std::string& lexeme, const front::source_location& location) :
+   dot_decl::dot_decl(const std::string& lexeme, const source_location& location) :
       decl{lexeme, location}
    {}
 

@@ -26,7 +26,7 @@
 #include <cstdint>
 #include <limits>
 
-namespace front
+namespace munster
 {
    /**
     * @brief Store the line and column data of a `lex_item`
@@ -44,10 +44,10 @@ namespace front
       constexpr auto operator<=>(const source_location& other) const
          -> std::strong_ordering = default;
    };
-} // namespace front
+} // namespace munster
 
 template <>
-struct fmt::formatter<front::source_location>
+struct fmt::formatter<munster::source_location>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -56,7 +56,7 @@ struct fmt::formatter<front::source_location>
    }
 
    template <typename FormatContext>
-   auto format(const front::source_location& pos, FormatContext& ctx)
+   auto format(const munster::source_location& pos, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "<line:{}, col:{}>", pos.line, pos.column);
    }

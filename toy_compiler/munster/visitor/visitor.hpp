@@ -1,6 +1,6 @@
 #pragma once
 
-#include <toy_compiler/front_end/parse_error.hpp>
+#include <toy_compiler/munster/parse_error.hpp>
 #include <toy_compiler/munster/symbol_table.hpp>
 #include <toy_compiler/util/crtp.hpp>
 #include <toy_compiler/util/strong_type.hpp>
@@ -109,12 +109,9 @@ namespace munster
       void operator()(const ast::mult_op& node) { this->underlying().visit(node); }
       void operator()(const ast::rel_op& node) { this->underlying().visit(node); }
 
-      [[nodiscard]] auto get_errors() const -> const std::vector<front::parse_error>&
-      {
-         return m_errors;
-      }
+      [[nodiscard]] auto get_errors() const -> const std::vector<parse_error>& { return m_errors; }
 
    protected:
-      std::vector<front::parse_error> m_errors; // NOLINT
+      std::vector<parse_error> m_errors; // NOLINT
    };
 }; // namespace munster

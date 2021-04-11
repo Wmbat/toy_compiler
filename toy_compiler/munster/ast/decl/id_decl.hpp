@@ -10,7 +10,7 @@ namespace munster::ast
       using ptr = std::unique_ptr<id_decl>;
 
    public:
-      id_decl(const std::string& lexeme, const front::source_location& location);
+      id_decl(const std::string& lexeme, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };

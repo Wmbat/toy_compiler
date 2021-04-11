@@ -10,7 +10,7 @@ namespace munster::ast
       using ptr = std::unique_ptr<location_decl>;
 
    public:
-      location_decl(const front::source_location& location);
+      location_decl(const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };

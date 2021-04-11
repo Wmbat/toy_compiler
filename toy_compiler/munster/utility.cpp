@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <toy_compiler/front_end/utility.hpp>
+#include <toy_compiler/munster/utility.hpp>
 
 #include <range/v3/algorithm/find.hpp>
 

@@ -2,7 +2,7 @@
 
 namespace munster::ast
 {
-   id_decl::id_decl(const std::string& lexeme, const front::source_location& location) :
+   id_decl::id_decl(const std::string& lexeme, const source_location& location) :
       decl{lexeme, location}
    {}
 

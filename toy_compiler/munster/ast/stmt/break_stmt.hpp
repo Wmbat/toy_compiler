@@ -7,7 +7,7 @@ namespace munster::ast
    class break_stmt : public stmt
    {
    public:
-      break_stmt(const std::string& lexeme, const front::source_location& location);
+      break_stmt(const std::string& lexeme, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };

@@ -7,7 +7,7 @@ namespace munster::ast
    class integer_literal : public literal
    {
    public:
-      integer_literal(const std::string& lexeme, const front::source_location& location);
+      integer_literal(const std::string& lexeme, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };

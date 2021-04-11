@@ -120,7 +120,7 @@ namespace munster
                else
                {
                   m_errors.push_back(
-                     {.type = front::parse_error_type::e_semantic_error,
+                     {.type = parse_error_type::e_semantic_error,
                       .pos = head.location(),
                       .lexeme = fmt::format("member function '{}' has no implementation '{}'",
                                             func_name, class_name)});
@@ -129,7 +129,7 @@ namespace munster
          }
          else
          {
-            m_errors.push_back({.type = front::parse_error_type::e_semantic_error,
+            m_errors.push_back({.type = parse_error_type::e_semantic_error,
                                 .pos = head.location(),
                                 .lexeme = fmt::format("undeclared class '{}'", class_name)});
          }
@@ -180,9 +180,9 @@ namespace munster
          {
             m_symbols.push_back({});
             m_errors.push_back(
-               front::parse_error{.type = front::parse_error_type::e_semantic_error,
-                                  .pos = node.location(),
-                                  .lexeme = fmt::format("undeclared variable '{}'", var_name)});
+               parse_error{.type = parse_error_type::e_semantic_error,
+                           .pos = node.location(),
+                           .lexeme = fmt::format("undeclared variable '{}'", var_name)});
          }
       }
       else if (std::size(m_tables) == 2u)
@@ -207,9 +207,9 @@ namespace munster
          if (!p_symbol)
          {
             m_errors.push_back(
-               front::parse_error{.type = front::parse_error_type::e_semantic_error,
-                                  .pos = node.location(),
-                                  .lexeme = fmt::format("undeclared variable '{}'", var_name)});
+               parse_error{.type = parse_error_type::e_semantic_error,
+                           .pos = node.location(),
+                           .lexeme = fmt::format("undeclared variable '{}'", var_name)});
          }
 
          m_symbols.push_back(p_symbol);
@@ -272,8 +272,8 @@ namespace munster
 
          if (left_type != right_type)
          {
-            m_errors.push_back(front::parse_error{
-               .type = front::parse_error_type::e_semantic_error,
+            m_errors.push_back( parse_error{
+               .type =  parse_error_type::e_semantic_error,
                .pos = node.children()[0]->location(),
                .lexeme = fmt::format("variable '{}' of type '{}' cannot be assigned to "
                                      "variable '{}' of type '{}'",
@@ -308,8 +308,8 @@ namespace munster
 
             if (const auto res = mp_root->lookup(type); !res)
             {
-               m_errors.push_back(front::parse_error{
-                  .type = front::parse_error_type::e_semantic_error,
+               m_errors.push_back(parse_error{
+                  .type = parse_error_type::e_semantic_error,
                   .pos = node.children()[0]->location(),
                   .lexeme = fmt::format("'{}' is not a class and does not have member variables",
                                         p_left_symbol->name())});
@@ -320,10 +320,10 @@ namespace munster
             const std::string type{p_left_symbol->type()};
             if (const auto res = mp_root->lookup(type); !res)
             {
-               m_errors.push_back(front::parse_error{
-                  .type = front::parse_error_type::e_semantic_error,
-                  .pos = node.children()[0]->location(),
-                  .lexeme = fmt::format("'{}' is not a class", p_left_symbol->name())});
+               m_errors.push_back(
+                  parse_error{.type = parse_error_type::e_semantic_error,
+                              .pos = node.children()[0]->location(),
+                              .lexeme = fmt::format("'{}' is not a class", p_left_symbol->name())});
             }
          }
 
@@ -368,8 +368,8 @@ namespace munster
          const auto name = fmt::format("temp{}", m_temporary_counter++);
          if (left_type != right_type)
          {
-            m_errors.push_back(front::parse_error{
-               .type = front::parse_error_type::e_semantic_error,
+            m_errors.push_back(parse_error{
+               .type = parse_error_type::e_semantic_error,
                .pos = node.children()[0]->location(),
                .lexeme = fmt::format("variable '{0}' and variable '{1}' have mismatched types on "
                                      "operator{4}({0} '{2}', {1} '{3}')",
@@ -411,8 +411,8 @@ namespace munster
          const auto name = fmt::format("temp{}", m_temporary_counter++);
          if (left_type != right_type)
          {
-            m_errors.push_back(front::parse_error{
-               .type = front::parse_error_type::e_semantic_error,
+            m_errors.push_back(parse_error{
+               .type = parse_error_type::e_semantic_error,
                .pos = node.children()[0]->location(),
                .lexeme = fmt::format("variable '{0}' and variable '{1}' have mismatched types on "
                                      "operator{4}({0} '{2}', {1} '{3}')",
@@ -464,8 +464,8 @@ namespace munster
          const auto name = fmt::format("temp{}", m_temporary_counter++);
          if (left_type != right_type)
          {
-            m_errors.push_back(front::parse_error{
-               .type = front::parse_error_type::e_semantic_error,
+            m_errors.push_back(parse_error{
+               .type = parse_error_type::e_semantic_error,
                .pos = node.children()[0]->location(),
                .lexeme = fmt::format("variable '{0}' and variable '{1}' have mismatched types on "
                                      "operator{4}({0} '{2}', {1} '{3}')",
@@ -517,8 +517,8 @@ namespace munster
          const auto name = fmt::format("temp{}", m_temporary_counter++);
          if (left_type != right_type)
          {
-            m_errors.push_back(front::parse_error{
-               .type = front::parse_error_type::e_semantic_error,
+            m_errors.push_back(parse_error{
+               .type = parse_error_type::e_semantic_error,
                .pos = node.children()[0]->location(),
                .lexeme = fmt::format("variable '{0}' and variable '{1}' have mismatched types on "
                                      "operator{4}({0} '{2}', {1} '{3}')",
@@ -640,7 +640,7 @@ namespace munster
       if (std::empty(symbols))
       {
          m_errors.push_back(
-            {.type = front::parse_error_type::e_semantic_error,
+            {.type = parse_error_type::e_semantic_error,
              .pos = var_expr->location(),
              .lexeme = fmt::format("undeclared identifier '{}'", var_expr->lexeme())});
 
@@ -699,7 +699,7 @@ namespace munster
             if (res.val().kind() != symbol_type::e_class)
             {
                m_errors.push_back(
-                  {.type = front::parse_error_type::e_semantic_error,
+                  {.type = parse_error_type::e_semantic_error,
                    .pos = var->location(),
                    .lexeme = fmt::format(
                       "identifier '{}' to the left of `operator.` is not a class", var->lexeme())});
@@ -708,7 +708,7 @@ namespace munster
          else
          {
             m_errors.push_back(
-               {.type = front::parse_error_type::e_semantic_error,
+               {.type = parse_error_type::e_semantic_error,
                 .pos = var->location(),
                 .lexeme = fmt::format("identifier '{}' to the left of `operator.` is not a class",
                                       var->lexeme())});
@@ -752,7 +752,7 @@ namespace munster
             if (it != std::end(decl_symbols))
             {
                m_errors.push_back(
-                  {.type = front::parse_error_type::e_semantic_error,
+                  {.type = parse_error_type::e_semantic_error,
                    .pos = func->location(),
                    .lexeme = fmt::format(
                       "invalid parameters for function '{}', expected {} parameters but got 0",
@@ -770,7 +770,7 @@ namespace munster
             else
             {
                m_errors.push_back(
-                  {.type = front::parse_error_type::e_semantic_error,
+                  {.type = parse_error_type::e_semantic_error,
                    .pos = func->location(),
                    .lexeme = fmt::format(
                       "invalid parameters for function '{}', expected {} parameters but got {}",
@@ -783,7 +783,7 @@ namespace munster
       }
       else
       {
-         m_errors.push_back({.type = front::parse_error_type::e_semantic_error,
+         m_errors.push_back({.type = parse_error_type::e_semantic_error,
                              .pos = func->location(),
                              .lexeme = fmt::format("undeclared function '{}' called",
                                                    func->lexeme(), func->location().line)});

@@ -2,7 +2,7 @@
 
 namespace munster::ast
 {
-   break_stmt::break_stmt(const std::string& lexeme, const front::source_location& location) :
+   break_stmt::break_stmt(const std::string& lexeme, const source_location& location) :
       stmt{lexeme, location}
    {}
 

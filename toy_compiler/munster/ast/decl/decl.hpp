@@ -8,8 +8,8 @@ namespace munster::ast
    {
    public:
       decl() = default;
-      decl(const front::source_location& location);
-      decl(const std::string& lexeme, const front::source_location& location);
+      decl(const source_location& location);
+      decl(const std::string& lexeme, const source_location& location);
 
       void accept(visitor_variant& visitor) const override;
 

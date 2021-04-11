@@ -7,7 +7,7 @@ namespace munster::ast
    class continue_stmt : public stmt
    {
    public:
-      continue_stmt(const std::string& lexeme, const front::source_location& location);
+      continue_stmt(const std::string& lexeme, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };

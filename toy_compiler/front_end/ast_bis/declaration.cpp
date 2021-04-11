@@ -13,7 +13,7 @@
 namespace munster::ast
 {
    visibility_decl::visibility_decl(const std::string& name,
-                                    const front::source_location& location) :
+                                    const source_location& location) :
       decl{name, location}
    {}
 

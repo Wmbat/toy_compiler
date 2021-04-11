@@ -19,8 +19,6 @@
 
 #include <toy_compiler/core/application.hpp>
 
-#include <toy_compiler/front_end/lexer.hpp>
-#include <toy_compiler/front_end/parser.hpp>
 #include <toy_compiler/munster/visitor/ast/symbol_table_visitor.hpp>
 #include <toy_compiler/munster/visitor/semantic_checking/type_checking_visitor.hpp>
 #include <toy_compiler/munster/visitor/visitor.hpp>
@@ -46,13 +44,14 @@ auto pop(std::vector<munster::ast::node*>& stack) -> munster::ast::node*
    return temp;
 }
 
-void print_errors(std::span<const front::parse_error> errors, const std::filesystem::path& filepath)
+void print_errors(std::span<const munster::parse_error> errors,
+                  const std::filesystem::path& filepath)
 {
    for (const auto& err : errors)
    {
       fmt::print(fmt::emphasis::bold, "{}:{}.{} - ", filepath.c_str(), err.pos.line,
                  err.pos.column);
-      if (err.type == front::parse_error_type::e_semantic_error)
+      if (err.type == munster::parse_error_type::e_semantic_error)
       {
          fmt::print(fmt::fg(fmt::color::red) | fmt::emphasis::bold, "[{}] ", err.type);
       }
@@ -86,7 +85,7 @@ application::application(std::span<const std::string_view> args, util::logger_wr
                              err.pos.column);
                   fmt::print(fmt::fg(fmt::color::red) | fmt::emphasis::bold, "[{}]", err.type);
 
-                  if (err.type == front::parse_error_type::e_syntax_error)
+                  if (err.type == munster::parse_error_type::e_syntax_error)
                   {
                      fmt::print(" expected '{}'\n", err.lexeme);
                   }

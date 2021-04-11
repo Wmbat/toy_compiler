@@ -2,8 +2,7 @@
 
 namespace munster::ast
 {
-   integer_literal::integer_literal(const std::string& lexeme,
-                                    const front::source_location& location) :
+   integer_literal::integer_literal(const std::string& lexeme, const source_location& location) :
       literal{lexeme, location}
    {}
 

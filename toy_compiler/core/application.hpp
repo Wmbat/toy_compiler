@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include <toy_compiler/front_end/lexer.hpp>
-#include <toy_compiler/front_end/parser.hpp>
+#include <toy_compiler/munster/lexer.hpp>
+#include <toy_compiler/munster/parser.hpp>
 #include <toy_compiler/util/logger.hpp>
 
 #include <filesystem>

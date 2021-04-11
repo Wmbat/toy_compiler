@@ -8,8 +8,8 @@ namespace munster::ast
    {
    public:
       literal() = default;
-      literal(const front::source_location& location);
-      literal(const std::string& lexeme, const front::source_location& location);
+      literal(const source_location& location);
+      literal(const std::string& lexeme, const source_location& location);
 
       void accept(visitor_variant& visitor) const override;
 

@@ -21,14 +21,14 @@
 
 #include <toy_compiler/munster/ast/decl/decl.hpp>
 
-#include <toy_compiler/front_end/source_location.hpp>
+#include <toy_compiler/munster/source_location.hpp>
 
 namespace munster::ast
 {
    class visibility_decl : public decl
    {
    public:
-      visibility_decl(const std::string& name, const front::source_location& location);
+      visibility_decl(const std::string& name, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
@@ -62,7 +62,7 @@ namespace munster::ast
       [[nodiscard]] auto to_string() const -> std::string override;
 
    private:
-      front::source_location m_end_loc;
+      source_location m_end_loc;
    };
 
    class compound_params_decl : public decl
@@ -116,7 +116,7 @@ namespace munster::ast
       [[nodiscard]] auto to_string() const -> std::string override;
 
    private:
-      front::source_location m_end;
+      source_location m_end;
    };
 
    class stmt_block_decl : public decl

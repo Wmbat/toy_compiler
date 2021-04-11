@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include <toy_compiler/front_end/source_location.hpp>
 #include <toy_compiler/munster/grammar/token_type.hpp>
+#include <toy_compiler/munster/source_location.hpp>
 #include <toy_compiler/util/logger.hpp>
 
 #include <monads/maybe.hpp>
@@ -35,9 +35,9 @@ namespace munster
     */
    struct lex_item
    {
-      grammar::token_type type{};   // NOLINT
-      std::string lexeme{};         // NOLINT
-      front::source_location pos{}; // NOLINT
+      grammar::token_type type{}; // NOLINT
+      std::string lexeme{};       // NOLINT
+      source_location pos{};      // NOLINT
 
       auto operator<=>(const lex_item& other) const -> std::strong_ordering = default;
    };

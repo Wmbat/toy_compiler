@@ -7,7 +7,7 @@ namespace munster::ast
    class dot_decl : public decl
    {
    public:
-      dot_decl(const std::string& lexeme, const front::source_location& location);
+      dot_decl(const std::string& lexeme, const source_location& location);
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };

@@ -2,10 +2,8 @@
 
 namespace munster::ast
 {
-   op::op(const front::source_location& location) : node{location} {}
-   op::op(const std::string& lexeme, const front::source_location& location) :
-      node{lexeme, location}
-   {}
+   op::op(const source_location& location) : node{location} {}
+   op::op(const std::string& lexeme, const source_location& location) : node{lexeme, location} {}
 
    void op::accept(visitor_variant& /*visitor*/) const {}
 } // namespace munster::ast

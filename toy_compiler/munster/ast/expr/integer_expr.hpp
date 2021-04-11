@@ -7,7 +7,7 @@ namespace munster::ast
    class integer_expr : public expr
    {
    public:
-      integer_expr(const std::string& lexeme, const front::source_location& location);
+      integer_expr(const std::string& lexeme, const source_location& location);
 
       void accept(visitor_variant& visitor) const override;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <toy_compiler/front_end/source_location.hpp>
+#include <toy_compiler/munster/source_location.hpp>
 
 #include <magic_enum.hpp>
 
@@ -40,14 +40,14 @@ namespace munster
    {
    public:
       symbol();
-      symbol(std::string name, symbol_type kind, const front::source_location& location,
+      symbol(std::string name, symbol_type kind, const source_location& location,
              std::string type = "", std::unique_ptr<symbol_table> link = {});
 
-      auto name() const noexcept -> std::string_view;                  // NOLINT
-      auto type() const noexcept -> std::string_view;                  // NOLINT
-      auto kind() const noexcept -> symbol_type;                       // NOLINT
-      auto link() const noexcept -> symbol_table*;                     // NOLINT
-      auto location() const noexcept -> const front::source_location&; // NOLINT
+      auto name() const noexcept -> std::string_view;           // NOLINT
+      auto type() const noexcept -> std::string_view;           // NOLINT
+      auto kind() const noexcept -> symbol_type;                // NOLINT
+      auto link() const noexcept -> symbol_table*;              // NOLINT
+      auto location() const noexcept -> const source_location&; // NOLINT
 
       void set_table(std::unique_ptr<symbol_table> table);
 
@@ -58,7 +58,7 @@ namespace munster
 
       std::unique_ptr<symbol_table> m_link;
 
-      front::source_location m_location;
+      source_location m_location;
    };
 
    class symbol_table
