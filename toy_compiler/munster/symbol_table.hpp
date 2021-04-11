@@ -31,8 +31,7 @@ namespace munster
       e_function,
       e_variable,
       e_parameter,
-      e_temporary,
-      e_type_error
+      e_temporary
    };
 
    class symbol_table;

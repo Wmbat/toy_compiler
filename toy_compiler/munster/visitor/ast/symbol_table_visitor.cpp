@@ -441,6 +441,9 @@ namespace munster
 
    void symbol_table_visitor::visit(const ast::dot_op& /*node*/) {}
    void symbol_table_visitor::visit(const ast::assign_op& /*node*/) {}
+   void symbol_table_visitor::visit(const ast::add_op&) {}
+   void symbol_table_visitor::visit(const ast::mult_op&) {}
+   void symbol_table_visitor::visit(const ast::rel_op&) {}
 
    auto symbol_table_visitor::get_root_table() const -> symbol_table*
    {

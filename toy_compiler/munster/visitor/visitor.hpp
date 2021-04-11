@@ -51,6 +51,9 @@ namespace munster
 
       class dot_op;
       class assign_op;
+      class add_op;
+      class mult_op;
+      class rel_op;
 
       class compound_variable_decl;
       class variable_decl;
@@ -102,6 +105,9 @@ namespace munster
 
       void operator()(const ast::dot_op& node) { this->underlying().visit(node); }
       void operator()(const ast::assign_op& node) { this->underlying().visit(node); }
+      void operator()(const ast::add_op& node) { this->underlying().visit(node); }
+      void operator()(const ast::mult_op& node) { this->underlying().visit(node); }
+      void operator()(const ast::rel_op& node) { this->underlying().visit(node); }
 
       [[nodiscard]] auto get_errors() const -> const std::vector<front::parse_error>&
       {

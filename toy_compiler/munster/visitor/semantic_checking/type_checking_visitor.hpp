@@ -1,4 +1,4 @@
-#pragma once
+ #pragma once
 
 #include <toy_compiler/munster/visitor/visitor.hpp>
 
@@ -46,12 +46,18 @@ namespace munster
 
       void visit(const ast::dot_op& node);
       void visit(const ast::assign_op& node);
+      void visit(const ast::add_op& node);
+      void visit(const ast::mult_op& node);
+      void visit(const ast::rel_op& node);
 
       void visit(const ast::compound_variable_decl& node);
       void visit(const ast::variable_decl& node);
       void visit(const ast::main_decl& node);
 
    private:
+      auto get_variable_type(const symbol* p_symbol) const -> std::string;
+      auto is_type_error(const symbol* p_symbol) const -> bool;
+
       void check_function_decl(const ast::func_body_decl*, std::span<symbol_table*> tables);
 
       void handle_assign_op(const ast::assign_op* assign, std::span<symbol_table*> tables);

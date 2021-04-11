@@ -50,6 +50,9 @@ namespace munster
 
       void visit(const ast::dot_op& node);
       void visit(const ast::assign_op& node);
+      void visit(const ast::add_op& node);
+      void visit(const ast::mult_op& node);
+      void visit(const ast::rel_op& node);
 
       [[nodiscard]] auto get_root_table() const -> symbol_table*;
 

@@ -10,9 +10,11 @@
 #include <toy_compiler/munster/ast/expr/integer_expr.hpp>
 #include <toy_compiler/munster/ast/expr/string_expr.hpp>
 #include <toy_compiler/munster/ast/expr/var_expr.hpp>
+#include <toy_compiler/munster/ast/op/add_op.hpp>
 #include <toy_compiler/munster/ast/op/assign_op.hpp>
 #include <toy_compiler/munster/ast/op/dot_op.hpp>
 #include <toy_compiler/munster/ast/op/mult_op.hpp>
+#include <toy_compiler/munster/ast/op/rel_op.hpp>
 #include <toy_compiler/munster/ast/stmt/assign_stmt.hpp>
 #include <toy_compiler/munster/ast/stmt/func_stmt.hpp>
 
@@ -31,7 +33,6 @@
 
 #include <mpark/patterns.hpp>
 
-namespace ra = ranges::actions;
 namespace vi = ranges::views;
 using namespace mpark::patterns;
 
@@ -247,8 +248,9 @@ namespace munster
 
    void type_checking_visitor::visit(const ast::func_stmt& /*node*/) { fmt::print("func_stmt"); }
    void type_checking_visitor::visit(const ast::compound_stmt& /*node*/) {}
-   void type_checking_visitor::visit(const ast::assign_stmt& node)
+   void type_checking_visitor::visit(const ast::assign_stmt& /*node*/)
    {
+      /*
       // TODO: remove
       if (std::size(m_symbols) != 2)
       {
@@ -260,26 +262,13 @@ namespace munster
          return;
       }
 
-      const auto get_var_type = [](symbol* s) {
-         if (s->kind() == symbol_type::e_member_variable)
-         {
-            const auto split = ranges::actions::split(s->type(), ' ');
-            const auto vis = *(std::end(split) - 2) | ranges::to<std::string>();
-            return *(std::end(split) - 1) | ranges::to<std::string>();
-         }
-         else
-         {
-            return std::string{s->type()};
-         }
-      };
-
       auto* p_left = *(std::end(m_symbols) - 2);
       auto* p_right = *(std::end(m_symbols) - 1);
 
       if (p_left && p_right)
       {
-         const std::string left_type = get_var_type(p_left);
-         const std::string right_type = get_var_type(p_right);
+         const std::string left_type = get_variable_type(p_left);
+         const std::string right_type = get_variable_type(p_right);
 
          if (left_type != right_type)
          {
@@ -294,8 +283,7 @@ namespace munster
 
       m_symbols.pop_back();
       m_symbols.pop_back();
-
-      fmt::print("assign_stmt\n");
+      */
    }
    void type_checking_visitor::visit(const ast::if_stmt& /*node*/) {}
    void type_checking_visitor::visit(const ast::while_stmt& /*node*/) {}
@@ -352,9 +340,240 @@ namespace munster
          m_symbols.push_back(nullptr);
       }
    }
-   void type_checking_visitor::visit(const ast::assign_op& /*node*/) {}
+   void type_checking_visitor::visit(const ast::assign_op& node)
+   {
+      // TODO: remove
+      if (std::size(m_symbols) != 2)
+      {
+         if (!std::empty(m_symbols))
+         {
+            m_symbols.pop_back();
+         }
+
+         return;
+      }
+
+      symbol_table* p_func_table = m_tables.back();
+
+      const symbol* p_left_symbol = *(std::end(m_symbols) - 2);
+      const symbol* p_right_symbol = *(std::end(m_symbols) - 1);
+
+      if (!(is_type_error(p_left_symbol) || is_type_error(p_right_symbol)))
+      {
+         symbol* p_res_symbol = nullptr;
+
+         const std::string left_type = get_variable_type(p_left_symbol);
+         const std::string right_type = get_variable_type(p_right_symbol);
+
+         const auto name = fmt::format("temp{}", m_temporary_counter++);
+         if (left_type != right_type)
+         {
+            m_errors.push_back(front::parse_error{
+               .type = front::parse_error_type::e_semantic_error,
+               .pos = node.children()[0]->location(),
+               .lexeme = fmt::format("variable '{0}' and variable '{1}' have mismatched types on "
+                                     "operator{4}({0} '{2}', {1} '{3}')",
+                                     p_left_symbol->name(), p_right_symbol->name(), left_type,
+                                     right_type, node.lexeme())});
+
+            const auto res = p_func_table->insert(
+               name, symbol{name, symbol_type::e_temporary, node.location(), "type_error"});
+
+            p_res_symbol = &res.val();
+         }
+         else
+         {
+            const auto name = fmt::format("temp{}", m_temporary_counter++);
+            const auto res = p_func_table->insert(
+               name, symbol{name, symbol_type::e_temporary, node.location(), right_type});
+
+            p_res_symbol = &res.val();
+         }
+
+         m_symbols.pop_back();
+         m_symbols.pop_back();
+      }
+   }
+   void type_checking_visitor::visit(const ast::add_op& node)
+   {
+      symbol_table* p_func_table = m_tables.back();
+
+      const symbol* p_left_symbol = *(std::end(m_symbols) - 2);
+      const symbol* p_right_symbol = *(std::end(m_symbols) - 1);
+
+      if (!(is_type_error(p_left_symbol) || is_type_error(p_right_symbol)))
+      {
+         symbol* p_res_symbol = nullptr;
+
+         const std::string left_type = get_variable_type(p_left_symbol);
+         const std::string right_type = get_variable_type(p_right_symbol);
+
+         const auto name = fmt::format("temp{}", m_temporary_counter++);
+         if (left_type != right_type)
+         {
+            m_errors.push_back(front::parse_error{
+               .type = front::parse_error_type::e_semantic_error,
+               .pos = node.children()[0]->location(),
+               .lexeme = fmt::format("variable '{0}' and variable '{1}' have mismatched types on "
+                                     "operator{4}({0} '{2}', {1} '{3}')",
+                                     p_left_symbol->name(), p_right_symbol->name(), left_type,
+                                     right_type, node.lexeme())});
+
+            const auto res = p_func_table->insert(
+               name, symbol{name, symbol_type::e_temporary, node.location(), "type_error"});
+
+            p_res_symbol = &res.val();
+         }
+         else
+         {
+            const auto name = fmt::format("temp{}", m_temporary_counter++);
+            const auto res = p_func_table->insert(
+               name, symbol{name, symbol_type::e_temporary, node.location(), right_type});
+
+            p_res_symbol = &res.val();
+         }
+
+         m_symbols.pop_back();
+         m_symbols.pop_back();
+
+         m_symbols.push_back(p_res_symbol);
+      }
+      else
+      {
+         const auto name = fmt::format("temp{}", m_temporary_counter++);
+         const auto res = p_func_table->insert(
+            name, symbol{name, symbol_type::e_temporary, node.location(), "type_error"});
+
+         m_symbols.push_back(&res.val());
+      }
+   }
+   void type_checking_visitor::visit(const ast::mult_op& node)
+   {
+      symbol_table* p_func_table = m_tables.back();
+
+      const symbol* p_left_symbol = *(std::end(m_symbols) - 2);
+      const symbol* p_right_symbol = *(std::end(m_symbols) - 1);
+
+      if (!(is_type_error(p_left_symbol) || is_type_error(p_right_symbol)))
+      {
+         symbol* p_res_symbol = nullptr;
+
+         const std::string left_type = get_variable_type(p_left_symbol);
+         const std::string right_type = get_variable_type(p_right_symbol);
+
+         const auto name = fmt::format("temp{}", m_temporary_counter++);
+         if (left_type != right_type)
+         {
+            m_errors.push_back(front::parse_error{
+               .type = front::parse_error_type::e_semantic_error,
+               .pos = node.children()[0]->location(),
+               .lexeme = fmt::format("variable '{0}' and variable '{1}' have mismatched types on "
+                                     "operator{4}({0} '{2}', {1} '{3}')",
+                                     p_left_symbol->name(), p_right_symbol->name(), left_type,
+                                     right_type, node.lexeme())});
+
+            const auto res = p_func_table->insert(
+               name, symbol{name, symbol_type::e_temporary, node.location(), "type_error"});
+
+            p_res_symbol = &res.val();
+         }
+         else
+         {
+            const auto name = fmt::format("temp{}", m_temporary_counter++);
+            const auto res = p_func_table->insert(
+               name, symbol{name, symbol_type::e_temporary, node.location(), right_type});
+
+            p_res_symbol = &res.val();
+         }
+
+         m_symbols.pop_back();
+         m_symbols.pop_back();
+
+         m_symbols.push_back(p_res_symbol);
+      }
+      else
+      {
+         const auto name = fmt::format("temp{}", m_temporary_counter++);
+         const auto res = p_func_table->insert(
+            name, symbol{name, symbol_type::e_temporary, node.location(), "type_error"});
+
+         m_symbols.push_back(&res.val());
+      }
+   }
+   void type_checking_visitor::visit(const ast::rel_op& node)
+   {
+      symbol_table* p_func_table = m_tables.back();
+
+      const symbol* p_left_symbol = *(std::end(m_symbols) - 2);
+      const symbol* p_right_symbol = *(std::end(m_symbols) - 1);
+
+      if (!(is_type_error(p_left_symbol) || is_type_error(p_right_symbol)))
+      {
+         symbol* p_res_symbol = nullptr;
+
+         const std::string left_type = get_variable_type(p_left_symbol);
+         const std::string right_type = get_variable_type(p_right_symbol);
+
+         const auto name = fmt::format("temp{}", m_temporary_counter++);
+         if (left_type != right_type)
+         {
+            m_errors.push_back(front::parse_error{
+               .type = front::parse_error_type::e_semantic_error,
+               .pos = node.children()[0]->location(),
+               .lexeme = fmt::format("variable '{0}' and variable '{1}' have mismatched types on "
+                                     "operator{4}({0} '{2}', {1} '{3}')",
+                                     p_left_symbol->name(), p_right_symbol->name(), left_type,
+                                     right_type, node.lexeme())});
+
+            const auto res = p_func_table->insert(
+               name, symbol{name, symbol_type::e_temporary, node.location(), "type_error"});
+
+            p_res_symbol = &res.val();
+         }
+         else
+         {
+            const auto name = fmt::format("temp{}", m_temporary_counter++);
+            const auto res = p_func_table->insert(
+               name, symbol{name, symbol_type::e_temporary, node.location(), right_type});
+
+            p_res_symbol = &res.val();
+         }
+
+         m_symbols.pop_back();
+         m_symbols.pop_back();
+
+         m_symbols.push_back(p_res_symbol);
+      }
+      else
+      {
+         const auto name = fmt::format("temp{}", m_temporary_counter++);
+         const auto res = p_func_table->insert(
+            name, symbol{name, symbol_type::e_temporary, node.location(), "type_error"});
+
+         m_symbols.push_back(&res.val());
+      }
+   }
+
+   auto type_checking_visitor::get_variable_type(const symbol* p_symbol) const -> std::string
+   {
+      if (p_symbol->kind() == symbol_type::e_member_variable)
+      {
+         const auto split = ranges::actions::split(p_symbol->type(), ' ');
+         const auto vis = *(std::end(split) - 2) | ranges::to<std::string>();
+         return *(std::end(split) - 1) | ranges::to<std::string>();
+      }
+      else
+      {
+         return std::string{p_symbol->type()};
+      }
+   }
+   auto type_checking_visitor::is_type_error(const symbol* p_symbol) const -> bool
+   {
+      return p_symbol->type() == "type_error";
+   }
 
    ////////////////////////////////////////////////////
+   //
 
    void type_checking_visitor::check_function_decl(const ast::func_body_decl* body,
                                                    std::span<symbol_table*> tables)

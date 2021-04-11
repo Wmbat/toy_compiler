@@ -523,14 +523,6 @@ namespace munster::ast
          return std::make_unique<compound_var_expr_decl>(std::move(nodes));
       }
 
-      if (action == grammar::action::e_func_expr)
-      {
-         node_ptr compound_param_expr = pop(recs);
-         node_ptr id = pop(recs);
-
-         return std::make_unique<func_expr>(std::move(id), std::move(compound_param_expr));
-      }
-
       if (action == grammar::action::e_compound_parameter_expr_decl)
       {
          std::vector<node_ptr> nodes;
@@ -539,13 +531,11 @@ namespace munster::ast
          if (std::size(recs) >= 1)
          {
             // clang-format off
-
             std::vector<node_ptr> placeholder = recs 
                | vi::reverse 
                | vi::take_while(detail::is_type<expr, op>) 
                | vi::move 
                | ranges::to_vector;
-
             // clang-format on
 
             std::vector<node_ptr> nodes;
@@ -698,6 +688,12 @@ namespace munster::ast
          pattern(grammar::action::e_dot_decl) = [&]() -> node_ptr {
             return std::make_unique<dot_decl>(item.lexeme, item.pos);
          },
+         pattern(grammar::action::e_func_expr) = [&]() -> node_ptr {
+            auto compound_param_expr = node_cast<compound_parameter_expr_decl>(pop(recs));
+            auto id = node_cast<id_decl>(pop(recs));
+
+            return std::make_unique<func_expr>(std::move(id), std::move(compound_param_expr));
+         },
          pattern(grammar::action::e_assign_stmt) = [&]() -> node_ptr {
             auto assign = node_cast<assign_op>(pop(recs));
 
@@ -724,5 +720,9 @@ namespace munster::ast
          pattern(_) = [&]() -> node_ptr {
             return nullptr;
          });
+
+      if (action == grammar::action::e_func_expr)
+      {
+      }
    }
 } // namespace munster::ast

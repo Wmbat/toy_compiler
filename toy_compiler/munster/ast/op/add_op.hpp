@@ -9,6 +9,8 @@ namespace munster::ast
    public:
       add_op(node_ptr term_0, node_ptr value, node_ptr term_1);
 
+      void accept(visitor_variant &visitor) const override;
+
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 } // namespace munster::ast

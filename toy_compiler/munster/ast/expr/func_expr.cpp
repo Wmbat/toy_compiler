@@ -2,7 +2,8 @@
 
 namespace munster::ast
 {
-   func_expr::func_expr(node_ptr id, node_ptr compound_input_parameter) :
+   func_expr::func_expr(id_decl::ptr id,
+                        compound_parameter_expr_decl::ptr compound_input_parameter) :
       expr{std::string{id->lexeme()}, id->location()}
    {
       if (!std::empty(compound_input_parameter->children()))
