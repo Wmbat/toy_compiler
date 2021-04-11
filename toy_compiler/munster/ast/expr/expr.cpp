@@ -6,4 +6,6 @@ namespace munster::ast
    expr::expr(const std::string& lexeme, const front::source_location& location) :
       decl{lexeme, location}
    {}
+
+   void expr::accept(visitor_variant& /*visitor*/) const {}
 } // namespace munster::ast

@@ -11,6 +11,8 @@ namespace munster::ast
    public:
       assign_stmt(assign_op::ptr assign);
 
+      void accept(visitor_variant &visitor) const override;
+
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 } // namespace munster::ast

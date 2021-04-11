@@ -2,6 +2,8 @@
 
 #include <fmt/core.h>
 
+#include <mpark/patterns.hpp>
+
 #include <cassert>
 #include <utility>
 
@@ -12,6 +14,23 @@ namespace munster::ast
    {
       make_child(std::move(val_0));
       make_child(std::move(val_1));
+   }
+
+   void assign_op::accept(visitor_variant& visitor) const
+   {
+      using namespace mpark::patterns;
+
+      for (const auto& child : children())
+      {
+         child->accept(visitor);
+      }
+
+      const auto visit = [this](auto& vis) {
+         vis(*this);
+      };
+
+      match(visitor)(pattern(as<symbol_table_visitor>(arg)) = visit,
+                     pattern(as<type_checking_visitor>(arg)) = visit);
    }
 
    auto assign_op::to_string() const -> std::string

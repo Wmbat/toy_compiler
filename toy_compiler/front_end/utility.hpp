@@ -19,13 +19,13 @@
 
 #pragma once
 
-#include <toy_compiler/front_end/sem/token_type.hpp>
+#include <toy_compiler/munster/grammar/token_type.hpp>
 
 #include <string_view>
 
 #include <range/v3/algorithm/find.hpp>
 
-namespace front
+namespace munster
 {
    namespace detail
    {
@@ -33,10 +33,12 @@ namespace front
          std::to_array("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")};
       constexpr std::array digits{std::to_array("0123456789")};
       constexpr std::array operators{std::to_array("=+-*/<>|&!?")};
-      constexpr std::array punctuations{sem::period, sem::comma, sem::colon, sem::semi_colon};
+      constexpr std::array punctuations{grammar::period, grammar::comma, grammar::colon,
+                                        grammar::semi_colon};
       constexpr std::array comments{"/*", "//"};
-      constexpr std::array braces{sem::open_parenth, sem::close_parenth, sem::open_square,
-                                  sem::close_square, sem::open_curly,    sem::close_curly};
+      constexpr std::array braces{grammar::open_parenth, grammar::close_parenth,
+                                  grammar::open_square,  grammar::close_square,
+                                  grammar::open_curly,   grammar::close_curly};
    } // namespace detail
 
    /**
@@ -107,4 +109,4 @@ namespace front
     * @brief Turn an unsigned integer literal into it's kilobyte representation.
     */
    constexpr auto operator""_kb(unsigned long long val) -> std::size_t { return val * kilobyte; }
-} // namespace front
+} // namespace munster

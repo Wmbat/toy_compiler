@@ -4,12 +4,12 @@
 
 namespace munster::ast
 {
-   class inheritance_decl : public decl
+   class compound_member_decl : public decl
    {
    public:
-      inheritance_decl(const std::string& name, const front::source_location& location);
+      compound_member_decl(std::vector<node_ptr>&& member_decl);
 
-      void accept(visitor_variant &visitor) const override;
+      void accept(visitor_variant& visitor) const override;
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };

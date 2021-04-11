@@ -2,6 +2,8 @@
 
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
 
+#include <mpark/patterns.hpp>
+
 namespace munster::ast
 {
    member_func_decl::member_func_decl(node_ptr visibility, node_ptr location, node_ptr id,
@@ -65,5 +67,17 @@ namespace munster::ast
    {
       return fmt::format("member_func_decl {} {} '{} {} ({})'", location(), lexeme(), visibility(),
                          m_return_type, params_string());
+   }
+
+   void member_func_decl::accept(visitor_variant& visitor) const
+   {
+      using namespace mpark::patterns;
+
+      const auto visit = [this](auto& vis) {
+         vis(*this);
+      };
+
+      match(visitor)(pattern(as<symbol_table_visitor>(arg)) = visit,
+                     pattern(as<type_checking_visitor>(arg)) = visit);
    }
 } // namespace munster::ast

@@ -15,16 +15,28 @@ namespace munster
 {
    namespace ast
    {
+      class node;
+
       class translation_unit_decl;
+
       class compound_class_decl;
       class class_decl;
+      class compound_inheritance_decl;
+      class compound_member_decl;
+      class member_func_decl;
+      class member_var_decl;
+
       class compound_function_decl;
+      class inheritance_decl;
       class func_decl;
       class func_head_decl;
       class func_body_decl;
 
       class func_expr;
       class var_expr;
+      class float_expr;
+      class integer_expr;
+      class string_expr;
 
       class compound_stmt;
       class func_stmt;
@@ -51,8 +63,18 @@ namespace munster
    {
    public:
       void operator()(const ast::translation_unit_decl& tl) { this->underlying().visit(tl); }
-      void operator()(const ast::compound_class_decl& ccd) { this->underlying().visit(ccd); }
-      void operator()(const ast::class_decl& cd) { this->underlying().visit(cd); }
+
+      void operator()(const ast::compound_class_decl& node) { this->underlying().visit(node); }
+      void operator()(const ast::class_decl& node) { this->underlying().visit(node); }
+      void operator()(const ast::compound_inheritance_decl& node)
+      {
+         this->underlying().visit(node);
+      }
+      void operator()(const ast::inheritance_decl& node) { this->underlying().visit(node); }
+      void operator()(const ast::compound_member_decl& node) { this->underlying().visit(node); }
+      void operator()(const ast::member_func_decl& node) { this->underlying().visit(node); }
+      void operator()(const ast::member_var_decl& node) { this->underlying().visit(node); }
+
       void operator()(const ast::compound_function_decl& cfd) { this->underlying().visit(cfd); }
       void operator()(const ast::func_decl& fd) { this->underlying().visit(fd); }
       void operator()(const ast::func_head_decl& fd) { this->underlying().visit(fd); }
@@ -63,6 +85,9 @@ namespace munster
 
       void operator()(const ast::func_expr& node) { this->underlying().visit(node); }
       void operator()(const ast::var_expr& node) { this->underlying().visit(node); }
+      void operator()(const ast::float_expr& node) { this->underlying().visit(node); }
+      void operator()(const ast::integer_expr& node) { this->underlying().visit(node); }
+      void operator()(const ast::string_expr& node) { this->underlying().visit(node); }
 
       void operator()(const ast::compound_stmt& node) { this->underlying().visit(node); }
       void operator()(const ast::func_stmt& node) { this->underlying().visit(node); }
@@ -76,6 +101,7 @@ namespace munster
       void operator()(const ast::continue_stmt& node) { this->underlying().visit(node); }
 
       void operator()(const ast::dot_op& node) { this->underlying().visit(node); }
+      void operator()(const ast::assign_op& node) { this->underlying().visit(node); }
 
       [[nodiscard]] auto get_errors() const -> const std::vector<front::parse_error>&
       {

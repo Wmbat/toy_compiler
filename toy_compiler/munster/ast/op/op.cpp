@@ -7,8 +7,5 @@ namespace munster::ast
       node{lexeme, location}
    {}
 
-   void op::accept(visitor_variant& /*visitor*/) const
-   {
-      assert(false && "Accept not implemented"); // NOLINT
-   }
+   void op::accept(visitor_variant& /*visitor*/) const {}
 } // namespace munster::ast

@@ -9,6 +9,8 @@ namespace munster::ast
    public:
       compound_inheritance_decl(std::vector<node_ptr>&& class_decls);
 
+      void accept(visitor_variant &visitor) const override;
+
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 } // namespace munster::ast

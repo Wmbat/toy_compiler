@@ -21,7 +21,7 @@
 
 #include <range/v3/algorithm/find.hpp>
 
-namespace front
+namespace munster
 {
    auto to_literal(const std::string_view data) -> std::string
    {
@@ -47,4 +47,4 @@ namespace front
 
       return res;
    }
-} // namespace front
+} // namespace munster

@@ -20,7 +20,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <toy_compiler/front_end/grammar/symbol.hpp>
+#include <toy_compiler/munster/grammar/symbol.hpp>
 
 #include <range/v3/view/iota.hpp>
 #include <range/v3/view/transform.hpp>
@@ -33,8 +33,7 @@ constexpr auto to(std::uint32_t i) -> T
 
 TEST_SUITE("grammar/symbol.hpp test suite")
 {
-   using namespace fr::grammar;
-   using namespace front::sem;
+   using namespace munster::grammar;
 
    namespace vi = ranges::views;
 
@@ -226,29 +225,29 @@ TEST_SUITE("grammar/symbol.hpp test suite")
 
    TEST_CASE("to_string_view()")
    {
-      using namespace fr::grammar;
+      using namespace munster::grammar;
 
       namespace vi = ranges::views;
 
       for (auto i : vi::iota(0u, static_cast<std::uint32_t>(symbol_type::stop) + 1))
       {
-         CHECK(to_string_view(to<symbol_type>(i)) == fr::grammar::detail::symbol_names[i]);
+         CHECK(to_string_view(to<symbol_type>(i)) == munster::grammar::detail::symbol_names[i]);
       }
    }
    TEST_CASE("fmt::formatter - symbol_type")
    {
-      using namespace fr::grammar;
+      using namespace munster::grammar;
 
       namespace vi = ranges::views;
 
       for (auto i : vi::iota(0u, static_cast<std::uint32_t>(symbol_type::stop) + 1))
       {
-         CHECK(fmt::format("{}", to<symbol_type>(i)) == fr::grammar::detail::symbol_names[i]);
+         CHECK(fmt::format("{}", to<symbol_type>(i)) == munster::grammar::detail::symbol_names[i]);
       }
    }
    TEST_CASE("fmt::formatter - symbol")
    {
-      using namespace fr::grammar;
+      using namespace munster::grammar;
 
       namespace vi = ranges::views;
 

@@ -12,13 +12,6 @@
 
 namespace munster::ast
 {
-   compound_member_decl::compound_member_decl(std::vector<node_ptr>&& member_decls)
-   {
-      make_family<member_func_decl, member_var_decl>(std::move(member_decls));
-   }
-
-   auto compound_member_decl::to_string() const -> std::string { return "compound_member_decl"; }
-
    visibility_decl::visibility_decl(const std::string& name,
                                     const front::source_location& location) :
       decl{name, location}

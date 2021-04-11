@@ -21,6 +21,8 @@ namespace munster
 {
    enum struct symbol_type
    {
+      e_undefined,
+      e_main,
       e_class,
       e_inheritance,
       e_member_variable,
@@ -29,7 +31,8 @@ namespace munster
       e_function,
       e_variable,
       e_parameter,
-      e_main
+      e_temporary,
+      e_type_error
    };
 
    class symbol_table;

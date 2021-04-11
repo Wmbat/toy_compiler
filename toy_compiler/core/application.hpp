@@ -42,7 +42,8 @@ private:
    void write_symbol_tables_to_file(const std::filesystem::path& path,
                                     const munster::symbol_table* root) const;
 
-   [[nodiscard]] auto fancy_lexical_error_type(front::sem::token_type value) const -> std::string;
+   [[nodiscard]] auto fancy_lexical_error_type(munster::grammar::token_type value) const
+      -> std::string;
 
 private:
    util::logger_wrapper m_logger;

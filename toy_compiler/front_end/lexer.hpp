@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include <toy_compiler/front_end/sem/token_type.hpp>
 #include <toy_compiler/front_end/source_location.hpp>
+#include <toy_compiler/munster/grammar/token_type.hpp>
 #include <toy_compiler/util/logger.hpp>
 
 #include <monads/maybe.hpp>
@@ -28,16 +28,16 @@
 #include <filesystem>
 #include <vector>
 
-namespace front
+namespace munster
 {
    /**
     * @brief Holds a the information of a parsed token.
     */
    struct lex_item
    {
-      sem::token_type type{}; // NOLINT
-      std::string lexeme{};   // NOLINT
-      source_location pos{};  // NOLINT
+      grammar::token_type type{};   // NOLINT
+      std::string lexeme{};         // NOLINT
+      front::source_location pos{}; // NOLINT
 
       auto operator<=>(const lex_item& other) const -> std::strong_ordering = default;
    };
@@ -51,14 +51,14 @@ namespace front
     * @return The list of `fr::lex_item` from the file
     */
    auto lex_file(const std::filesystem::path& path, util::logger_wrapper log = nullptr)
-      -> monad::maybe<std::vector<front::lex_item>>;
-} // namespace front
+      -> monad::maybe<std::vector<lex_item>>;
+} // namespace munster
 
 /**
  * @brief A specialization for using the `fr::lex_item` struct in the **fmt** & **spdlog** libraries
  */
 template <>
-struct fmt::formatter<front::lex_item>
+struct fmt::formatter<munster::lex_item>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -67,7 +67,7 @@ struct fmt::formatter<front::lex_item>
    }
 
    template <typename FormatContext>
-   auto format(const front::lex_item& tok, FormatContext& ctx)
+   auto format(const munster::lex_item& tok, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "[.type = {0}, .lexeme = {1}, .position = {2}]", tok.type,
                             tok.lexeme, tok.pos);

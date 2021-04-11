@@ -28,7 +28,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace front::sem
+namespace munster::grammar
 {
    /**
     * @brief All the possible item type that may be lexed from a source file
@@ -124,14 +124,14 @@ namespace front::sem
    constexpr char close_square = ']';
    constexpr char open_curly = '{';
    constexpr char close_curly = '}';
-} // namespace front::sem
+} // namespace munster::grammar
 
 /**
  * @brief A specialization for using the `sem::token_type` enum in the **fmt** & **spdlog**
  * libraries
  */
 template <>
-struct fmt::formatter<front::sem::token_type>
+struct fmt::formatter<munster::grammar::token_type>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -140,7 +140,7 @@ struct fmt::formatter<front::sem::token_type>
    }
 
    template <typename FormatContext>
-   auto format(front::sem::token_type t, FormatContext& ctx)
+   auto format(munster::grammar::token_type t, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "{}", magic_enum::enum_name(t).substr(2));
    }

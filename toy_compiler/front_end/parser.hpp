@@ -21,6 +21,7 @@
 
 #include <toy_compiler/front_end/lexer.hpp>
 #include <toy_compiler/front_end/parse_error.hpp>
+#include <toy_compiler/munster/ast/node.hpp>
 #include <toy_compiler/munster/ast/node_factory.hpp>
 #include <toy_compiler/util/logger.hpp>
 
@@ -29,7 +30,7 @@
 #include <span>
 #include <unordered_map>
 
-namespace fr
+namespace munster
 {
    /**
     * @brief
@@ -46,7 +47,7 @@ namespace fr
    struct [[nodiscard]] parse_result
    {
       parse_status value = parse_status::success;
-      munster::ast::node_ptr ast = nullptr;
+      ast::node_ptr ast = nullptr;
       std::string derivation;
       monad::maybe<std::vector<front::parse_error>> errors = {};
    };
@@ -57,6 +58,6 @@ namespace fr
     *
     * @param[in] items The lexed items to use for parsing
     */
-   auto parse_items(std::span<const front::lex_item> items, util::logger_wrapper log = nullptr)
+   auto parse_items(std::span<const lex_item> items, util::logger_wrapper log = nullptr)
       -> parse_result;
-} // namespace fr
+} // namespace munster

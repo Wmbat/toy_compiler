@@ -19,27 +19,26 @@
 
 #pragma once
 
-#include <toy_compiler/front_end/grammar/production.hpp>
-#include <toy_compiler/front_end/grammar/symbol.hpp>
+#include <toy_compiler/munster/grammar/production.hpp>
+#include <toy_compiler/munster/grammar/symbol.hpp>
 
 #include <array>
 
-namespace fr::grammar
+namespace munster::grammar
 {
    /**
     * @brief A simple data structure to hold the table of rules needed for the table driven parsing.
     */
    class production_table
    {
-      static constexpr std::size_t width = static_cast<std::size_t>(front::sem::token_type::e_max_size);
-      static constexpr std::size_t height =
-         static_cast<std::size_t>(front::sem::grammar_type::max_size);
+      static constexpr std::size_t width = static_cast<std::size_t>(token_type::e_max_size);
+      static constexpr std::size_t height = static_cast<std::size_t>(grammar_type::max_size);
 
    public:
       /**
        * @brief The type used to access elements within the `symbol_table`
        */
-      using key = std::pair<front::sem::grammar_type, sets::token_type>;
+      using key = std::pair<grammar_type, token_type>;
 
    public:
       /**
@@ -74,4 +73,4 @@ namespace fr::grammar
    };
 
    auto construct_production_table() -> const grammar::production_table;
-} // namespace fr::grammar
+} // namespace munster::grammar

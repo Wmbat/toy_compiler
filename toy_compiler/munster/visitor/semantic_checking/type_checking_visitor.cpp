@@ -5,7 +5,10 @@
 #include <toy_compiler/munster/ast/decl/func_head_decl.hpp>
 #include <toy_compiler/munster/ast/decl/member_func_decl.hpp>
 #include <toy_compiler/munster/ast/decl/member_var_decl.hpp>
+#include <toy_compiler/munster/ast/expr/float_expr.hpp>
 #include <toy_compiler/munster/ast/expr/func_expr.hpp>
+#include <toy_compiler/munster/ast/expr/integer_expr.hpp>
+#include <toy_compiler/munster/ast/expr/string_expr.hpp>
 #include <toy_compiler/munster/ast/expr/var_expr.hpp>
 #include <toy_compiler/munster/ast/op/assign_op.hpp>
 #include <toy_compiler/munster/ast/op/dot_op.hpp>
@@ -15,6 +18,7 @@
 
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
 
+#include <range/v3/action/split.hpp>
 #include <range/v3/algorithm/count_if.hpp>
 #include <range/v3/algorithm/find.hpp>
 #include <range/v3/algorithm/find_if.hpp>
@@ -25,7 +29,11 @@
 
 #include <fmt/core.h>
 
+#include <mpark/patterns.hpp>
+
+namespace ra = ranges::actions;
 namespace vi = ranges::views;
+using namespace mpark::patterns;
 
 namespace munster
 {
@@ -40,6 +48,11 @@ namespace munster
    void type_checking_visitor::visit(const ast::translation_unit_decl& /*tud*/) {}
    void type_checking_visitor::visit(const ast::compound_class_decl& /*ccd*/) {}
    void type_checking_visitor::visit(const ast::class_decl& /*cd*/) {}
+   void type_checking_visitor::visit(const ast::compound_inheritance_decl&) {}
+   void type_checking_visitor::visit(const ast::inheritance_decl&) {}
+   void type_checking_visitor::visit(const ast::compound_member_decl&) {}
+   void type_checking_visitor::visit(const ast::member_func_decl&) {}
+   void type_checking_visitor::visit(const ast::member_var_decl&) {}
    void type_checking_visitor::visit(const ast::compound_function_decl& /*cfd*/) {}
    void type_checking_visitor::visit(const ast::func_decl& func_d)
    {
@@ -85,8 +98,6 @@ namespace munster
    }
    void type_checking_visitor::visit(const ast::func_head_decl& head)
    {
-      fmt::print("func head\n");
-
       if (head.class_name())
       {
          const auto class_name = std::string{head.lexeme()};
@@ -152,12 +163,140 @@ namespace munster
    void type_checking_visitor::visit(const ast::func_expr& /*node*/) {}
    void type_checking_visitor::visit(const ast::var_expr& node)
    {
-      [[maybe_unused]] const auto var_name = node.lexeme();
+      const std::string var_name{node.lexeme()};
+
+      fmt::print("var_expr: {}\n", var_name);
+
+      if (std::size(m_tables) == 1u)
+      {
+         symbol_table* func_table = *(std::end(m_tables) - 1);
+
+         if (const auto res = func_table->lookup(var_name))
+         {
+            m_symbols.push_back(&res.val());
+         }
+         else
+         {
+            m_symbols.push_back({});
+            m_errors.push_back(
+               front::parse_error{.type = front::parse_error_type::e_semantic_error,
+                                  .pos = node.location(),
+                                  .lexeme = fmt::format("undeclared variable '{}'", var_name)});
+         }
+      }
+      else if (std::size(m_tables) == 2u)
+      {
+         symbol_table* p_func_table = *(std::end(m_tables) - 1);
+         symbol_table* p_class_table = *(std::end(m_tables) - 2);
+
+         symbol* p_symbol = nullptr;
+         if (const auto res = p_func_table->lookup(var_name))
+         {
+            p_symbol = &res.val();
+         }
+
+         if (!p_symbol)
+         {
+            if (const auto res = p_class_table->lookup(var_name))
+            {
+               p_symbol = &res.val();
+            }
+         }
+
+         if (!p_symbol)
+         {
+            m_errors.push_back(
+               front::parse_error{.type = front::parse_error_type::e_semantic_error,
+                                  .pos = node.location(),
+                                  .lexeme = fmt::format("undeclared variable '{}'", var_name)});
+         }
+
+         m_symbols.push_back(p_symbol);
+      }
+   }
+   void type_checking_visitor::visit(const ast::float_expr& node)
+   {
+      auto* func_table = m_tables.back();
+
+      const auto name = fmt::format("temp{}", m_temporary_counter++);
+      const auto res =
+         func_table->insert(name, symbol{name, symbol_type::e_temporary, node.location(), "float"});
+
+      m_symbols.push_back(&res.val());
+   }
+   void type_checking_visitor::visit(const ast::integer_expr& node)
+   {
+      auto* func_table = m_tables.back();
+
+      const auto name = fmt::format("temp{}", m_temporary_counter++);
+      const auto res = func_table->insert(
+         name, symbol{name, symbol_type::e_temporary, node.location(), "integer"});
+
+      m_symbols.push_back(&res.val());
+   }
+   void type_checking_visitor::visit(const ast::string_expr& node)
+   {
+      auto* func_table = m_tables.back();
+
+      const auto name = fmt::format("temp{}", m_temporary_counter++);
+      const auto res = func_table->insert(
+         name, symbol{name, symbol_type::e_temporary, node.location(), "string"});
+
+      m_symbols.push_back(&res.val());
    }
 
-   void type_checking_visitor::visit(const ast::compound_stmt& /*node*/) {}
    void type_checking_visitor::visit(const ast::func_stmt& /*node*/) { fmt::print("func_stmt"); }
-   void type_checking_visitor::visit(const ast::assign_stmt& /*node*/) {}
+   void type_checking_visitor::visit(const ast::compound_stmt& /*node*/) {}
+   void type_checking_visitor::visit(const ast::assign_stmt& node)
+   {
+      // TODO: remove
+      if (std::size(m_symbols) != 2)
+      {
+         if (!std::empty(m_symbols))
+         {
+            m_symbols.pop_back();
+         }
+
+         return;
+      }
+
+      const auto get_var_type = [](symbol* s) {
+         if (s->kind() == symbol_type::e_member_variable)
+         {
+            const auto split = ranges::actions::split(s->type(), ' ');
+            const auto vis = *(std::end(split) - 2) | ranges::to<std::string>();
+            return *(std::end(split) - 1) | ranges::to<std::string>();
+         }
+         else
+         {
+            return std::string{s->type()};
+         }
+      };
+
+      auto* p_left = *(std::end(m_symbols) - 2);
+      auto* p_right = *(std::end(m_symbols) - 1);
+
+      if (p_left && p_right)
+      {
+         const std::string left_type = get_var_type(p_left);
+         const std::string right_type = get_var_type(p_right);
+
+         if (left_type != right_type)
+         {
+            m_errors.push_back(front::parse_error{
+               .type = front::parse_error_type::e_semantic_error,
+               .pos = node.children()[0]->location(),
+               .lexeme = fmt::format("variable '{}' of type '{}' cannot be assigned to "
+                                     "variable '{}' of type '{}'",
+                                     p_right->name(), right_type, p_left->name(), left_type)});
+         }
+      }
+
+      m_symbols.pop_back();
+      m_symbols.pop_back();
+
+      fmt::print("assign_stmt\n");
+   }
    void type_checking_visitor::visit(const ast::if_stmt& /*node*/) {}
    void type_checking_visitor::visit(const ast::while_stmt& /*node*/) {}
    void type_checking_visitor::visit(const ast::read_stmt& /*node*/) {}
@@ -166,18 +305,54 @@ namespace munster
    void type_checking_visitor::visit(const ast::break_stmt& /*node*/) {}
    void type_checking_visitor::visit(const ast::continue_stmt& /*node*/) {}
 
-   void type_checking_visitor::visit(const ast::dot_op& /*node*/)
+   void type_checking_visitor::visit(const ast::dot_op& node)
    {
-      /*
-      [[maybe_unused]] const auto* p_left_symbol = m_symbols.top();
-      [[maybe_unused]] const auto* p_right_symbol = m_symbols.top();
+      auto* p_left_symbol = *(std::end(m_symbols) - 2);
+      auto* p_right_symbol = *(std::end(m_symbols) - 1);
 
-      // do stuff
+      if (p_left_symbol && p_right_symbol)
+      {
+         if (p_left_symbol->kind() == symbol_type::e_member_variable)
+         {
+            const auto split = ranges::actions::split(p_left_symbol->type(), ' ');
+            const auto vis = *(std::end(split) - 2) | ranges::to<std::string>();
+            const auto type = *(std::end(split) - 1) | ranges::to<std::string>();
 
-      m_symbols.pop();
-      m_symbols.pop();
-      */
+            if (const auto res = mp_root->lookup(type); !res)
+            {
+               m_errors.push_back(front::parse_error{
+                  .type = front::parse_error_type::e_semantic_error,
+                  .pos = node.children()[0]->location(),
+                  .lexeme = fmt::format("'{}' is not a class and does not have member variables",
+                                        p_left_symbol->name())});
+            }
+         }
+         if (p_left_symbol->kind() == symbol_type::e_variable)
+         {
+            const std::string type{p_left_symbol->type()};
+            if (const auto res = mp_root->lookup(type); !res)
+            {
+               m_errors.push_back(front::parse_error{
+                  .type = front::parse_error_type::e_semantic_error,
+                  .pos = node.children()[0]->location(),
+                  .lexeme = fmt::format("'{}' is not a class", p_left_symbol->name())});
+            }
+         }
+
+         m_symbols.pop_back();
+         m_symbols.pop_back();
+
+         m_symbols.push_back(p_right_symbol);
+      }
+      else
+      {
+         m_symbols.pop_back();
+         m_symbols.pop_back();
+
+         m_symbols.push_back(nullptr);
+      }
    }
+   void type_checking_visitor::visit(const ast::assign_op& /*node*/) {}
 
    ////////////////////////////////////////////////////
 

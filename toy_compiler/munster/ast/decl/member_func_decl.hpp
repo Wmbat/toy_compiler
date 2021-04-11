@@ -17,6 +17,8 @@ namespace munster::ast
       [[nodiscard]] auto params_string() const -> std::string;
       [[nodiscard]] auto to_string() const -> std::string override;
 
+      void accept(visitor_variant &visitor) const override;
+
    private:
       std::string m_visibility;
       std::string m_return_type;

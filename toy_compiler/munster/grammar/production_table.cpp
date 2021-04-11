@@ -17,11 +17,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <toy_compiler/front_end/grammar/production_table.hpp>
+#include <toy_compiler/munster/grammar/production_table.hpp>
 
 #include <utility>
 
-namespace fr::grammar
+namespace munster::grammar
 {
    auto production_table::lookup(const key& k) const -> const production&
    {
@@ -48,9 +48,6 @@ namespace fr::grammar
 
    auto construct_production_table() -> const grammar::production_table
    {
-      using namespace grammar;
-      using namespace front::sem;
-
       production_table table{};
       symbol_array epsilon = {token_type::e_epsilon};
 
@@ -153,12 +150,13 @@ namespace fr::grammar
 
       // <ClassDecl>
       {
-         table.set_production(
-            {grammar_type::class_decl, token_type::e_class},
-            {token_type::e_class, action::e_location_decl, token_type::e_id, action::e_id_decl,
-             grammar_type::inherit, action::e_compound_inheritance_decl, token_type::e_left_brace,
-             grammar_type::class_decl_body, action::e_compound_member_decl, token_type::e_right_brace,
-             token_type::e_semi_colon, action::e_class_decl, grammar_type::class_decl});
+         table.set_production({grammar_type::class_decl, token_type::e_class},
+                              {token_type::e_class, action::e_location_decl, token_type::e_id,
+                               action::e_id_decl, grammar_type::inherit,
+                               action::e_compound_inheritance_decl, token_type::e_left_brace,
+                               grammar_type::class_decl_body, action::e_compound_member_decl,
+                               token_type::e_right_brace, token_type::e_semi_colon,
+                               action::e_class_decl, grammar_type::class_decl});
          table.set_production({grammar_type::class_decl, token_type::e_func},
                               {token_type::e_epsilon, action::e_epsilon});
          table.set_production({grammar_type::class_decl, token_type::e_main},
@@ -253,8 +251,8 @@ namespace fr::grammar
       // <fParams>
       {
          symbol_array common{
-            grammar_type::type,    action::e_type_decl,           token_type::e_id,
-            action::e_id_decl,     grammar_type::array_size_rept, action::e_compound_array_decl,
+            grammar_type::type,      action::e_type_decl,           token_type::e_id,
+            action::e_id_decl,       grammar_type::array_size_rept, action::e_compound_array_decl,
             action::e_variable_decl, grammar_type::f_params_tail};
          table.set_production({grammar_type::f_params, token_type::e_id}, common);
          table.set_production({grammar_type::f_params, token_type::e_right_paren},
@@ -577,10 +575,11 @@ namespace fr::grammar
 
       // <Prog>
       {
-         symbol_array common{
-            grammar_type::class_decl,     action::e_compound_class_decl, grammar_type::func_def,
-            action::e_compound_func_decl, token_type::e_main,          action::e_id_decl,
-            grammar_type::func_body,      action::e_func_body_decl,    action::e_main_decl};
+         symbol_array common{grammar_type::class_decl, action::e_compound_class_decl,
+                             grammar_type::func_def,   action::e_compound_func_decl,
+                             token_type::e_main,       action::e_id_decl,
+                             grammar_type::func_body,  action::e_func_body_decl,
+                             action::e_main_decl};
          table.set_production({grammar_type::prog, token_type::e_main}, common);
          table.set_production({grammar_type::prog, token_type::e_func}, common);
          table.set_production({grammar_type::prog, token_type::e_class}, common);
@@ -798,4 +797,4 @@ namespace fr::grammar
 
       return table;
    }
-} // namespace fr::grammar
+} // namespace munster::grammar

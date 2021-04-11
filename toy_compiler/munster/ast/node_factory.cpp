@@ -5,6 +5,7 @@
 #include <toy_compiler/munster/ast/decl/compound_class_decl.hpp>
 #include <toy_compiler/munster/ast/decl/compound_func_decl.hpp>
 #include <toy_compiler/munster/ast/decl/compound_inheritance_decl.hpp>
+#include <toy_compiler/munster/ast/decl/compound_member_decl.hpp>
 #include <toy_compiler/munster/ast/decl/decl.hpp>
 #include <toy_compiler/munster/ast/decl/dot_decl.hpp>
 #include <toy_compiler/munster/ast/decl/func_body_decl.hpp>
@@ -74,17 +75,17 @@ namespace munster::ast
       return temp;
    }
 
-   auto node_factory(front::sem::action action, const front::lex_item& item,
-                     std::vector<node_ptr>& recs) -> node_ptr
+   auto node_factory(grammar::action action, const lex_item& item, std::vector<node_ptr>& recs)
+      -> node_ptr
    {
       using namespace mpark::patterns;
 
-      if (action == front::sem::action::e_type_decl)
+      if (action == grammar::action::e_type_decl)
       {
          return std::make_unique<type_decl>(item.lexeme, item.pos);
       }
 
-      if (action == front::sem::action::e_compound_func_decl)
+      if (action == grammar::action::e_compound_func_decl)
       {
          std::vector<node_ptr> nodes;
          auto null = pop(recs);
@@ -107,7 +108,7 @@ namespace munster::ast
          return std::make_unique<compound_func_decl>(std::vector<func_decl::ptr>{});
       }
 
-      if (action == front::sem::action::e_func_decl)
+      if (action == grammar::action::e_func_decl)
       {
          node_ptr statements = pop(recs);
          node_ptr function_head = pop(recs);
@@ -115,7 +116,7 @@ namespace munster::ast
          return std::make_unique<func_decl>(std::move(function_head), std::move(statements));
       }
 
-      if (action == front::sem::action::e_func_head_decl)
+      if (action == grammar::action::e_func_head_decl)
       {
          node_ptr return_type = pop(recs);
          node_ptr function_params = pop(recs);
@@ -128,7 +129,7 @@ namespace munster::ast
             std::move(return_type));
       }
 
-      if (action == front::sem::action::e_func_body_decl)
+      if (action == grammar::action::e_func_body_decl)
       {
          node_ptr statements = pop(recs);
          node_ptr variables = pop(recs);
@@ -136,7 +137,7 @@ namespace munster::ast
          return std::make_unique<func_body_decl>(std::move(variables), std::move(statements));
       }
 
-      if (action == front::sem::action::e_compound_class_decl)
+      if (action == grammar::action::e_compound_class_decl)
       {
          std::vector<node_ptr> nodes;
          node_ptr null = pop(recs);
@@ -164,7 +165,7 @@ namespace munster::ast
          return std::make_unique<compound_class_decl>(std::vector<class_decl::ptr>{});
       }
 
-      if (action == front::sem::action::e_class_decl)
+      if (action == grammar::action::e_class_decl)
       {
          node_ptr compound_member = pop(recs);
          node_ptr compound_inheritance = pop(recs);
@@ -176,7 +177,7 @@ namespace munster::ast
                                              std::move(compound_member));
       }
 
-      if (action == front::sem::action::e_compound_inheritance_decl)
+      if (action == grammar::action::e_compound_inheritance_decl)
       {
          std::vector<node_ptr> nodes;
          auto null = pop(recs);
@@ -204,12 +205,12 @@ namespace munster::ast
          return std::make_unique<compound_inheritance_decl>(std::vector<node_ptr>{});
       }
 
-      if (action == front::sem::action::e_inheritance_decl)
+      if (action == grammar::action::e_inheritance_decl)
       {
          return std::make_unique<inheritance_decl>(item.lexeme, item.pos);
       }
 
-      if (action == front::sem::action::e_compound_member_decl)
+      if (action == grammar::action::e_compound_member_decl)
       {
          std::vector<node_ptr> nodes;
          auto null = pop(recs);
@@ -233,7 +234,7 @@ namespace munster::ast
          return std::make_unique<compound_member_decl>(std::vector<node_ptr>{});
       }
 
-      if (action == front::sem::action::e_member_var_decl)
+      if (action == grammar::action::e_member_var_decl)
       {
          node_ptr compound_array = pop(recs);
          node_ptr id = pop(recs);
@@ -244,14 +245,14 @@ namespace munster::ast
                                                   std::move(id), std::move(compound_array));
       }
 
-      if (action == front::sem::action::e_visibily_decl)
+      if (action == grammar::action::e_visibily_decl)
       {
          node_ptr vis = std::make_unique<visibility_decl>(item.lexeme, item.pos);
 
          return vis;
       }
 
-      if (action == front::sem::action::e_variable_decl)
+      if (action == grammar::action::e_variable_decl)
       {
          node_ptr compound_array = pop(recs);
          node_ptr id = pop(recs);
@@ -261,7 +262,7 @@ namespace munster::ast
                                                 std::move(compound_array));
       }
 
-      if (action == front::sem::action::e_compound_array_decl)
+      if (action == grammar::action::e_compound_array_decl)
       {
          std::vector<node_ptr> nodes;
          auto null = pop(recs);
@@ -289,7 +290,7 @@ namespace munster::ast
          return std::make_unique<compound_array_decl>(std::vector<node_ptr>{});
       }
 
-      if (action == front::sem::action::e_array_decl)
+      if (action == grammar::action::e_array_decl)
       {
          node_ptr end_loc = pop(recs);
          node_ptr size = pop(recs);
@@ -299,7 +300,7 @@ namespace munster::ast
                                              std::move(end_loc));
       }
 
-      if (action == front::sem::action::e_member_func_decl)
+      if (action == grammar::action::e_member_func_decl)
       {
          node_ptr tail = pop(recs);
          node_ptr compound_param = pop(recs);
@@ -312,7 +313,7 @@ namespace munster::ast
                                                    std::move(tail));
       }
 
-      if (action == front::sem::action::e_compound_param_decl)
+      if (action == grammar::action::e_compound_param_decl)
       {
          std::vector<node_ptr> nodes;
          node_ptr epsilon = pop(recs);
@@ -342,7 +343,7 @@ namespace munster::ast
          return std::make_unique<compound_params_decl>(std::vector<node_ptr>{});
       }
 
-      if (action == front::sem::action::e_compound_variable_decl)
+      if (action == grammar::action::e_compound_variable_decl)
       {
          std::vector<node_ptr> nodes;
          node_ptr null = pop(recs);
@@ -365,7 +366,7 @@ namespace munster::ast
          return std::make_unique<compound_variable_decl>(std::vector<node_ptr>{});
       }
 
-      if (action == front::sem::action::e_main_decl)
+      if (action == grammar::action::e_main_decl)
       {
          node_ptr func_body = pop(recs);
          node_ptr id = pop(recs);
@@ -373,7 +374,7 @@ namespace munster::ast
          return std::make_unique<main_decl>(std::move(id), std::move(func_body));
       }
 
-      if (action == front::sem::action::e_rel_op)
+      if (action == grammar::action::e_rel_op)
       {
          node_ptr term_1 = pop(recs);
          node_ptr id = pop(recs);
@@ -384,7 +385,7 @@ namespace munster::ast
          return std::make_unique<mult_op>(std::move(term_0), std::move(id), std::move(term_1));
       }
 
-      if (action == front::sem::action::e_add_op)
+      if (action == grammar::action::e_add_op)
       {
          node_ptr factor_1 = pop(recs);
          node_ptr id = pop(recs);
@@ -395,7 +396,7 @@ namespace munster::ast
          return std::make_unique<add_op>(std::move(factor_0), std::move(id), std::move(factor_1));
       }
 
-      if (action == front::sem::action::e_dot_op)
+      if (action == grammar::action::e_dot_op)
       {
          node_ptr expr_1 = pop(recs);
 
@@ -410,7 +411,7 @@ namespace munster::ast
          return expr_1;
       }
 
-      if (action == front::sem::action::e_mult_op)
+      if (action == grammar::action::e_mult_op)
       {
          node_ptr factor_1 = pop(recs);
          node_ptr id = pop(recs);
@@ -425,7 +426,7 @@ namespace munster::ast
          return std::make_unique<mult_op>(std::move(factor_0), std::move(id), std::move(factor_1));
       }
 
-      if (action == front::sem::action::e_assign_op)
+      if (action == grammar::action::e_assign_op)
       {
          node_ptr value_1 = pop(recs);
          node_ptr id = pop(recs);
@@ -441,22 +442,22 @@ namespace munster::ast
          return std::make_unique<assign_op>(std::move(value_0), std::move(id), std::move(value_1));
       }
 
-      if (action == front::sem::action::e_int_expr)
+      if (action == grammar::action::e_int_expr)
       {
          return std::make_unique<integer_expr>(item.lexeme, item.pos);
       }
 
-      if (action == front::sem::action::e_float_expr)
+      if (action == grammar::action::e_float_expr)
       {
          return std::make_unique<float_expr>(item.lexeme, item.pos);
       }
 
-      if (action == front::sem::action::e_str_expr)
+      if (action == grammar::action::e_str_expr)
       {
          return std::make_unique<string_expr>(item.lexeme, item.pos);
       }
 
-      if (action == front::sem::action::e_priority_expr)
+      if (action == grammar::action::e_priority_expr)
       {
          node_ptr expr = pop(recs);
          node_ptr location = pop(recs);
@@ -464,7 +465,7 @@ namespace munster::ast
          return std::make_unique<priority_expr>(std::move(location), std::move(expr));
       }
 
-      if (action == front::sem::action::e_not_expr)
+      if (action == grammar::action::e_not_expr)
       {
          node_ptr factor = pop(recs);
          node_ptr id = pop(recs);
@@ -472,7 +473,7 @@ namespace munster::ast
          return std::make_unique<not_expr>(std::move(id), std::move(factor));
       }
 
-      if (action == front::sem::action::e_not_expr)
+      if (action == grammar::action::e_not_expr)
       {
          node_ptr factor = pop(recs);
          node_ptr id = pop(recs);
@@ -480,7 +481,7 @@ namespace munster::ast
          return std::make_unique<not_expr>(std::move(id), std::move(factor));
       }
 
-      if (action == front::sem::action::e_sign_expr)
+      if (action == grammar::action::e_sign_expr)
       {
          node_ptr factor = pop(recs);
          node_ptr id = pop(recs);
@@ -492,7 +493,7 @@ namespace munster::ast
          return std::make_unique<sign_expr>(std::move(id), std::move(factor));
       }
 
-      if (action == front::sem::action::e_func_or_assign_stmt)
+      if (action == grammar::action::e_func_or_assign_stmt)
       {
          std::vector place_holders = recs | vi::reverse |
             vi::take_while(detail::is_type<expr, op>) | vi::move | ranges::to_vector;
@@ -507,7 +508,7 @@ namespace munster::ast
          return std::make_unique<func_stmt>(std::move(nodes));
       }
 
-      if (action == front::sem::action::e_compound_var_expr)
+      if (action == grammar::action::e_compound_var_expr)
       {
          std::vector place_holders = recs | vi::reverse |
             vi::take_while(detail::is_type<var_expr>) | vi::move | ranges::to_vector;
@@ -522,7 +523,7 @@ namespace munster::ast
          return std::make_unique<compound_var_expr_decl>(std::move(nodes));
       }
 
-      if (action == front::sem::action::e_func_expr)
+      if (action == grammar::action::e_func_expr)
       {
          node_ptr compound_param_expr = pop(recs);
          node_ptr id = pop(recs);
@@ -530,7 +531,7 @@ namespace munster::ast
          return std::make_unique<func_expr>(std::move(id), std::move(compound_param_expr));
       }
 
-      if (action == front::sem::action::e_compound_parameter_expr_decl)
+      if (action == grammar::action::e_compound_parameter_expr_decl)
       {
          std::vector<node_ptr> nodes;
          auto null = pop(recs);
@@ -560,7 +561,7 @@ namespace munster::ast
          return std::make_unique<compound_parameter_expr_decl>(std::vector<node_ptr>{});
       }
 
-      if (action == front::sem::action::e_var_expr)
+      if (action == grammar::action::e_var_expr)
       {
          node_ptr compound_array_index_access = pop(recs);
          node_ptr id = pop(recs);
@@ -568,7 +569,7 @@ namespace munster::ast
          return std::make_unique<var_expr>(std::move(id), std::move(compound_array_index_access));
       }
 
-      if (action == front::sem::action::e_compound_array_index_access_decl)
+      if (action == grammar::action::e_compound_array_index_access_decl)
       {
          std::vector<node_ptr> nodes;
          auto null = pop(recs);
@@ -595,7 +596,7 @@ namespace munster::ast
          return std::make_unique<compound_array_index_access_decl>(std::vector<node_ptr>{});
       }
 
-      if (action == front::sem::action::e_array_index_access_decl)
+      if (action == grammar::action::e_array_index_access_decl)
       {
          node_ptr end = pop(recs);
          node_ptr expr = pop(recs);
@@ -605,7 +606,7 @@ namespace munster::ast
                                                           std::move(end));
       }
 
-      if (action == front::sem::action::e_ternary_expr)
+      if (action == grammar::action::e_ternary_expr)
       {
          node_ptr expr_1 = pop(recs);
          node_ptr expr_0 = pop(recs);
@@ -616,7 +617,7 @@ namespace munster::ast
                                                std::move(expr_0), std::move(expr_1));
       }
 
-      if (action == front::sem::action::e_compound_stmt)
+      if (action == grammar::action::e_compound_stmt)
       {
          std::vector<node_ptr> nodes;
          auto null = pop(recs);
@@ -642,7 +643,7 @@ namespace munster::ast
          return std::make_unique<compound_stmt>(std::vector<node_ptr>{});
       }
 
-      if (action == front::sem::action::e_if_stmt)
+      if (action == grammar::action::e_if_stmt)
       {
          node_ptr else_block = pop(recs);
          node_ptr then_block = pop(recs);
@@ -653,7 +654,7 @@ namespace munster::ast
                                           std::move(then_block), std::move(else_block));
       }
 
-      if (action == front::sem::action::e_while_stmt)
+      if (action == grammar::action::e_while_stmt)
       {
          node_ptr stmt_block = pop(recs);
          node_ptr expr = pop(recs);
@@ -663,7 +664,7 @@ namespace munster::ast
                                              std::move(stmt_block));
       }
 
-      if (action == front::sem::action::e_write_stmt)
+      if (action == grammar::action::e_write_stmt)
       {
          node_ptr expr = pop(recs);
          node_ptr id = pop(recs);
@@ -671,7 +672,7 @@ namespace munster::ast
          return std::make_unique<write_stmt>(std::move(id), std::move(expr));
       }
 
-      if (action == front::sem::action::e_read_stmt)
+      if (action == grammar::action::e_read_stmt)
       {
          node_ptr compound_var = pop(recs);
          node_ptr loc = pop(recs);
@@ -680,7 +681,7 @@ namespace munster::ast
       }
 
       return match(action)(
-         pattern(front::sem::action::e_translation_unit) = [&]() -> node_ptr {
+         pattern(grammar::action::e_translation_unit) = [&]() -> node_ptr {
             node_ptr main_decl = pop(recs);
             node_ptr compound_function_decl = pop(recs);
             auto compound_class = node_cast<compound_class_decl>(pop(recs));
@@ -688,36 +689,36 @@ namespace munster::ast
             return std::make_unique<translation_unit_decl>(
                std::move(compound_class), std::move(compound_function_decl), std::move(main_decl));
          },
-         pattern(front::sem::action::e_location_decl) = [&]() -> node_ptr {
+         pattern(grammar::action::e_location_decl) = [&]() -> node_ptr {
             return std::make_unique<location_decl>(item.pos);
          },
-         pattern(front::sem::action::e_id_decl) = [&]() -> node_ptr {
+         pattern(grammar::action::e_id_decl) = [&]() -> node_ptr {
             return std::make_unique<id_decl>(item.lexeme, item.pos);
          },
-         pattern(front::sem::action::e_dot_decl) = [&]() -> node_ptr {
+         pattern(grammar::action::e_dot_decl) = [&]() -> node_ptr {
             return std::make_unique<dot_decl>(item.lexeme, item.pos);
          },
-         pattern(front::sem::action::e_assign_stmt) = [&]() -> node_ptr {
+         pattern(grammar::action::e_assign_stmt) = [&]() -> node_ptr {
             auto assign = node_cast<assign_op>(pop(recs));
 
             return std::make_unique<assign_stmt>(std::move(assign));
          },
-         pattern(front::sem::action::e_return_stmt) = [&]() -> node_ptr {
+         pattern(grammar::action::e_return_stmt) = [&]() -> node_ptr {
             node_ptr expr = pop(recs);
             node_ptr id = pop(recs);
 
             return std::make_unique<return_stmt>(std::move(id), std::move(expr));
          },
-         pattern(front::sem::action::e_break_stmt) = [&]() -> node_ptr {
+         pattern(grammar::action::e_break_stmt) = [&]() -> node_ptr {
             return std::make_unique<break_stmt>(item.lexeme, item.pos);
          },
-         pattern(front::sem::action::e_continue_stmt) = [&]() -> node_ptr {
+         pattern(grammar::action::e_continue_stmt) = [&]() -> node_ptr {
             return std::make_unique<continue_stmt>(item.lexeme, item.pos);
          },
-         pattern(front::sem::action::e_stmt_block_decl) = [&]() -> node_ptr {
+         pattern(grammar::action::e_stmt_block_decl) = [&]() -> node_ptr {
             return std::make_unique<stmt_block_decl>(pop(recs));
          },
-         pattern(front::sem::action::e_integer_literal) = [&]() -> node_ptr {
+         pattern(grammar::action::e_integer_literal) = [&]() -> node_ptr {
             return std::make_unique<integer_literal>(item.lexeme, item.pos);
          },
          pattern(_) = [&]() -> node_ptr {

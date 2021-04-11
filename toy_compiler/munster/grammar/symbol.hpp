@@ -19,16 +19,16 @@
 
 #pragma once
 
-#include <toy_compiler/front_end/sem/actions.hpp>
-#include <toy_compiler/front_end/sem/grammar_type.hpp>
-#include <toy_compiler/front_end/sem/token_type.hpp>
+#include <toy_compiler/munster/grammar/actions.hpp>
+#include <toy_compiler/munster/grammar/grammar_type.hpp>
+#include <toy_compiler/munster/grammar/token_type.hpp>
 
 #include <array>
 #include <cstdint>
 #include <string_view>
 #include <variant>
 
-namespace fr::grammar
+namespace munster::grammar
 {
    /**
     * @brief All possible types of symbols that may be present during parsing.
@@ -49,19 +49,19 @@ namespace fr::grammar
       template <>
       struct convert_helper<symbol_type::terminal>
       {
-         using type = front::sem::token_type;
+         using type = token_type;
       };
 
       template <>
       struct convert_helper<symbol_type::non_terminal>
       {
-         using type = front::sem::grammar_type;
+         using type = grammar_type;
       };
 
       template <>
       struct convert_helper<symbol_type::action>
       {
-         using type = front::sem::action;
+         using type = action;
       };
 
       template <>
@@ -101,24 +101,20 @@ namespace fr::grammar
    class symbol
    {
    public:
-      using storage =
-         std::variant<bool, front::sem::token_type, front::sem::grammar_type, front::sem::action>;
+      using storage = std::variant<bool, token_type, grammar_type, action>;
 
       /**
        * @brief Construct a default **terminal** `grammar::symbol`
        */
-      static constexpr auto terminal() -> symbol { return {front::sem::token_type::e_max_size}; }
+      static constexpr auto terminal() -> symbol { return {token_type::e_max_size}; }
       /**
        * @brief Construct a default **non_terminal** `grammar::symbol`
        */
-      static constexpr auto non_terminal() -> symbol
-      {
-         return {front::sem::grammar_type::max_size};
-      }
+      static constexpr auto non_terminal() -> symbol { return {grammar_type::max_size}; }
       /**
        * @brief Construct a default **start** `grammar::symbol`
        */
-      static constexpr auto start() -> symbol { return {front::sem::grammar_type::start}; }
+      static constexpr auto start() -> symbol { return {grammar_type::start}; }
       /**
        * @brief Construct a default **stop** `grammar::symbol`
        */
@@ -131,45 +127,41 @@ namespace fr::grammar
        *
        * @param[in] value The `grammar::token_type` value to store
        */
-      constexpr symbol(front::sem::token_type value) : m_type{symbol_type::terminal}, m_data{value}
-      {}
+      constexpr symbol(token_type value) : m_type{symbol_type::terminal}, m_data{value} {}
       /**
        * @brief Construct a `grammar::symbol` of type `grammar::symbol_type::non_terminal` from a
        * `grammar::grammar_type` value
        *
        * @param[in] value The `sem::grammar_type` value to store
        */
-      constexpr symbol(front::sem::grammar_type value) :
-         m_type{symbol_type::non_terminal},
-         m_data{value}
-      {}
+      constexpr symbol(grammar_type value) : m_type{symbol_type::non_terminal}, m_data{value} {}
 
-      constexpr symbol(front::sem::action value) : m_type{symbol_type::action}, m_data{value} {}
+      constexpr symbol(action value) : m_type{symbol_type::action}, m_data{value} {}
 
       constexpr auto operator==(const symbol& symbol) const -> bool = default;
-      constexpr auto operator==(front::sem::token_type tok) const -> bool
+      constexpr auto operator==(token_type tok) const -> bool
       {
          if (m_type == symbol_type::terminal)
          {
-            return std::get<front::sem::token_type>(m_data) == tok;
+            return std::get<token_type>(m_data) == tok;
          }
 
          return false;
       }
-      constexpr auto operator==(front::sem::grammar_type tok) const -> bool
+      constexpr auto operator==(grammar_type tok) const -> bool
       {
          if (m_type == symbol_type::non_terminal)
          {
-            return std::get<front::sem::grammar_type>(m_data) == tok;
+            return std::get<grammar_type>(m_data) == tok;
          }
 
          return false;
       }
-      constexpr auto operator==(front::sem::action action) const -> bool
+      constexpr auto operator==(action ac) const -> bool
       {
          if (m_type == symbol_type::action)
          {
-            return std::get<front::sem::action>(m_data) == action;
+            return std::get<action>(m_data) == ac;
          }
 
          return false;
@@ -235,7 +227,7 @@ namespace fr::grammar
     *
     * @return The `grammar::token_type` value stored in `grammar::symbol`
     */
-   constexpr auto get_token_type(const symbol& s) -> front::sem::token_type
+   constexpr auto get_token_type(const symbol& s) -> token_type
    {
       return get<symbol_type::terminal>(s);
    }
@@ -249,23 +241,20 @@ namespace fr::grammar
     *
     * @return The `sem::grammar_type` value stored in `grammar::symbol`
     */
-   constexpr auto get_grammar_type(const symbol& s) -> front::sem::grammar_type
+   constexpr auto get_grammar_type(const symbol& s) -> grammar_type
    {
       return get<symbol_type::non_terminal>(s);
    }
 
-   constexpr auto get_action_type(const symbol& s) -> front::sem::action
-   {
-      return get<symbol_type::action>(s);
-   }
-} // namespace fr::grammar
+   constexpr auto get_action_type(const symbol& s) -> action { return get<symbol_type::action>(s); }
+} // namespace munster::grammar
 
 /**
  * @brief A specialization for using the `grammar::grammar_type` enum in the **fmt** & **spdlog**
  * libraries
  */
 template <>
-struct fmt::formatter<fr::grammar::symbol_type>
+struct fmt::formatter<munster::grammar::symbol_type>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -274,9 +263,9 @@ struct fmt::formatter<fr::grammar::symbol_type>
    }
 
    template <typename FormatContext>
-   auto format(fr::grammar::symbol_type type, FormatContext& ctx)
+   auto format(munster::grammar::symbol_type type, FormatContext& ctx)
    {
-      return fmt::format_to(ctx.out(), "{}", fr::grammar::to_string_view(type));
+      return fmt::format_to(ctx.out(), "{}", munster::grammar::to_string_view(type));
    }
 };
 
@@ -285,7 +274,7 @@ struct fmt::formatter<fr::grammar::symbol_type>
  * libraries
  */
 template <>
-struct fmt::formatter<fr::grammar::symbol>
+struct fmt::formatter<munster::grammar::symbol>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -294,21 +283,22 @@ struct fmt::formatter<fr::grammar::symbol>
    }
 
    template <typename FormatContext>
-   auto format(const fr::grammar::symbol& s, FormatContext& ctx)
+   auto format(const munster::grammar::symbol& s, FormatContext& ctx)
    {
-      if (fr::grammar::is_terminal(s))
+      if (munster::grammar::is_terminal(s))
       {
-         return fmt::format_to(ctx.out(), "{}({})", s.type(), fr::grammar::get_token_type(s));
+         return fmt::format_to(ctx.out(), "{}({})", s.type(), munster::grammar::get_token_type(s));
       }
 
-      if (fr::grammar::is_non_terminal(s))
+      if (munster::grammar::is_non_terminal(s))
       {
-         return fmt::format_to(ctx.out(), "{}({})", s.type(), fr::grammar::get_grammar_type(s));
+         return fmt::format_to(ctx.out(), "{}({})", s.type(),
+                               munster::grammar::get_grammar_type(s));
       }
 
-      if (fr::grammar::is_action(s))
+      if (munster::grammar::is_action(s))
       {
-         return fmt::format_to(ctx.out(), "{}({})", s.type(), fr::grammar::get_action_type(s));
+         return fmt::format_to(ctx.out(), "{}({})", s.type(), munster::grammar::get_action_type(s));
       }
 
       return fmt::format_to(ctx.out(), "{}", s.type());

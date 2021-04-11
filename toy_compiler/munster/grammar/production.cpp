@@ -1,5 +1,6 @@
 /**
- * @brief Runs tests on functions defined in grammar_type.hpp
+ * @file production.cpp
+ * @brief Implement the functions defined at production.hpp
  * @copyright Copyright (C) 2021 wmbat.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,25 +17,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include <doctest/doctest.h>
+#include <toy_compiler/munster/grammar/production.hpp>
 
-#include <toy_compiler/front_end/sem/grammar_type.hpp>
+#include <utility>
 
-#include <range/v3/view/iota.hpp>
-#include <range/v3/view/transform.hpp>
-
-TEST_SUITE("grammar/grammar_type.hpp test suite")
+namespace munster::grammar
 {
-   TEST_CASE("fmt::formatter - grammar_type")
-   {
-      using namespace front::sem;
+   production::production(grammar_type start, symbol_array tail, nullable_t nullable) :
+      m_start{start},
+      m_symbols{std::move(tail)},
+      m_is_nullable{nullable}
+   {}
 
-      namespace vi = ranges::views;
+   auto production::start() const -> grammar_type { return m_start; }
 
-      for (auto i : magic_enum::enum_values<grammar_type>())
-      {
-         CHECK(fmt::format("{}", i) == magic_enum::enum_name(i));
-      }
-   }
-}
+   auto production::tail() const -> const symbol_array& { return m_symbols; }
+   auto production::tail() -> symbol_array& { return m_symbols; }
+
+   auto production::nullable() const noexcept -> bool { return m_is_nullable.value(); }
+} // namespace munster::grammar

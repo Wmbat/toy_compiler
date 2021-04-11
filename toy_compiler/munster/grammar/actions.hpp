@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-namespace front::sem
+namespace munster::grammar
 {
    enum struct action
    {
@@ -72,7 +72,7 @@ namespace front::sem
  * libraries
  */
 template <>
-struct fmt::formatter<front::sem::action>
+struct fmt::formatter<munster::grammar::action>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -81,7 +81,7 @@ struct fmt::formatter<front::sem::action>
    }
 
    template <typename FormatContext>
-   auto format(front::sem::action action, FormatContext& ctx)
+   auto format(munster::grammar::action action, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "{}", magic_enum::enum_name(action));
    }

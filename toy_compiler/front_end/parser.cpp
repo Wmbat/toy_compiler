@@ -19,9 +19,9 @@
 
 #include <toy_compiler/front_end/parser.hpp>
 
-#include <toy_compiler/front_end/grammar/production.hpp>
-#include <toy_compiler/front_end/grammar/production_table.hpp>
-#include <toy_compiler/front_end/grammar/symbol.hpp>
+#include <toy_compiler/munster/grammar/production.hpp>
+#include <toy_compiler/munster/grammar/production_table.hpp>
+#include <toy_compiler/munster/grammar/symbol.hpp>
 
 #include <fmt/color.h>
 #include <fmt/core.h>
@@ -39,16 +39,13 @@
 
 #include <iostream>
 
-namespace fr
+namespace munster
 {
    namespace vi = ranges::views;
 
    auto construct_symbol_table() -> const grammar::production_table;
-   auto is_comment(const front::lex_item& item) -> bool;
-   auto is_epsilon(const grammar::symbol& s) -> bool
-   {
-      return s == front::sem::token_type::e_epsilon;
-   }
+   auto is_comment(const lex_item& item) -> bool;
+   auto is_epsilon(const grammar::symbol& s) -> bool { return s == grammar::token_type::e_epsilon; }
    auto pop(std::vector<grammar::symbol>& stack) -> grammar::symbol
    {
       auto temp = *(std::end(stack) - 1);
@@ -56,7 +53,7 @@ namespace fr
       return temp;
    }
 
-   auto check_follow_sets(front::sem::token_type type, const grammar::symbol& top) -> bool
+   auto check_follow_sets(grammar::token_type type, const grammar::symbol& top) -> bool
    {
       const auto tail =
          ranges::find(grammar::sets::follow, top, &grammar::production::start)->tail();
@@ -64,14 +61,14 @@ namespace fr
       return ranges::find(tail, type) != std::end(tail);
    }
 
-   auto contains(const grammar::symbol_array& tail, front::sem::token_type type) -> bool
+   auto contains(const grammar::symbol_array& tail, grammar::token_type type) -> bool
    {
       return ranges::find(tail, type) != std::end(tail);
    }
 
-   auto parse_impl(std::span<const front::lex_item> items, util::logger_wrapper log) -> parse_result
+   auto parse_impl(std::span<const lex_item> items, util::logger_wrapper log) -> parse_result
    {
-      static const auto table = fr::grammar::construct_production_table();
+      static const auto table = grammar::construct_production_table();
 
       std::vector<front::parse_error> errors;
       std::vector<munster::ast::node_ptr> nodes;
@@ -97,7 +94,7 @@ namespace fr
 
          if (grammar::is_terminal(top_symbol))
          {
-            if (!front::sem::is_eof(item_it->type) && top_symbol == item_it->type)
+            if (!grammar::is_eof(item_it->type) && top_symbol == item_it->type)
             {
                log.info("Parsed token: {}", *item_it);
 
@@ -108,7 +105,7 @@ namespace fr
             }
             else
             {
-               if (front::sem::is_eof(item_it->type))
+               if (grammar::is_eof(item_it->type))
                {
                   log.info("symbol {} popped from stack", top_symbol);
 
@@ -125,7 +122,7 @@ namespace fr
                                         .lexeme = fmt::format("{}", type),
                                         .line = {}});
 
-                  while (!front::sem::is_eof(item_it->type) && item_it->type != top_symbol)
+                  while (!grammar::is_eof(item_it->type) && item_it->type != top_symbol)
                   {
                      log.warning("\t{} : {}", top_symbol, *item_it);
 
@@ -153,8 +150,7 @@ namespace fr
             }
             else
             {
-               if (front::sem::is_eof(item_it->type) ||
-                   check_follow_sets(item_it->type, top_symbol))
+               if (grammar::is_eof(item_it->type) || check_follow_sets(item_it->type, top_symbol))
                {
                   log.info("symbol {} popped from stack", top_symbol);
                   stack.pop_back();
@@ -177,7 +173,7 @@ namespace fr
 
                   if (first_it->nullable())
                   {
-                     while (!front::sem::is_eof(item_it->type) &&
+                     while (!grammar::is_eof(item_it->type) &&
                             !contains(follow_it->tail(), item_it->type))
                      {
                         log.warning("\t{} : {}", top_symbol, *item_it);
@@ -187,7 +183,7 @@ namespace fr
                   }
                   else
                   {
-                     while (!front::sem::is_eof(item_it->type) &&
+                     while (!grammar::is_eof(item_it->type) &&
                             !contains(first_it->tail(), item_it->type))
                      {
                         log.warning("\t{} : {}", top_symbol, *item_it);
@@ -216,7 +212,7 @@ namespace fr
          final_derivations += fmt::format("{}{}\n", parsed_tokens, derivation);
       }
 
-      if (!front::sem::is_eof(item_it->type) || !std::empty(errors))
+      if (!grammar::is_eof(item_it->type) || !std::empty(errors))
       {
          return {.value = parse_status::error,
                  .ast = std::move(nodes.back()),
@@ -230,18 +226,17 @@ namespace fr
               .errors = monad::none};
    }
 
-   auto parse_items(std::span<const front::lex_item> items, util::logger_wrapper log)
-      -> parse_result
+   auto parse_items(std::span<const lex_item> items, util::logger_wrapper log) -> parse_result
    {
       const auto cleaned = items | vi::filter(ranges::not_fn(is_comment)) | ranges::to_vector;
 
       return parse_impl(cleaned, log);
    }
 
-   auto is_comment(const front::lex_item& item) -> bool
+   auto is_comment(const lex_item& item) -> bool
    {
       using namespace grammar;
-      return (item.type == front::sem::token_type::e_block_cmt) ||
-         (item.type == front::sem::token_type::e_line_cmt);
+      return (item.type == grammar::token_type::e_block_cmt) ||
+         (item.type == grammar::token_type::e_line_cmt);
    }
-} // namespace fr
+} // namespace munster

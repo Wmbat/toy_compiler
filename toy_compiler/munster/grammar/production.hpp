@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include <toy_compiler/front_end/grammar/symbol.hpp>
-#include <toy_compiler/front_end/sem/grammar_type.hpp>
-#include <toy_compiler/front_end/sem/token_type.hpp>
+#include <toy_compiler/munster/grammar/grammar_type.hpp>
+#include <toy_compiler/munster/grammar/symbol.hpp>
+#include <toy_compiler/munster/grammar/token_type.hpp>
 
 #include <toy_compiler/util/strong_type.hpp>
 
@@ -30,7 +30,7 @@
 #include <memory>
 #include <utility>
 
-namespace fr::grammar
+namespace munster::grammar
 {
    /**
     * @brief shorthand to designate a dynamic array containing `grammar::symbol`s with a small
@@ -58,15 +58,14 @@ namespace fr::grammar
        * @param[in] tail The resulting `grammar::symbol`s derived from the `start`.
        * @param[in] is_nullable Tell whether the rule may be null. **False** by default.
        */
-      production(front::sem::grammar_type start, symbol_array tail,
-                 nullable_t is_nullable = nullable_t{false});
+      production(grammar_type start, symbol_array tail, nullable_t is_nullable = nullable_t{false});
 
       auto operator==(const production& other) const -> bool = default;
 
       /**
        * @brief Access the start of the `grammar::rule`
        */
-      [[nodiscard]] auto start() const -> front::sem::grammar_type;
+      [[nodiscard]] auto start() const -> grammar_type;
 
       /**
        * @brief Access the tail of the `grammar::rule`
@@ -83,27 +82,25 @@ namespace fr::grammar
       [[nodiscard]] auto nullable() const noexcept -> bool;
 
    private:
-      front::sem::grammar_type m_start = front::sem::grammar_type::max_size;
+      grammar_type m_start = grammar_type::max_size;
       symbol_array m_symbols{};
       nullable_t m_is_nullable{false};
    };
 
    namespace sets
    {
-      using namespace front::sem;
-
       static const std::array<production, 54> first{{
          {grammar_type::add_op, {token_type::e_or, token_type::e_plus, token_type::e_minus}},
          {grammar_type::a_params,
-          {token_type::e_plus, token_type::e_minus, front::sem::token_type::e_id,
-           token_type::e_integer_lit, token_type::e_float_lit, token_type::e_str_lit,
-           token_type::e_left_paren, token_type::e_qmark, token_type::e_not},
+          {token_type::e_plus, token_type::e_minus, token_type::e_id, token_type::e_integer_lit,
+           token_type::e_float_lit, token_type::e_str_lit, token_type::e_left_paren,
+           token_type::e_qmark, token_type::e_not},
           nullable_t{true}},
          {grammar_type::a_params_tail, {token_type::e_comma}, nullable_t{true}},
          {grammar_type::arith_expr,
-          {token_type::e_plus, token_type::e_minus, front::sem::token_type::e_id,
-           token_type::e_integer_lit, token_type::e_float_lit, token_type::e_str_lit,
-           token_type::e_left_paren, token_type::e_qmark, token_type::e_not}},
+          {token_type::e_plus, token_type::e_minus, token_type::e_id, token_type::e_integer_lit,
+           token_type::e_float_lit, token_type::e_str_lit, token_type::e_left_paren,
+           token_type::e_qmark, token_type::e_not}},
          {grammar_type::arith_expr_tail,
           {token_type::e_plus, token_type::e_minus, token_type::e_or},
           nullable_t{true}},
@@ -117,18 +114,18 @@ namespace fr::grammar
           nullable_t{true}},
          {grammar_type::class_method, {token_type::e_double_colon}, nullable_t{true}},
          {grammar_type::expr,
-          {token_type::e_plus, token_type::e_minus, front::sem::token_type::e_id,
-           token_type::e_integer_lit, token_type::e_float_lit, token_type::e_str_lit,
-           token_type::e_left_paren, token_type::e_not}},
+          {token_type::e_plus, token_type::e_minus, token_type::e_id, token_type::e_integer_lit,
+           token_type::e_float_lit, token_type::e_str_lit, token_type::e_left_paren,
+           token_type::e_not}},
          {grammar_type::expr_tail,
           {token_type::e_equal, token_type::e_not_equal, token_type::e_less_than,
            token_type::e_greater_thane, token_type::e_less_equal_than,
            token_type::e_greater_equal_than},
           nullable_t{true}},
          {grammar_type::factor,
-          {token_type::e_plus, token_type::e_minus, front::sem::token_type::e_id,
-           token_type::e_integer_lit, token_type::e_float_lit, token_type::e_str_lit,
-           token_type::e_left_paren, token_type::e_qmark, token_type::e_not}},
+          {token_type::e_plus, token_type::e_minus, token_type::e_id, token_type::e_integer_lit,
+           token_type::e_float_lit, token_type::e_str_lit, token_type::e_left_paren,
+           token_type::e_qmark, token_type::e_not}},
          {grammar_type::f_params,
           {token_type::e_id, token_type::e_string, token_type::e_integer, token_type::e_float},
           nullable_t{true}},
@@ -362,14 +359,14 @@ namespace fr::grammar
           nullable_t{true}},
       }};
    } // namespace sets
-} // namespace fr::grammar
+} // namespace munster::grammar
 
 /**
  * @brief A specialization for using the `grammar::rule` class in the **fmt** & **spdlog**
  * libraries
  */
 template <>
-struct fmt::formatter<fr::grammar::production>
+struct fmt::formatter<munster::grammar::production>
 {
    template <typename ParseContex>
    constexpr auto parse(ParseContex& ctx)
@@ -378,7 +375,7 @@ struct fmt::formatter<fr::grammar::production>
    }
 
    template <typename FormatContext>
-   auto format(const fr::grammar::production& r, FormatContext& ctx)
+   auto format(const munster::grammar::production& r, FormatContext& ctx)
    {
       return fmt::format_to(ctx.out(), "{} -> {}", r.start(), r.tail());
    }

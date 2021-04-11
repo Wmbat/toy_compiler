@@ -19,7 +19,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <toy_compiler/front_end/grammar/production_table.hpp>
+#include <toy_compiler/munster/grammar/production_table.hpp>
 
 #include <range/v3/range/conversion.hpp>
 #include <range/v3/view/cartesian_product.hpp>
@@ -38,20 +38,20 @@ constexpr auto to(std::uint32_t i) -> T
 }
 
 constexpr auto to_key(std::tuple<std::uint32_t, std::uint32_t> t)
-   -> fr::grammar::production_table::key
+   -> munster::grammar::production_table::key
 {
-   return {to<front::sem::grammar_type>(std::get<0>(t)),
-           to<front::sem::token_type>(std::get<1>(t))};
+   return {to<munster::grammar::grammar_type>(std::get<0>(t)),
+           to<munster::grammar::token_type>(std::get<1>(t))};
 }
 
-auto create_table() -> fr::grammar::production_table
+auto create_table() -> munster::grammar::production_table
 {
-   using namespace fr::grammar;
+   using namespace munster::grammar;
 
    namespace vi = ranges::views;
 
-   const auto grammar_size = static_cast<std::uint32_t>(front::sem::grammar_type::max_size);
-   const auto token_size = static_cast<std::uint32_t>(front::sem::token_type::e_max_size);
+   const auto grammar_size = static_cast<std::uint32_t>(munster::grammar::grammar_type::max_size);
+   const auto token_size = static_cast<std::uint32_t>(munster::grammar::token_type::e_max_size);
 
    std::mt19937 rng(std::random_device{}());
    std::uniform_int_distribution<std::uint32_t> grammar_size_dist{0, grammar_size};
@@ -70,11 +70,11 @@ auto create_table() -> fr::grammar::production_table
       {
          if (i % 2 == 0)
          {
-            tail.push_back(to<front::sem::grammar_type>(grammar_size_dist(rng)));
+            tail.push_back(to<munster::grammar::grammar_type>(grammar_size_dist(rng)));
          }
          else
          {
-            tail.push_back(to<front::sem::token_type>(token_size_dist(rng)));
+            tail.push_back(to<munster::grammar::token_type>(token_size_dist(rng)));
          }
       }
 
@@ -85,18 +85,18 @@ auto create_table() -> fr::grammar::production_table
 }
 
 auto generate_tail(std::mt19937& rng, udist& arr_size_dist, udist& grammar_size_dist,
-                   udist& token_size_dist) -> fr::grammar::symbol_array
+                   udist& token_size_dist) -> munster::grammar::symbol_array
 {
-   fr::grammar::symbol_array tail{};
+   munster::grammar::symbol_array tail{};
    for (auto i : ranges::views::iota(0u, arr_size_dist(rng)))
    {
       if (i % 2 == 0)
       {
-         tail.push_back(to<front::sem::grammar_type>(grammar_size_dist(rng)));
+         tail.push_back(to<munster::grammar::grammar_type>(grammar_size_dist(rng)));
       }
       else
       {
-         tail.push_back(to<front::sem::token_type>(token_size_dist(rng)));
+         tail.push_back(to<munster::grammar::token_type>(token_size_dist(rng)));
       }
    }
    return tail;
@@ -106,13 +106,14 @@ TEST_SUITE("grammar/symbol_table.hpp test suite")
 {
    TEST_CASE("set_rule()")
    {
-      using namespace fr::grammar;
+      using namespace munster::grammar;
       production_table table;
 
       namespace vi = ranges::views;
 
-      const auto grammar_size = static_cast<std::uint32_t>(front::sem::grammar_type::max_size);
-      const auto token_size = static_cast<std::uint32_t>(front::sem::token_type::e_max_size);
+      const auto grammar_size =
+         static_cast<std::uint32_t>(munster::grammar::grammar_type::max_size);
+      const auto token_size = static_cast<std::uint32_t>(munster::grammar::token_type::e_max_size);
 
       std::mt19937 rng(std::random_device{}());
       std::uniform_int_distribution<std::uint32_t> arr_size_dist{0, 10};
@@ -135,12 +136,13 @@ TEST_SUITE("grammar/symbol_table.hpp test suite")
    }
    TEST_CASE("lookup()")
    {
-      using namespace fr::grammar;
+      using namespace munster::grammar;
 
       namespace vi = ranges::views;
 
-      const auto grammar_size = static_cast<std::uint32_t>(front::sem::grammar_type::max_size);
-      const auto token_size = static_cast<std::uint32_t>(front::sem::token_type::e_max_size);
+      const auto grammar_size =
+         static_cast<std::uint32_t>(munster::grammar::grammar_type::max_size);
+      const auto token_size = static_cast<std::uint32_t>(munster::grammar::token_type::e_max_size);
 
       production_table table = create_table();
 
@@ -156,12 +158,13 @@ TEST_SUITE("grammar/symbol_table.hpp test suite")
    }
    TEST_CASE("lookup() const")
    {
-      using namespace fr::grammar;
+      using namespace munster::grammar;
 
       namespace vi = ranges::views;
 
-      const auto grammar_size = static_cast<std::uint32_t>(front::sem::grammar_type::max_size);
-      const auto token_size = static_cast<std::uint32_t>(front::sem::token_type::e_max_size);
+      const auto grammar_size =
+         static_cast<std::uint32_t>(munster::grammar::grammar_type::max_size);
+      const auto token_size = static_cast<std::uint32_t>(munster::grammar::token_type::e_max_size);
 
       const production_table table = create_table();
 

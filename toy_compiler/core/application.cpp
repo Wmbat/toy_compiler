@@ -75,10 +75,10 @@ application::application(std::span<const std::string_view> args, util::logger_wr
       const auto filepath = fs::path{filename};
       if (filepath.extension() == ".src")
       {
-         if (auto maybe = front::lex_file(filepath, m_logger))
+         if (auto maybe = munster::lex_file(filepath, m_logger))
          {
-            const auto result = fr::parse_items(maybe.value(), m_logger);
-            if (result.value == fr::parse_status::error)
+            const auto result = munster::parse_items(maybe.value(), m_logger);
+            if (result.value == munster::parse_status::error)
             {
                for (auto& err : result.errors.value())
                {
@@ -107,7 +107,6 @@ application::application(std::span<const std::string_view> args, util::logger_wr
 
                auto* root_table = match(st_variant)(
                   pattern(as<symbol_table_visitor>(arg)) = [&](symbol_table_visitor& vis) {
-                     write_symbol_tables_to_file(filepath, vis.get_root_table());
                      print_errors(vis.get_errors(), filepath);
 
                      return vis.get_root_table();
@@ -120,6 +119,8 @@ application::application(std::span<const std::string_view> args, util::logger_wr
                   pattern(as<type_checking_visitor>(arg)) = [&](type_checking_visitor& vis) {
                      print_errors(vis.get_errors(), filepath);
                   });
+
+               write_symbol_tables_to_file(filepath, root_table);
             }
          }
          else
@@ -215,12 +216,12 @@ void application::write_symbol_tables_to_file(const std::filesystem::path& path,
    st_pre_order_traversal(root, output_file);
 }
 
-auto application::fancy_lexical_error_type(front::sem::token_type value) const -> std::string
+auto application::fancy_lexical_error_type(munster::grammar::token_type value) const -> std::string
 {
    // NOLINTNEXTLINE
-   assert(front::sem::is_token_invalid(value) && "Only invalid types should be passed");
+   assert(munster::grammar::is_token_invalid(value) && "Only invalid types should be passed");
 
-   using namespace front::sem;
+   using namespace munster::grammar;
 
    if (value == token_type::e_invalid_char)
    {

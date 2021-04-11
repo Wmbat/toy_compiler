@@ -2,16 +2,11 @@
 
 #include <toy_compiler/munster/visitor/visitor.hpp>
 
-#include <stack>
-#include <vector>
-
 namespace munster
 {
-   class type_checking_visitor : public visitor<type_checking_visitor>
+   class code_gen_visitor : public visitor<code_gen_visitor>
    {
    public:
-      type_checking_visitor(symbol_table* p_root);
-
       void visit(const ast::translation_unit_decl&);
 
       void visit(const ast::compound_class_decl&);
@@ -52,24 +47,6 @@ namespace munster
       void visit(const ast::main_decl& node);
 
    private:
-      void check_function_decl(const ast::func_body_decl*, std::span<symbol_table*> tables);
-
-      void handle_assign_op(const ast::assign_op* assign, std::span<symbol_table*> tables);
-      auto handle_var_expr(const ast::var_expr* var_expr, std::span<symbol_table*> tables)
-         -> std::string_view;
-      auto handle_dot_operator(const ast::dot_op* dot, std::span<symbol_table*> tables)
-         -> std::string_view;
-      auto handle_func_expr(const ast::func_expr* func_expr, std::span<symbol_table*> tables);
-
-      auto handle_function_expr(const ast::func_expr*) -> std::string;
-      auto handle_dot_operator(const ast::dot_op*) -> std::string;
-
-   private:
-      inline static std::int64_t m_temporary_counter = 0; // NOLINT
-
-      symbol_table* mp_root{};
-
-      std::vector<symbol_table*> m_tables;
-      std::vector<symbol*> m_symbols;
+      std::string moon_code_output;
    };
 } // namespace munster

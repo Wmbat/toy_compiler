@@ -19,7 +19,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <toy_compiler/front_end/grammar/production.hpp>
+#include <toy_compiler/munster/grammar/production.hpp>
 
 #include <range/v3/view/iota.hpp>
 #include <range/v3/view/transform.hpp>
@@ -32,13 +32,13 @@ constexpr auto to(std::uint32_t i) -> T
    return static_cast<T>(i);
 }
 
+using namespace munster::grammar;
+namespace vi = ranges::views;
+
 TEST_SUITE("grammar/production.hpp test suite")
 {
    TEST_CASE("empty production")
    {
-      using namespace fr::grammar;
-      using namespace front::sem;
-
       production r1{};
 
       CHECK(r1.start() == grammar_type::max_size);
@@ -46,11 +46,6 @@ TEST_SUITE("grammar/production.hpp test suite")
    }
    TEST_CASE("normal production")
    {
-      using namespace fr::grammar;
-      using namespace front::sem;
-
-      namespace vi = ranges::views;
-
       const auto grammar_size = static_cast<std::uint32_t>(grammar_type::max_size);
 
       std::mt19937 rng(std::random_device{}());
@@ -81,11 +76,6 @@ TEST_SUITE("grammar/production.hpp test suite")
    }
    TEST_CASE("fmt::formatter - production")
    {
-      using namespace fr::grammar;
-      using namespace front::sem;
-
-      namespace vi = ranges::views;
-
       const auto grammar_size = static_cast<std::uint32_t>(grammar_type::max_size);
 
       std::mt19937 rng(std::random_device{}());

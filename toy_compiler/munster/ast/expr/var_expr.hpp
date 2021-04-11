@@ -8,6 +8,8 @@ namespace munster::ast
    {
    public:
       var_expr(node_ptr id, node_ptr compound_array_indices);
+      
+      void accept(visitor_variant &visitor) const override;
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };
