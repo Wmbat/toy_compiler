@@ -34,27 +34,49 @@ namespace munster
       e_temporary
    };
 
+   enum struct symbol_table_type
+   {
+      e_undefined,
+      e_translation_unit,
+      e_class,
+      e_func,
+      e_main
+   };
+
    class symbol_table;
+
+   struct symbol_create_info
+   {
+      std::string name;
+      symbol_type kind;
+      source_location location;
+
+      std::int64_t size{0};
+      std::string type{""};
+      std::unique_ptr<symbol_table> link{};
+   };
 
    class symbol
    {
    public:
       symbol();
-      symbol(std::string name, symbol_type kind, const source_location& location,
-             std::string type = "", std::unique_ptr<symbol_table> link = {});
+      symbol(symbol_create_info&& info);
 
       auto name() const noexcept -> std::string_view;           // NOLINT
       auto type() const noexcept -> std::string_view;           // NOLINT
       auto kind() const noexcept -> symbol_type;                // NOLINT
+      auto size() const noexcept -> std::int64_t;               // NOLINT
       auto link() const noexcept -> symbol_table*;              // NOLINT
       auto location() const noexcept -> const source_location&; // NOLINT
 
+      void update_size(std::int64_t size);
       void set_table(std::unique_ptr<symbol_table> table);
 
    private:
       std::string m_name{};
       std::string m_type{};
       symbol_type m_kind{};
+      std::int64_t m_size{};
 
       std::unique_ptr<symbol_table> m_link;
 
@@ -122,9 +144,10 @@ namespace munster
 
    public:
       symbol_table() = default;
-      symbol_table(std::string name);
+      symbol_table(std::string name, symbol_table_type kind);
 
-      auto name() const noexcept -> std::string_view; // NOLINT
+      auto name() const noexcept -> std::string_view;  // NOLINT
+      auto kind() const noexcept -> symbol_table_type; // NOLINT
       auto symbols() const -> const std::unordered_map<std::string, symbol>&;
 
       auto insert(const std::string& name, symbol&& value) -> insert_kv_result;
@@ -133,6 +156,7 @@ namespace munster
 
    private:
       std::string m_name = "default";
+      symbol_table_type m_kind{symbol_table_type::e_undefined};
 
       std::unordered_map<std::string, symbol> m_symbols;
    };
@@ -183,7 +207,8 @@ struct fmt::formatter<munster::symbol_table>
    template <typename FormatContext>
    auto format(const munster::symbol_table& s, FormatContext& ctx)
    {
-      return fmt::format_to(ctx.out(), "symbol_table(\n\tname={}, \n\tvalues={})", s.name(),
+      return fmt::format_to(ctx.out(), "symbol_table(\n\tname={}, \n\tkind={}, \n\tvalues={})",
+                            s.name(), magic_enum::enum_name(s.kind()).substr(2),
                             fmt::join(s.symbols() | ranges::views::values, "\n\t       "));
    }
 };

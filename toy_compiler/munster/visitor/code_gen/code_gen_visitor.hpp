@@ -22,6 +22,11 @@ namespace munster
       void visit(const ast::func_head_decl&);
       void visit(const ast::func_body_decl&);
 
+      void visit(const ast::main_decl& node);
+
+      void visit(const ast::compound_variable_decl& node);
+      void visit(const ast::variable_decl& node);
+
       void visit(const ast::func_expr& node);
       void visit(const ast::var_expr& node);
       void visit(const ast::float_expr& node);
@@ -41,10 +46,9 @@ namespace munster
 
       void visit(const ast::dot_op& node);
       void visit(const ast::assign_op& node);
-
-      void visit(const ast::compound_variable_decl& node);
-      void visit(const ast::variable_decl& node);
-      void visit(const ast::main_decl& node);
+      void visit(const ast::add_op& node);
+      void visit(const ast::mult_op& node);
+      void visit(const ast::rel_op& node);
 
    private:
       std::string moon_code_output;

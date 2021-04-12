@@ -14,10 +14,12 @@
 #include <toy_compiler/munster/ast/decl/id_decl.hpp>
 #include <toy_compiler/munster/ast/decl/inheritance_decl.hpp>
 #include <toy_compiler/munster/ast/decl/location_decl.hpp>
+#include <toy_compiler/munster/ast/decl/main_decl.hpp>
 #include <toy_compiler/munster/ast/decl/member_func_decl.hpp>
 #include <toy_compiler/munster/ast/decl/member_var_decl.hpp>
 #include <toy_compiler/munster/ast/decl/translation_unit_decl.hpp>
 #include <toy_compiler/munster/ast/decl/type_decl.hpp>
+#include <toy_compiler/munster/ast/decl/variable_decl.hpp>
 #include <toy_compiler/munster/ast/expr/compound_param_expr_decl.hpp>
 #include <toy_compiler/munster/ast/expr/compound_var_expr_decl.hpp>
 #include <toy_compiler/munster/ast/expr/float_expr.hpp>
@@ -366,14 +368,6 @@ namespace munster::ast
          return std::make_unique<compound_variable_decl>(std::vector<node_ptr>{});
       }
 
-      if (action == grammar::action::e_main_decl)
-      {
-         node_ptr func_body = pop(recs);
-         node_ptr id = pop(recs);
-
-         return std::make_unique<main_decl>(std::move(id), std::move(func_body));
-      }
-
       if (action == grammar::action::e_rel_op)
       {
          node_ptr term_1 = pop(recs);
@@ -688,6 +682,12 @@ namespace munster::ast
          pattern(grammar::action::e_dot_decl) = [&]() -> node_ptr {
             return std::make_unique<dot_decl>(item.lexeme, item.pos);
          },
+         pattern(grammar::action::e_main_decl) = [&]() -> node_ptr {
+            auto func_body = node_cast<func_body_decl>(pop(recs));
+            auto id = node_cast<id_decl>(pop(recs));
+
+            return std::make_unique<main_decl>(std::move(id), std::move(func_body));
+         },
          pattern(grammar::action::e_func_expr) = [&]() -> node_ptr {
             auto compound_param_expr = node_cast<compound_parameter_expr_decl>(pop(recs));
             auto id = node_cast<id_decl>(pop(recs));
@@ -720,9 +720,5 @@ namespace munster::ast
          pattern(_) = [&]() -> node_ptr {
             return nullptr;
          });
-
-      if (action == grammar::action::e_func_expr)
-      {
-      }
    }
 } // namespace munster::ast

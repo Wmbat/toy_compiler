@@ -3,8 +3,10 @@
 #include <toy_compiler/munster/ast/decl/func_body_decl.hpp>
 #include <toy_compiler/munster/ast/decl/func_decl.hpp>
 #include <toy_compiler/munster/ast/decl/func_head_decl.hpp>
+#include <toy_compiler/munster/ast/decl/main_decl.hpp>
 #include <toy_compiler/munster/ast/decl/member_func_decl.hpp>
 #include <toy_compiler/munster/ast/decl/member_var_decl.hpp>
+#include <toy_compiler/munster/ast/decl/variable_decl.hpp>
 #include <toy_compiler/munster/ast/expr/float_expr.hpp>
 #include <toy_compiler/munster/ast/expr/func_expr.hpp>
 #include <toy_compiler/munster/ast/expr/integer_expr.hpp>
@@ -220,8 +222,11 @@ namespace munster
       auto* func_table = m_tables.back();
 
       const auto name = fmt::format("temp{}", m_temporary_counter++);
-      const auto res =
-         func_table->insert(name, symbol{name, symbol_type::e_temporary, node.location(), "float"});
+      const auto res = func_table->insert(name,
+                                          symbol{{.name = name,
+                                                  .kind = symbol_type::e_temporary,
+                                                  .location = node.location(),
+                                                  .type = "float"}});
 
       m_symbols.push_back(&res.val());
    }
@@ -230,8 +235,11 @@ namespace munster
       auto* func_table = m_tables.back();
 
       const auto name = fmt::format("temp{}", m_temporary_counter++);
-      const auto res = func_table->insert(
-         name, symbol{name, symbol_type::e_temporary, node.location(), "integer"});
+      const auto res = func_table->insert(name,
+                                          symbol{{.name = name,
+                                                  .kind = symbol_type::e_temporary,
+                                                  .location = node.location(),
+                                                  .type = "integer"}});
 
       m_symbols.push_back(&res.val());
    }
@@ -240,51 +248,18 @@ namespace munster
       auto* func_table = m_tables.back();
 
       const auto name = fmt::format("temp{}", m_temporary_counter++);
-      const auto res = func_table->insert(
-         name, symbol{name, symbol_type::e_temporary, node.location(), "string"});
+      const auto res = func_table->insert(name,
+                                          symbol{{.name = name,
+                                                  .kind = symbol_type::e_temporary,
+                                                  .location = node.location(),
+                                                  .type = "string"}});
 
       m_symbols.push_back(&res.val());
    }
 
    void type_checking_visitor::visit(const ast::func_stmt& /*node*/) { fmt::print("func_stmt"); }
    void type_checking_visitor::visit(const ast::compound_stmt& /*node*/) {}
-   void type_checking_visitor::visit(const ast::assign_stmt& /*node*/)
-   {
-      /*
-      // TODO: remove
-      if (std::size(m_symbols) != 2)
-      {
-         if (!std::empty(m_symbols))
-         {
-            m_symbols.pop_back();
-         }
-
-         return;
-      }
-
-      auto* p_left = *(std::end(m_symbols) - 2);
-      auto* p_right = *(std::end(m_symbols) - 1);
-
-      if (p_left && p_right)
-      {
-         const std::string left_type = get_variable_type(p_left);
-         const std::string right_type = get_variable_type(p_right);
-
-         if (left_type != right_type)
-         {
-            m_errors.push_back( parse_error{
-               .type =  parse_error_type::e_semantic_error,
-               .pos = node.children()[0]->location(),
-               .lexeme = fmt::format("variable '{}' of type '{}' cannot be assigned to "
-                                     "variable '{}' of type '{}'",
-                                     p_right->name(), right_type, p_left->name(), left_type)});
-         }
-      }
-
-      m_symbols.pop_back();
-      m_symbols.pop_back();
-      */
-   }
+   void type_checking_visitor::visit(const ast::assign_stmt& /*node*/) {}
    void type_checking_visitor::visit(const ast::if_stmt& /*node*/) {}
    void type_checking_visitor::visit(const ast::while_stmt& /*node*/) {}
    void type_checking_visitor::visit(const ast::read_stmt& /*node*/) {}
@@ -376,16 +351,22 @@ namespace munster
                                      p_left_symbol->name(), p_right_symbol->name(), left_type,
                                      right_type, node.lexeme())});
 
-            const auto res = p_func_table->insert(
-               name, symbol{name, symbol_type::e_temporary, node.location(), "type_error"});
+            const auto res = p_func_table->insert(name,
+                                                  symbol{{.name = name,
+                                                          .kind = symbol_type::e_temporary,
+                                                          .location = node.location(),
+                                                          .type = "type_error"}});
 
             p_res_symbol = &res.val();
          }
          else
          {
             const auto name = fmt::format("temp{}", m_temporary_counter++);
-            const auto res = p_func_table->insert(
-               name, symbol{name, symbol_type::e_temporary, node.location(), right_type});
+            const auto res = p_func_table->insert(name,
+                                                  symbol{{.name = name,
+                                                          .kind = symbol_type::e_temporary,
+                                                          .location = node.location(),
+                                                          .type = right_type}});
 
             p_res_symbol = &res.val();
          }
@@ -419,16 +400,22 @@ namespace munster
                                      p_left_symbol->name(), p_right_symbol->name(), left_type,
                                      right_type, node.lexeme())});
 
-            const auto res = p_func_table->insert(
-               name, symbol{name, symbol_type::e_temporary, node.location(), "type_error"});
+            const auto res = p_func_table->insert(name,
+                                                  symbol{{.name = name,
+                                                          .kind = symbol_type::e_temporary,
+                                                          .location = node.location(),
+                                                          .type = "type_error"}});
 
             p_res_symbol = &res.val();
          }
          else
          {
             const auto name = fmt::format("temp{}", m_temporary_counter++);
-            const auto res = p_func_table->insert(
-               name, symbol{name, symbol_type::e_temporary, node.location(), right_type});
+            const auto res = p_func_table->insert(name,
+                                                  symbol{{.name = name,
+                                                          .kind = symbol_type::e_temporary,
+                                                          .location = node.location(),
+                                                          .type = right_type}});
 
             p_res_symbol = &res.val();
          }
@@ -441,8 +428,11 @@ namespace munster
       else
       {
          const auto name = fmt::format("temp{}", m_temporary_counter++);
-         const auto res = p_func_table->insert(
-            name, symbol{name, symbol_type::e_temporary, node.location(), "type_error"});
+         const auto res = p_func_table->insert(name,
+                                               symbol{{.name = name,
+                                                       .kind = symbol_type::e_temporary,
+                                                       .location = node.location(),
+                                                       .type = "type_error"}});
 
          m_symbols.push_back(&res.val());
       }
@@ -472,16 +462,22 @@ namespace munster
                                      p_left_symbol->name(), p_right_symbol->name(), left_type,
                                      right_type, node.lexeme())});
 
-            const auto res = p_func_table->insert(
-               name, symbol{name, symbol_type::e_temporary, node.location(), "type_error"});
+            const auto res = p_func_table->insert(name,
+                                                  symbol{{.name = name,
+                                                          .kind = symbol_type::e_temporary,
+                                                          .location = node.location(),
+                                                          .type = "type_error"}});
 
             p_res_symbol = &res.val();
          }
          else
          {
             const auto name = fmt::format("temp{}", m_temporary_counter++);
-            const auto res = p_func_table->insert(
-               name, symbol{name, symbol_type::e_temporary, node.location(), right_type});
+            const auto res = p_func_table->insert(name,
+                                                  symbol{{.name = name,
+                                                          .kind = symbol_type::e_temporary,
+                                                          .location = node.location(),
+                                                          .type = right_type}});
 
             p_res_symbol = &res.val();
          }
@@ -494,8 +490,11 @@ namespace munster
       else
       {
          const auto name = fmt::format("temp{}", m_temporary_counter++);
-         const auto res = p_func_table->insert(
-            name, symbol{name, symbol_type::e_temporary, node.location(), "type_error"});
+         const auto res = p_func_table->insert(name,
+                                               symbol{{.name = name,
+                                                       .kind = symbol_type::e_temporary,
+                                                       .location = node.location(),
+                                                       .type = "type_error"}});
 
          m_symbols.push_back(&res.val());
       }
@@ -525,16 +524,22 @@ namespace munster
                                      p_left_symbol->name(), p_right_symbol->name(), left_type,
                                      right_type, node.lexeme())});
 
-            const auto res = p_func_table->insert(
-               name, symbol{name, symbol_type::e_temporary, node.location(), "type_error"});
+            const auto res = p_func_table->insert(name,
+                                                  symbol{{.name = name,
+                                                          .kind = symbol_type::e_temporary,
+                                                          .location = node.location(),
+                                                          .type = "type_error"}});
 
             p_res_symbol = &res.val();
          }
          else
          {
             const auto name = fmt::format("temp{}", m_temporary_counter++);
-            const auto res = p_func_table->insert(
-               name, symbol{name, symbol_type::e_temporary, node.location(), right_type});
+            const auto res = p_func_table->insert(name,
+                                                  symbol{{.name = name,
+                                                          .kind = symbol_type::e_temporary,
+                                                          .location = node.location(),
+                                                          .type = right_type}});
 
             p_res_symbol = &res.val();
          }
@@ -547,8 +552,11 @@ namespace munster
       else
       {
          const auto name = fmt::format("temp{}", m_temporary_counter++);
-         const auto res = p_func_table->insert(
-            name, symbol{name, symbol_type::e_temporary, node.location(), "type_error"});
+         const auto res = p_func_table->insert(name,
+                                               symbol{{.name = name,
+                                                       .kind = symbol_type::e_temporary,
+                                                       .location = node.location(),
+                                                       .type = "type_error"}});
 
          m_symbols.push_back(&res.val());
       }

@@ -1,0 +1,67 @@
+#include <toy_compiler/munster/ast/decl/variable_decl.hpp>
+
+#include <mpark/patterns.hpp>
+
+namespace munster::ast
+{
+   variable_decl::variable_decl(node_ptr type, node_ptr id, node_ptr compound_array_decl) :
+      decl{std::string{id->lexeme()}, type->location()},
+      m_type(type->lexeme())
+   {
+      if (!std::empty(compound_array_decl->children()))
+      {
+         make_child(std::move(compound_array_decl));
+      }
+   }
+
+   auto variable_decl::type() const -> std::string_view { return m_type; }
+   auto variable_decl::to_string() const -> std::string
+   {
+      return fmt::format("variable_decl <line:{}, col:{}> {} '{}'", location().line,
+                         location().column, lexeme(), m_type);
+   }
+
+   void variable_decl::accept(visitor_variant& visitor) const
+   {
+      using namespace mpark::patterns;
+
+      for (const auto& child : children())
+      {
+         child->accept(visitor);
+      }
+
+      const auto visit = [this](auto& vis) {
+         vis(*this);
+      };
+
+      match(visitor)(pattern(as<symbol_table_visitor>(arg)) = visit,
+                     pattern(as<type_checking_visitor>(arg)) = visit);
+   }
+
+   compound_variable_decl::compound_variable_decl(std::vector<node_ptr>&& variables)
+   {
+      make_family<variable_decl>(std::move(variables));
+   }
+
+   void compound_variable_decl::accept(visitor_variant& visitor) const
+   {
+      using namespace mpark::patterns;
+
+      for (const auto& child : children())
+      {
+         child->accept(visitor);
+      }
+
+      const auto visit = [this](auto& vis) {
+         vis(*this);
+      };
+
+      match(visitor)(pattern(as<symbol_table_visitor>(arg)) = visit,
+                     pattern(as<type_checking_visitor>(arg)) = visit);
+   }
+
+   auto compound_variable_decl::to_string() const -> std::string
+   {
+      return fmt::format("compound_variable_decl");
+   }
+} // namespace munster::ast

@@ -111,6 +111,8 @@ application::application(std::span<const std::string_view> args, util::logger_wr
                      return vis.get_root_table();
                   });
 
+               write_symbol_tables_to_file(filepath, root_table);
+
                munster::ast::visitor_variant tc_variant{type_checking_visitor{root_table}};
                result.ast->accept(tc_variant);
 
@@ -118,8 +120,6 @@ application::application(std::span<const std::string_view> args, util::logger_wr
                   pattern(as<type_checking_visitor>(arg)) = [&](type_checking_visitor& vis) {
                      print_errors(vis.get_errors(), filepath);
                   });
-
-               write_symbol_tables_to_file(filepath, root_table);
             }
          }
          else

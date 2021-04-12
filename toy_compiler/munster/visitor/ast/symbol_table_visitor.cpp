@@ -7,9 +7,11 @@
 #include <toy_compiler/munster/ast/decl/func_decl.hpp>
 #include <toy_compiler/munster/ast/decl/func_head_decl.hpp>
 #include <toy_compiler/munster/ast/decl/inheritance_decl.hpp>
+#include <toy_compiler/munster/ast/decl/main_decl.hpp>
 #include <toy_compiler/munster/ast/decl/member_func_decl.hpp>
 #include <toy_compiler/munster/ast/decl/member_var_decl.hpp>
 #include <toy_compiler/munster/ast/decl/translation_unit_decl.hpp>
+#include <toy_compiler/munster/ast/decl/variable_decl.hpp>
 
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
 
@@ -20,12 +22,16 @@
 #include <range/v3/view/filter.hpp>
 #include <range/v3/view/map.hpp>
 #include <range/v3/view/move.hpp>
+#include <range/v3/view/reverse.hpp>
 #include <range/v3/view/take_while.hpp>
 #include <range/v3/view/transform.hpp>
+
+#include <mpark/patterns.hpp>
 
 #include <map>
 
 namespace vi = ranges::views;
+using namespace mpark::patterns;
 
 namespace munster
 {
@@ -44,7 +50,8 @@ namespace munster
 
    void symbol_table_visitor::visit(const ast::translation_unit_decl& tl)
    {
-      auto table = std::make_unique<symbol_table>("translation unit");
+      auto table =
+         std::make_unique<symbol_table>("translation unit", symbol_table_type::e_translation_unit);
 
       for (const auto& node : tl.children()[0]->children())
       {
@@ -54,8 +61,12 @@ namespace munster
 
          std::iter_swap(ranges::find(m_tables, name, &symbol_table::name), std::end(m_tables) - 1);
 
-         auto result = table->insert(
-            name, symbol{name, symbol_type::e_class, value->location(), "", pop_back(m_tables)});
+         auto result = table->insert(name,
+                                     symbol{{.name = name,
+                                             .kind = symbol_type::e_class,
+                                             .location = value->location(),
+                                             .type = "",
+                                             .link = pop_back(m_tables)}});
 
          if (!result.is_inserted())
          {
@@ -86,9 +97,12 @@ namespace munster
 
             // crosscheck params
 
-            auto result = table->insert(
-               key,
-               symbol{name, symbol_type::e_function, func->location(), type, pop_back(m_tables)});
+            auto result = table->insert(key,
+                                        symbol{{.name = name,
+                                                .kind = symbol_type::e_function,
+                                                .location = func->location(),
+                                                .type = type,
+                                                .link = pop_back(m_tables)}});
 
             if (!result.is_inserted())
             {
@@ -108,8 +122,12 @@ namespace munster
       {
          std::iter_swap(it, std::end(m_tables) - 1);
 
-         auto result = table->insert(
-            name, symbol{name, symbol_type::e_main, main_func->location(), "", pop_back(m_tables)});
+         auto result = table->insert(name,
+                                     symbol{{.name = name,
+                                             .kind = symbol_type::e_main,
+                                             .location = main_func->location(),
+                                             .type = "",
+                                             .link = pop_back(m_tables)}});
 
          if (!result.is_inserted())
          {
@@ -132,27 +150,19 @@ namespace munster
    void symbol_table_visitor::visit(const ast::class_decl& node_t)
    {
       const std::string table_name{node_t.lexeme()};
-      auto table = std::make_unique<symbol_table>(table_name);
+      auto table = std::make_unique<symbol_table>(table_name, symbol_table_type::e_class);
 
-      // clang-format off
-      auto member_functions = m_symbols 
-         | vi::filter([](symbol_kv& s) { 
-               return s.val.kind() == symbol_type::e_member_function;
-            }) 
-         | vi::move;
-      auto member_variables = m_symbols 
-         | vi::filter([](symbol_kv& s) {
-               return s.val.kind() == symbol_type::e_member_variable;
-            }) 
-         | vi::move;
-      auto inheritance = m_symbols 
-         | vi::filter([](symbol_kv& s) {
-               return s.val.kind() == symbol_type::e_inheritance;
-            }) 
-         | vi::move;
-      // clang-format on
+      const auto is_mem_func = [](symbol_kv& s) {
+         return s.val.kind() == symbol_type::e_member_function;
+      };
+      const auto is_mem_var = [](symbol_kv& s) {
+         return s.val.kind() == symbol_type::e_member_variable;
+      };
+      const auto is_inheritance = [](symbol_kv& s) {
+         return s.val.kind() == symbol_type::e_inheritance;
+      };
 
-      for (auto [key, sym] : inheritance)
+      for (auto [key, sym] : m_symbols | vi::filter(is_inheritance) | vi::move)
       {
          const std::string name{sym.name()};
          if (ranges::find(m_tables, name, &symbol_table::name) != std::end(m_tables))
@@ -171,7 +181,7 @@ namespace munster
          }
       }
 
-      for (auto [key, sym] : member_variables)
+      for (auto [key, sym] : m_symbols | vi::filter(is_mem_var) | vi::move)
       {
          const auto name = sym.name();
          const auto location = sym.location();
@@ -190,7 +200,7 @@ namespace munster
       }
 
       std::map<std::string_view, int> duplicates_counter;
-      for (auto [key, sym] : member_functions)
+      for (auto [key, sym] : m_symbols | vi::filter(is_mem_func) | vi::move)
       {
          const auto name = sym.name();
          const auto type = sym.type();
@@ -221,30 +231,6 @@ namespace munster
          }
       }
 
-      /*
-      for (const auto& node : node_t.children())
-      {
-         if (dynamic_cast<ast::compound_member_decl*>(node.get()))
-         {
-            for (const auto& member : node->children())
-            {
-               const bool is_func = dynamic_cast<ast::member_func_decl*>(member.get());
-
-               if (is_func)
-               {
-                  const auto* func = to<ast::member_func_decl>(member);
-
-                  const std::string name{func->lexeme()};
-                  const auto type = fmt::format("{} '{} ({})'", func->visibility(),
-                                                func->return_type(), func->params_string());
-                  const auto key = fmt::format("{} '{} ({})'", func->lexeme(), func->return_type(),
-                                               func->params_string());
-               }
-            }
-         }
-      }
-      */
-
       m_symbols.clear();
       m_tables.push_back(std::move(table));
    }
@@ -253,7 +239,9 @@ namespace munster
    {
       const std::string name{node.lexeme()};
       m_symbols.push_back(
-         {.key = name, .val = symbol{name, symbol_type::e_inheritance, node.location()}});
+         {.key = name,
+          .val = symbol{
+             {.name = name, .kind = symbol_type::e_inheritance, .location = node.location()}}});
    }
    void symbol_table_visitor::visit(const ast::compound_member_decl&) {}
    void symbol_table_visitor::visit(const ast::member_func_decl& node)
@@ -264,16 +252,23 @@ namespace munster
       const auto key =
          fmt::format("{} '{} ({})'", node.lexeme(), node.return_type(), node.params_string());
 
-      m_symbols.push_back(
-         {.key = key, .val = symbol{name, symbol_type::e_member_variable, node.location(), type}});
+      m_symbols.push_back({.key = key,
+                           .val = symbol{{.name = name,
+                                          .kind = symbol_type::e_member_variable,
+                                          .location = node.location(),
+                                          .type = type}}});
    }
    void symbol_table_visitor::visit(const ast::member_var_decl& node)
    {
       const std::string name{node.lexeme()};
       const auto type = fmt::format("{} {}", node.visibility(), node.type());
 
-      m_symbols.push_back(
-         {.key = name, .val = symbol{name, symbol_type::e_member_variable, node.location(), type}});
+      m_symbols.push_back({.key = name,
+                           .val = symbol{{.name = name,
+                                          .kind = symbol_type::e_member_variable,
+                                          .location = node.location(),
+                                          .size = 0,
+                                          .type = type}}});
    }
 
    void symbol_table_visitor::visit(const ast::compound_variable_decl&) {}
@@ -281,7 +276,7 @@ namespace munster
    void symbol_table_visitor::visit(const ast::func_decl& fd)
    {
       const auto* head = to<ast::func_head_decl>(fd.children()[0]);
-      const auto* body = to<ast::func_body_decl>(fd.children()[1]);
+      // const auto* body = to<ast::func_body_decl>(fd.children()[1]);
 
       std::string table_name;
       if (head->class_name())
@@ -293,7 +288,7 @@ namespace munster
          table_name = head->lexeme();
       }
 
-      auto table = std::make_unique<symbol_table>(table_name);
+      auto table = std::make_unique<symbol_table>(table_name, symbol_table_type::e_func);
 
       // Check return type
 
@@ -317,32 +312,79 @@ namespace munster
          }
       }
 
-      if (!std::empty(body->children()))
+      const auto is_variable = [](symbol_kv& s) {
+         return s.val.kind() == symbol_type::e_variable;
+      };
+
+      // clang-format off
+      auto variables = m_symbols 
+         | vi::reverse 
+         | vi::take_while(is_variable) 
+         | vi::move 
+         | ranges::to<std::vector>;
+      // clang-format on
+
+      for (auto [key, symbol] : variables | vi::move)
       {
-         const auto& child = body->children()[0];
+         const auto name = symbol.name();
+         const auto type = symbol.type();
+         const auto loc = symbol.location();
 
-         if (const auto* value = to<ast::compound_variable_decl>(child))
+         if (type == "float" || type == "integer")
          {
-            for (const auto* var : value->children() | vi::transform(to<ast::variable_decl>))
+            const auto result = table->insert(key, std::move(symbol));
+            if (!result.is_inserted())
             {
-               const std::string name{var->lexeme()};
-               const std::string type{var->type()};
+               const parse_error err{
+                  .type = parse_error_type::e_semantic_error,
+                  .pos = loc,
+                  .lexeme =
+                     fmt::format("variable '{}' already declared on line '{}'", name, loc.line)};
 
-               const auto result =
-                  table->insert(name, symbol(name, symbol_type::e_variable, var->location(), type));
+               m_errors.push_back(err);
+            }
+         }
+         else
+         {
+            const auto is_class = [](std::unique_ptr<symbol_table>& t) {
+               return t->kind() == symbol_table_type::e_class;
+            };
 
+            bool is_present = false;
+            for (const auto& test : m_tables | vi::filter(is_class))
+            {
+               if (test->name() == type)
+               {
+                  is_present = true;
+               }
+            }
+
+            if (is_present)
+            {
+               const auto result = table->insert(key, std::move(symbol));
                if (!result.is_inserted())
                {
                   const parse_error err{
                      .type = parse_error_type::e_semantic_error,
-                     .pos = var->location(),
-                     .lexeme = fmt::format("variable '{}' already declared on line '{}'",
-                                           var->lexeme(), var->location().line)};
+                     .pos = loc,
+                     .lexeme =
+                        fmt::format("variable '{}' already declared on line '{}'", name, loc.line)};
 
                   m_errors.push_back(err);
                }
             }
+            else
+            {
+               const parse_error err{
+                  .type = parse_error_type::e_semantic_error,
+                  .pos = loc,
+                  .lexeme = fmt::format("variable '{}' does not have a valid type", name)};
+
+               m_errors.push_back(err);
+            }
          }
+
+         m_symbols.pop_back();
       }
 
       if (head->class_name())
@@ -384,39 +426,95 @@ namespace munster
    }
    void symbol_table_visitor::visit(const ast::func_head_decl& /*fd*/) {}
    void symbol_table_visitor::visit(const ast::func_body_decl& /*fbd*/) {}
-   void symbol_table_visitor::visit(const ast::variable_decl&) {}
+   void symbol_table_visitor::visit(const ast::variable_decl& node)
+   {
+      const std::string name{node.lexeme()};
+      const std::string type{node.type()};
+
+      m_symbols.push_back({.key = name,
+                           .val = symbol({.name = name,
+                                          .kind = symbol_type::e_variable,
+                                          .location = node.location(),
+                                          .type = type})});
+   }
    void symbol_table_visitor::visit(const ast::main_decl& md)
    {
       const std::string table_name{md.lexeme()};
-      auto table = std::make_unique<symbol_table>(table_name);
+      auto table = std::make_unique<symbol_table>(table_name, symbol_table_type::e_main);
 
-      const auto* body = to<ast::func_body_decl>(md.children()[0]);
-      if (!std::empty(body->children()))
+      const auto is_variable = [](symbol_kv& s) {
+         return s.val.kind() == symbol_type::e_variable;
+      };
+
+      // clang-format off
+      auto variables = m_symbols 
+         | vi::reverse 
+         | vi::take_while(is_variable) 
+         | vi::move 
+         | ranges::to<std::vector>;
+      // clang-format on
+
+      for (auto [key, symbol] : variables | vi::move)
       {
-         const auto& child = body->children()[0];
+         const auto name = symbol.name();
+         const auto type = symbol.type();
+         const auto loc = symbol.location();
 
-         if (const auto* value = to<ast::compound_variable_decl>(child))
+         if (type == "float" || type == "integer")
          {
-            for (const auto* var : value->children() | vi::transform(to<ast::variable_decl>))
+            const auto result = table->insert(key, std::move(symbol));
+            if (!result.is_inserted())
             {
-               const std::string name{var->lexeme()};
-               const std::string type{var->type()};
+               const parse_error err{
+                  .type = parse_error_type::e_semantic_error,
+                  .pos = loc,
+                  .lexeme =
+                     fmt::format("variable '{}' already declared on line '{}'", name, loc.line)};
 
-               const auto result =
-                  table->insert(name, symbol(name, symbol_type::e_variable, var->location(), type));
+               m_errors.push_back(err);
+            }
+         }
+         else
+         {
+            const auto is_class = [](std::unique_ptr<symbol_table>& t) {
+               return t->kind() == symbol_table_type::e_class;
+            };
 
+            bool is_present = false;
+            for (const auto& test : m_tables | vi::filter(is_class))
+            {
+               if (test->name() == type)
+               {
+                  is_present = true;
+               }
+            }
+
+            if (is_present)
+            {
+               const auto result = table->insert(key, std::move(symbol));
                if (!result.is_inserted())
                {
                   const parse_error err{
                      .type = parse_error_type::e_semantic_error,
-                     .pos = var->location(),
-                     .lexeme = fmt::format("variable '{}' already declared on line '{}'",
-                                           var->lexeme(), var->location().line)};
+                     .pos = loc,
+                     .lexeme =
+                        fmt::format("variable '{}' already declared on line '{}'", name, loc.line)};
 
                   m_errors.push_back(err);
                }
             }
+            else
+            {
+               const parse_error err{
+                  .type = parse_error_type::e_semantic_error,
+                  .pos = loc,
+                  .lexeme = fmt::format("variable '{}' does not have a valid type", name)};
+
+               m_errors.push_back(err);
+            }
          }
+
+         m_symbols.pop_back();
       }
 
       m_tables.push_back(std::move(table));
@@ -464,7 +562,10 @@ namespace munster
             {
                const std::string type{var->type()};
 
-               symbols.emplace_back(name, symbol_type::e_parameter, var->location(), type);
+               symbols.emplace_back(symbol_create_info{.name = name,
+                                                       .kind = symbol_type::e_parameter,
+                                                       .location = var->location(),
+                                                       .type = type});
             }
             else
             {
@@ -477,7 +578,10 @@ namespace munster
                   type += fmt::format("[{}]", array->lexeme());
                }
 
-               symbols.emplace_back(name, symbol_type::e_parameter, var->location(), type);
+               symbols.emplace_back(symbol_create_info{.name = name,
+                                                       .kind = symbol_type::e_parameter,
+                                                       .location = var->location(),
+                                                       .type = type});
             }
          }
       }

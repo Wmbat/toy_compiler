@@ -33,19 +33,6 @@ namespace munster::ast
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 
-   class variable_decl : public decl
-   {
-   public:
-      variable_decl(node_ptr type, node_ptr id, node_ptr compound_array);
-
-      [[nodiscard]] auto type() const -> std::string_view;
-
-      [[nodiscard]] auto to_string() const -> std::string override;
-
-   private:
-      std::string m_type;
-   };
-
    class compound_array_decl : public decl
    {
    public:
@@ -69,26 +56,6 @@ namespace munster::ast
    {
    public:
       compound_params_decl(std::vector<node_ptr>&& member_decl);
-
-      [[nodiscard]] auto to_string() const -> std::string override;
-   };
-
-   class compound_variable_decl : public decl
-   {
-   public:
-      compound_variable_decl(std::vector<node_ptr>&& variables);
-
-      void accept(visitor_variant& visitor) const override;
-
-      [[nodiscard]] auto to_string() const -> std::string override;
-   };
-
-   class main_decl : public decl
-   {
-   public:
-      main_decl(node_ptr location, node_ptr func_body);
-
-      void accept(visitor_variant& visitor) const override;
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };

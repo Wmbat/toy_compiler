@@ -3,6 +3,7 @@
 #include <toy_compiler/munster/ast/decl/compound_func_decl.hpp>
 #include <toy_compiler/munster/ast/decl/member_func_decl.hpp>
 #include <toy_compiler/munster/ast/decl/member_var_decl.hpp>
+#include <toy_compiler/munster/ast/decl/variable_decl.hpp>
 #include <toy_compiler/munster/ast/stmt/compound_stmt.hpp>
 
 #include <toy_compiler/munster/visitor/visitor.hpp>
@@ -12,8 +13,7 @@
 
 namespace munster::ast
 {
-   visibility_decl::visibility_decl(const std::string& name,
-                                    const source_location& location) :
+   visibility_decl::visibility_decl(const std::string& name, const source_location& location) :
       decl{name, location}
    {}
 
@@ -21,23 +21,6 @@ namespace munster::ast
    {
       return fmt::format("{} <line:{}, col:{}> '{}'", "visibility_decl", location().line,
                          location().column, lexeme());
-   }
-
-   variable_decl::variable_decl(node_ptr type, node_ptr id, node_ptr compound_array_decl) :
-      decl{std::string{id->lexeme()}, type->location()},
-      m_type(type->lexeme())
-   {
-      if (!std::empty(compound_array_decl->children()))
-      {
-         make_child(std::move(compound_array_decl));
-      }
-   }
-
-   auto variable_decl::type() const -> std::string_view { return m_type; }
-   auto variable_decl::to_string() const -> std::string
-   {
-      return fmt::format("variable_decl <line:{}, col:{}> {} '{}'", location().line,
-                         location().column, lexeme(), m_type);
    }
 
    compound_array_decl::compound_array_decl(std::vector<node_ptr>&& array_decls)
@@ -74,44 +57,6 @@ namespace munster::ast
    }
 
    auto compound_params_decl::to_string() const -> std::string { return "compound_param_decl"; }
-
-   compound_variable_decl::compound_variable_decl(std::vector<node_ptr>&& variables)
-   {
-      make_family<variable_decl>(std::move(variables));
-   }
-
-   void compound_variable_decl::accept(visitor_variant&) const {}
-
-   auto compound_variable_decl::to_string() const -> std::string
-   {
-      return fmt::format("compound_variable_decl");
-   }
-
-   main_decl::main_decl(node_ptr id, node_ptr func_body) :
-      decl{std::string{id->lexeme()}, id->location()}
-   {
-      make_child(std::move(func_body));
-   }
-
-   void main_decl::accept(visitor_variant& visitor) const
-   {
-      for (const auto& child : children())
-      {
-         child->accept(visitor);
-      }
-
-      std::visit(
-         [this](auto& visitor) {
-            visitor.visit(*this);
-         },
-         visitor);
-   }
-
-   auto main_decl::to_string() const -> std::string
-   {
-      return fmt::format("main_decl <line:{}, col:{}> {}", location().line, location().column,
-                         lexeme());
-   }
 
    compound_array_index_access_decl::compound_array_index_access_decl(
       std::vector<node_ptr>&& variables)

@@ -8,13 +8,14 @@
 
 namespace munster
 {
-   symbol::symbol(std::string name, symbol_type kind, const source_location& location,
-                  std::string type, std::unique_ptr<symbol_table> link) :
-      m_name{std::move(name)},
-      m_type{std::move(type)},
-      m_kind{kind},
-      m_link{std::move(link)},
-      m_location{location}
+
+   symbol::symbol(symbol_create_info&& info) :
+      m_name{std::move(info.name)},
+      m_type{std::move(info.type)},
+      m_kind{info.kind},
+      m_size{info.size},
+      m_link{std::move(info.link)},
+      m_location{info.location}
    {}
 
    auto symbol::name() const noexcept -> std::string_view { return m_name; }
@@ -23,6 +24,7 @@ namespace munster
    auto symbol::link() const noexcept -> symbol_table* { return m_link.get(); }
    auto symbol::location() const noexcept -> const source_location& { return m_location; }
 
+   void symbol::update_size(std::int64_t size) { m_size = size; }
    void symbol::set_table(std::unique_ptr<symbol_table> table) { m_link = std::move(table); }
 
    symbol_table::lookup_kv_result::lookup_kv_result(const std::string* p_key, symbol* p_val) :
@@ -61,9 +63,13 @@ namespace munster
    }
    auto symbol_table::remove_kv_result::take_val() -> symbol { return std::move(m_val.value()); }
 
-   symbol_table::symbol_table(std::string name) : m_name{std::move(name)} {}
+   symbol_table::symbol_table(std::string name, symbol_table_type kind) :
+      m_name{std::move(name)},
+      m_kind{kind}
+   {}
 
    auto symbol_table::name() const noexcept -> std::string_view { return m_name; }
+   auto symbol_table::kind() const noexcept -> symbol_table_type { return m_kind; }
    auto symbol_table::symbols() const -> const std::unordered_map<std::string, symbol>&
    {
       return m_symbols;

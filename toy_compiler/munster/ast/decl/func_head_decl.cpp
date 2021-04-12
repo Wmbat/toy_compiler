@@ -1,6 +1,7 @@
 #include <toy_compiler/munster/ast/decl/func_head_decl.hpp>
 
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
+#include <toy_compiler/munster/ast/decl/variable_decl.hpp>
 
 #include <mpark/patterns.hpp>
 
