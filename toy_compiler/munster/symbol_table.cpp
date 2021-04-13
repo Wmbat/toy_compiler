@@ -21,6 +21,7 @@ namespace munster
    auto symbol::name() const noexcept -> std::string_view { return m_name; }
    auto symbol::type() const noexcept -> std::string_view { return m_type; }
    auto symbol::kind() const noexcept -> symbol_type { return m_kind; }
+   auto symbol::size() const noexcept -> std::int64_t { return m_size; }
    auto symbol::link() const noexcept -> symbol_table* { return m_link.get(); }
    auto symbol::location() const noexcept -> const source_location& { return m_location; }
 

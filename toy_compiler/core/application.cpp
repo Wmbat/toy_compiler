@@ -19,8 +19,8 @@
 
 #include <toy_compiler/core/application.hpp>
 
-#include <toy_compiler/munster/visitor/ast/symbol_table_visitor.hpp>
 #include <toy_compiler/munster/visitor/semantic_checking/type_checking_visitor.hpp>
+#include <toy_compiler/munster/visitor/symbol_table/symbol_table_visitor.hpp>
 #include <toy_compiler/munster/visitor/visitor.hpp>
 
 #include <fmt/color.h>

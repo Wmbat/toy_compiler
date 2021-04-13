@@ -32,6 +32,8 @@ namespace munster
 
       void visit(const ast::compound_variable_decl& node);
       void visit(const ast::variable_decl& node);
+      void visit(const ast::compound_array_decl& node);
+      void visit(const ast::array_decl& node);
 
       void visit(const ast::func_expr& node);
       void visit(const ast::var_expr& node);
@@ -61,8 +63,13 @@ namespace munster
    private:
       auto generate_var_symbols(const ast::node* head) -> std::vector<symbol>;
 
+      auto is_valid(const std::string_view type) -> bool;
+      auto is_pod(std::string_view type) -> bool;
+      auto get_type_size(std::string_view type) -> std::int64_t;
+
    private:
       std::vector<std::unique_ptr<symbol_table>> m_tables;
       std::vector<symbol_kv> m_symbols;
+      std::vector<std::int64_t> m_array_sizes;
    };
 } // namespace munster

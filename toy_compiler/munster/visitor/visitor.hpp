@@ -57,6 +57,8 @@ namespace munster
 
       class compound_variable_decl;
       class variable_decl;
+      class compound_array_decl;
+      class array_decl;
 
       class main_decl;
    } // namespace ast
@@ -82,9 +84,13 @@ namespace munster
       void operator()(const ast::func_decl& fd) { this->underlying().visit(fd); }
       void operator()(const ast::func_head_decl& fd) { this->underlying().visit(fd); }
       void operator()(const ast::func_body_decl& fbd) { this->underlying().visit(fbd); }
-      void operator()(const ast::compound_variable_decl& cv) { this->underlying().visit(cv); }
-      void operator()(const ast::variable_decl& var) { this->underlying().visit(var); }
+
       void operator()(const ast::main_decl& main) { this->underlying().visit(main); }
+
+      void operator()(const ast::compound_variable_decl& node) { this->underlying().visit(node); }
+      void operator()(const ast::variable_decl& node) { this->underlying().visit(node); }
+      void operator()(const ast::compound_array_decl& node) { this->underlying().visit(node); }
+      void operator()(const ast::array_decl& node) { this->underlying().visit(node); }
 
       void operator()(const ast::func_expr& node) { this->underlying().visit(node); }
       void operator()(const ast::var_expr& node) { this->underlying().visit(node); }

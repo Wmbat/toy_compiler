@@ -1,10 +1,8 @@
 #include <toy_compiler/munster/ast/node_factory.hpp>
 
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
+#include <toy_compiler/munster/ast/decl/array_decl.hpp>
 #include <toy_compiler/munster/ast/decl/class_decl.hpp>
-#include <toy_compiler/munster/ast/decl/compound_class_decl.hpp>
-#include <toy_compiler/munster/ast/decl/compound_func_decl.hpp>
-#include <toy_compiler/munster/ast/decl/compound_inheritance_decl.hpp>
 #include <toy_compiler/munster/ast/decl/compound_member_decl.hpp>
 #include <toy_compiler/munster/ast/decl/decl.hpp>
 #include <toy_compiler/munster/ast/decl/dot_decl.hpp>

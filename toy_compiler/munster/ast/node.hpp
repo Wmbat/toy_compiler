@@ -2,8 +2,8 @@
 
 #include <toy_compiler/munster/grammar/actions.hpp>
 #include <toy_compiler/munster/lexer.hpp>
-#include <toy_compiler/munster/visitor/ast/symbol_table_visitor.hpp>
 #include <toy_compiler/munster/visitor/semantic_checking/type_checking_visitor.hpp>
+#include <toy_compiler/munster/visitor/symbol_table/symbol_table_visitor.hpp>
 #include <toy_compiler/munster/visitor/visitor.hpp>
 
 #include <toy_compiler/util/strong_type.hpp>

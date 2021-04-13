@@ -4,25 +4,25 @@
 
 namespace munster::ast
 {
-   class func_decl : public decl
+   class array_decl : public decl
    {
    public:
-      using ptr = std::unique_ptr<func_decl>;
-
-   public:
-      func_decl(node_ptr function_head, node_ptr statements);
+      array_decl(node_ptr start_loc, node_ptr integer_lit, node_ptr end_loc);
 
       void accept(visitor_variant &visitor) const override;
 
       [[nodiscard]] auto to_string() const -> std::string override;
+
+   private:
+      source_location m_end_loc;
    };
 
-   class compound_func_decl : public decl
+   class compound_array_decl : public decl
    {
    public:
-      compound_func_decl(std::vector<func_decl::ptr>&& class_decls);
+      compound_array_decl(std::vector<node_ptr>&& member_decl);
 
-      void accept(visitor_variant& visitor) const override;
+      void accept(visitor_variant &visitor) const override;
 
       [[nodiscard]] auto to_string() const -> std::string override;
    };

@@ -2,7 +2,7 @@
 
 #include <toy_compiler/munster/ast/decl/decl.hpp>
 
-#include <toy_compiler/munster/ast/decl/compound_class_decl.hpp>
+#include <toy_compiler/munster/ast/decl/class_decl.hpp>
 
 namespace munster::ast
 {

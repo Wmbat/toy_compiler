@@ -161,6 +161,9 @@ namespace munster
    }
    void type_checking_visitor::visit(const ast::compound_variable_decl&) {}
    void type_checking_visitor::visit(const ast::variable_decl&) {}
+   void type_checking_visitor::visit(const ast::compound_array_decl&) {}
+   void type_checking_visitor::visit(const ast::array_decl&) {}
+
    void type_checking_visitor::visit(const ast::main_decl&) {}
 
    void type_checking_visitor::visit(const ast::func_expr& /*node*/) {}

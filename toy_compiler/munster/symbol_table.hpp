@@ -190,8 +190,8 @@ struct fmt::formatter<munster::symbol>
    template <typename FormatContext>
    auto format(const munster::symbol& s, FormatContext& ctx)
    {
-      return fmt::format_to(ctx.out(), "symbol(name={}, kind={}, type={}, link={})", s.name(),
-                            s.kind(), s.type(), s.link() ? "Yes" : "No");
+      return fmt::format_to(ctx.out(), "symbol(name={}, kind={}, type={}, size={}, link={})",
+                            s.name(), s.kind(), s.type(), s.size(), s.link() ? "Yes" : "No");
    }
 };
 

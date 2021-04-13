@@ -1,7 +1,8 @@
-#include <toy_compiler/munster/visitor/ast/symbol_table_visitor.hpp>
+#include "range/v3/view/enumerate.hpp"
+#include <toy_compiler/munster/visitor/symbol_table/symbol_table_visitor.hpp>
 
+#include <toy_compiler/munster/ast/decl/array_decl.hpp>
 #include <toy_compiler/munster/ast/decl/class_decl.hpp>
-#include <toy_compiler/munster/ast/decl/compound_inheritance_decl.hpp>
 #include <toy_compiler/munster/ast/decl/compound_member_decl.hpp>
 #include <toy_compiler/munster/ast/decl/func_body_decl.hpp>
 #include <toy_compiler/munster/ast/decl/func_decl.hpp>
@@ -18,11 +19,14 @@
 #include <fmt/color.h>
 #include <fmt/core.h>
 
+#include <range/v3/numeric/accumulate.hpp>
 #include <range/v3/range/conversion.hpp>
 #include <range/v3/view/filter.hpp>
 #include <range/v3/view/map.hpp>
 #include <range/v3/view/move.hpp>
 #include <range/v3/view/reverse.hpp>
+#include <range/v3/view/split.hpp>
+#include <range/v3/view/tail.hpp>
 #include <range/v3/view/take_while.hpp>
 #include <range/v3/view/transform.hpp>
 
@@ -46,6 +50,18 @@ namespace munster
    auto to(const ast::node_ptr& node) -> Any*
    {
       return dynamic_cast<Any*>(node.get());
+   }
+
+   auto array_index_to_string(std::int64_t i) -> std::string
+   {
+      if (i >= 0)
+      {
+         return fmt::format("[{}]", i);
+      }
+      else
+      {
+         return "[]";
+      }
    }
 
    void symbol_table_visitor::visit(const ast::translation_unit_decl& tl)
@@ -261,22 +277,34 @@ namespace munster
    void symbol_table_visitor::visit(const ast::member_var_decl& node)
    {
       const std::string name{node.lexeme()};
-      const auto type = fmt::format("{} {}", node.visibility(), node.type());
+
+      const std::string type = fmt::format(
+         "{} {}{}", node.visibility(), node.type(),
+         ranges::accumulate(m_array_sizes | vi::transform(array_index_to_string), std::string{}));
+
+      auto size = get_type_size(node.type());
+      for (std::int64_t i : m_array_sizes)
+      {
+         if (i != -1)
+         {
+            size *= i;
+         }
+      }
 
       m_symbols.push_back({.key = name,
                            .val = symbol{{.name = name,
                                           .kind = symbol_type::e_member_variable,
                                           .location = node.location(),
-                                          .size = 0,
+                                          .size = size,
                                           .type = type}}});
+
+      m_array_sizes.clear();
    }
 
-   void symbol_table_visitor::visit(const ast::compound_variable_decl&) {}
    void symbol_table_visitor::visit(const ast::compound_function_decl&) {}
    void symbol_table_visitor::visit(const ast::func_decl& fd)
    {
       const auto* head = to<ast::func_head_decl>(fd.children()[0]);
-      // const auto* body = to<ast::func_body_decl>(fd.children()[1]);
 
       std::string table_name;
       if (head->class_name())
@@ -327,10 +355,21 @@ namespace munster
       for (auto [key, symbol] : variables | vi::move)
       {
          const auto name = symbol.name();
-         const auto type = symbol.type();
+         const auto type = symbol.type().substr(0, symbol.type().find_first_of('['));
          const auto loc = symbol.location();
 
-         if (type == "float" || type == "integer")
+         if (!is_valid(symbol.type()))
+         {
+            const parse_error err{
+               .type = parse_error_type::e_semantic_error,
+               .pos = loc,
+               .lexeme = fmt::format("variable '{}' is invalid. Type '{}' cannot have '[]'", name,
+                                     symbol.type())};
+
+            m_errors.push_back(err);
+         }
+
+         if (is_pod(type))
          {
             const auto result = table->insert(key, std::move(symbol));
             if (!result.is_inserted())
@@ -426,17 +465,7 @@ namespace munster
    }
    void symbol_table_visitor::visit(const ast::func_head_decl& /*fd*/) {}
    void symbol_table_visitor::visit(const ast::func_body_decl& /*fbd*/) {}
-   void symbol_table_visitor::visit(const ast::variable_decl& node)
-   {
-      const std::string name{node.lexeme()};
-      const std::string type{node.type()};
 
-      m_symbols.push_back({.key = name,
-                           .val = symbol({.name = name,
-                                          .kind = symbol_type::e_variable,
-                                          .location = node.location(),
-                                          .type = type})});
-   }
    void symbol_table_visitor::visit(const ast::main_decl& md)
    {
       const std::string table_name{md.lexeme()};
@@ -457,10 +486,21 @@ namespace munster
       for (auto [key, symbol] : variables | vi::move)
       {
          const auto name = symbol.name();
-         const auto type = symbol.type();
+         const auto type = symbol.type().substr(0, symbol.type().find_first_of('['));
          const auto loc = symbol.location();
 
-         if (type == "float" || type == "integer")
+         if (!is_valid(symbol.type()))
+         {
+            const parse_error err{
+               .type = parse_error_type::e_semantic_error,
+               .pos = loc,
+               .lexeme = fmt::format("variable '{}' is invalid. Type '{}' cannot have '[]'", name,
+                                     symbol.type())};
+
+            m_errors.push_back(err);
+         }
+
+         if (is_pod(type))
          {
             const auto result = table->insert(key, std::move(symbol));
             if (!result.is_inserted())
@@ -518,6 +558,46 @@ namespace munster
       }
 
       m_tables.push_back(std::move(table));
+   }
+
+   void symbol_table_visitor::visit(const ast::compound_variable_decl&) {}
+   void symbol_table_visitor::visit(const ast::variable_decl& node)
+   {
+      const std::string name{node.lexeme()};
+      const std::string type = fmt::format(
+         "{}{}", node.type(),
+         ranges::accumulate(m_array_sizes | vi::transform(array_index_to_string), std::string{}));
+
+      auto size = get_type_size(node.type());
+      for (std::int64_t i : m_array_sizes)
+      {
+         if (i != -1)
+         {
+            size *= i;
+         }
+      }
+
+      m_symbols.push_back({.key = name,
+                           .val = symbol({.name = name,
+                                          .kind = symbol_type::e_variable,
+                                          .location = node.location(),
+                                          .size = size,
+                                          .type = type})});
+
+      m_array_sizes.clear();
+   }
+   void symbol_table_visitor::visit(const ast::compound_array_decl&) {}
+   void symbol_table_visitor::visit(const ast::array_decl& node)
+   {
+      const auto lexeme = node.lexeme();
+      if (std::empty(lexeme))
+      {
+         m_array_sizes.push_back(-1);
+      }
+      else
+      {
+         m_array_sizes.push_back(std::stoi(std::string{lexeme}));
+      }
    }
 
    void symbol_table_visitor::visit(const ast::func_expr& /*node*/) {}
@@ -587,5 +667,40 @@ namespace munster
       }
 
       return symbols;
+   }
+
+   auto symbol_table_visitor::is_valid(const std::string_view type) -> bool
+   {
+      // clang-format off
+      std::vector index_data = type
+         | vi::split('[') 
+         | vi::tail 
+         | ranges::to<std::vector<std::string>>;
+      // clang-format on
+
+      for (const auto& str : index_data)
+      {
+         if (str == "]")
+         {
+            return false;
+         }
+      }
+
+      return true;
+   }
+   auto symbol_table_visitor::is_pod(std::string_view type) -> bool
+   {
+      return type == "float" || type == "integer";
+   }
+   auto symbol_table_visitor::get_type_size(std::string_view type) -> std::int64_t
+   {
+      if (is_pod(type))
+      {
+         return 4;
+      }
+      else
+      {
+         return 0;
+      }
    }
 } // namespace munster
