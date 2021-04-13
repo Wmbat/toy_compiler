@@ -26,6 +26,8 @@ namespace munster
       class member_func_decl;
       class member_var_decl;
 
+      class compound_params_decl;
+
       class compound_function_decl;
       class inheritance_decl;
       class func_decl;
@@ -66,6 +68,9 @@ namespace munster
    template <typename Any>
    class visitor : public util::crtp<Any, visitor>
    {
+   private:
+      friend Any;
+
    public:
       void operator()(const ast::translation_unit_decl& tl) { this->underlying().visit(tl); }
 
@@ -87,6 +92,7 @@ namespace munster
 
       void operator()(const ast::main_decl& main) { this->underlying().visit(main); }
 
+      void operator()(const ast::compound_params_decl& node) { this->underlying().visit(node); }
       void operator()(const ast::compound_variable_decl& node) { this->underlying().visit(node); }
       void operator()(const ast::variable_decl& node) { this->underlying().visit(node); }
       void operator()(const ast::compound_array_decl& node) { this->underlying().visit(node); }

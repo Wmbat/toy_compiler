@@ -69,6 +69,7 @@ namespace munster
       auto link() const noexcept -> symbol_table*;              // NOLINT
       auto location() const noexcept -> const source_location&; // NOLINT
 
+      void update_kind(symbol_type kind);
       void update_size(std::int64_t size);
       void set_table(std::unique_ptr<symbol_table> table);
 

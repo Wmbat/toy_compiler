@@ -270,7 +270,7 @@ namespace munster
 
       m_symbols.push_back({.key = key,
                            .val = symbol{{.name = name,
-                                          .kind = symbol_type::e_member_variable,
+                                          .kind = symbol_type::e_member_function,
                                           .location = node.location(),
                                           .type = type}}});
    }
@@ -302,130 +302,13 @@ namespace munster
    }
 
    void symbol_table_visitor::visit(const ast::compound_function_decl&) {}
-   void symbol_table_visitor::visit(const ast::func_decl& fd)
+   void symbol_table_visitor::visit(const ast::func_decl& node)
    {
-      const auto* head = to<ast::func_head_decl>(fd.children()[0]);
+      auto table = pop_back(m_tables);
 
-      std::string table_name;
-      if (head->class_name())
-      {
-         table_name = fmt::format("{}::{}", head->lexeme(), head->class_name().value());
-      }
-      else
-      {
-         table_name = head->lexeme();
-      }
+      handle_variables(table);
 
-      auto table = std::make_unique<symbol_table>(table_name, symbol_table_type::e_func);
-
-      // Check return type
-
-      {
-         auto symbols = generate_var_symbols(head);
-         for (auto symbol : symbols | vi::move)
-         {
-            const std::string name{symbol.name()};
-            const auto result = table->insert(name, std::move(symbol));
-
-            if (!result.is_inserted())
-            {
-               const parse_error err{
-                  .type = parse_error_type::e_semantic_error,
-                  .pos = result.val().location(),
-                  .lexeme = fmt::format("Parameter '{}' already declared in function '{}'",
-                                        result.val().name(), table->name())};
-
-               m_errors.push_back(err);
-            }
-         }
-      }
-
-      const auto is_variable = [](symbol_kv& s) {
-         return s.val.kind() == symbol_type::e_variable;
-      };
-
-      // clang-format off
-      auto variables = m_symbols 
-         | vi::reverse 
-         | vi::take_while(is_variable) 
-         | vi::move 
-         | ranges::to<std::vector>;
-      // clang-format on
-
-      for (auto [key, symbol] : variables | vi::move)
-      {
-         const auto name = symbol.name();
-         const auto type = symbol.type().substr(0, symbol.type().find_first_of('['));
-         const auto loc = symbol.location();
-
-         if (!is_valid(symbol.type()))
-         {
-            const parse_error err{
-               .type = parse_error_type::e_semantic_error,
-               .pos = loc,
-               .lexeme = fmt::format("variable '{}' is invalid. Type '{}' cannot have '[]'", name,
-                                     symbol.type())};
-
-            m_errors.push_back(err);
-         }
-
-         if (is_pod(type))
-         {
-            const auto result = table->insert(key, std::move(symbol));
-            if (!result.is_inserted())
-            {
-               const parse_error err{
-                  .type = parse_error_type::e_semantic_error,
-                  .pos = loc,
-                  .lexeme =
-                     fmt::format("variable '{}' already declared on line '{}'", name, loc.line)};
-
-               m_errors.push_back(err);
-            }
-         }
-         else
-         {
-            const auto is_class = [](std::unique_ptr<symbol_table>& t) {
-               return t->kind() == symbol_table_type::e_class;
-            };
-
-            bool is_present = false;
-            for (const auto& test : m_tables | vi::filter(is_class))
-            {
-               if (test->name() == type)
-               {
-                  is_present = true;
-               }
-            }
-
-            if (is_present)
-            {
-               const auto result = table->insert(key, std::move(symbol));
-               if (!result.is_inserted())
-               {
-                  const parse_error err{
-                     .type = parse_error_type::e_semantic_error,
-                     .pos = loc,
-                     .lexeme =
-                        fmt::format("variable '{}' already declared on line '{}'", name, loc.line)};
-
-                  m_errors.push_back(err);
-               }
-            }
-            else
-            {
-               const parse_error err{
-                  .type = parse_error_type::e_semantic_error,
-                  .pos = loc,
-                  .lexeme = fmt::format("variable '{}' does not have a valid type", name)};
-
-               m_errors.push_back(err);
-            }
-         }
-
-         m_symbols.pop_back();
-      }
-
+      const auto* head = to<ast::func_head_decl>(node.children()[0]);
       if (head->class_name())
       {
          const auto class_name = head->class_name().value();
@@ -463,103 +346,37 @@ namespace munster
          m_tables.push_back(std::move(table));
       }
    }
-   void symbol_table_visitor::visit(const ast::func_head_decl& /*fd*/) {}
-   void symbol_table_visitor::visit(const ast::func_body_decl& /*fbd*/) {}
+   void symbol_table_visitor::visit(const ast::func_head_decl& node)
+   {
+      std::string table_name;
+      if (node.class_name())
+      {
+         table_name = fmt::format("{}::{}", node.lexeme(), node.class_name().value());
+      }
+      else
+      {
+         table_name = node.lexeme();
+      }
+
+      auto table = std::make_unique<symbol_table>(table_name, symbol_table_type::e_func);
+
+      handle_parameters(table);
+
+      m_tables.push_back(std::move(table));
+   }
+   void symbol_table_visitor::visit(const ast::func_body_decl&) {}
 
    void symbol_table_visitor::visit(const ast::main_decl& md)
    {
       const std::string table_name{md.lexeme()};
       auto table = std::make_unique<symbol_table>(table_name, symbol_table_type::e_main);
 
-      const auto is_variable = [](symbol_kv& s) {
-         return s.val.kind() == symbol_type::e_variable;
-      };
-
-      // clang-format off
-      auto variables = m_symbols 
-         | vi::reverse 
-         | vi::take_while(is_variable) 
-         | vi::move 
-         | ranges::to<std::vector>;
-      // clang-format on
-
-      for (auto [key, symbol] : variables | vi::move)
-      {
-         const auto name = symbol.name();
-         const auto type = symbol.type().substr(0, symbol.type().find_first_of('['));
-         const auto loc = symbol.location();
-
-         if (!is_valid(symbol.type()))
-         {
-            const parse_error err{
-               .type = parse_error_type::e_semantic_error,
-               .pos = loc,
-               .lexeme = fmt::format("variable '{}' is invalid. Type '{}' cannot have '[]'", name,
-                                     symbol.type())};
-
-            m_errors.push_back(err);
-         }
-
-         if (is_pod(type))
-         {
-            const auto result = table->insert(key, std::move(symbol));
-            if (!result.is_inserted())
-            {
-               const parse_error err{
-                  .type = parse_error_type::e_semantic_error,
-                  .pos = loc,
-                  .lexeme =
-                     fmt::format("variable '{}' already declared on line '{}'", name, loc.line)};
-
-               m_errors.push_back(err);
-            }
-         }
-         else
-         {
-            const auto is_class = [](std::unique_ptr<symbol_table>& t) {
-               return t->kind() == symbol_table_type::e_class;
-            };
-
-            bool is_present = false;
-            for (const auto& test : m_tables | vi::filter(is_class))
-            {
-               if (test->name() == type)
-               {
-                  is_present = true;
-               }
-            }
-
-            if (is_present)
-            {
-               const auto result = table->insert(key, std::move(symbol));
-               if (!result.is_inserted())
-               {
-                  const parse_error err{
-                     .type = parse_error_type::e_semantic_error,
-                     .pos = loc,
-                     .lexeme =
-                        fmt::format("variable '{}' already declared on line '{}'", name, loc.line)};
-
-                  m_errors.push_back(err);
-               }
-            }
-            else
-            {
-               const parse_error err{
-                  .type = parse_error_type::e_semantic_error,
-                  .pos = loc,
-                  .lexeme = fmt::format("variable '{}' does not have a valid type", name)};
-
-               m_errors.push_back(err);
-            }
-         }
-
-         m_symbols.pop_back();
-      }
+      handle_variables(table);
 
       m_tables.push_back(std::move(table));
    }
 
+   void symbol_table_visitor::visit(const ast::compound_params_decl&) {}
    void symbol_table_visitor::visit(const ast::compound_variable_decl&) {}
    void symbol_table_visitor::visit(const ast::variable_decl& node)
    {
@@ -669,7 +486,215 @@ namespace munster
       return symbols;
    }
 
-   auto symbol_table_visitor::is_valid(const std::string_view type) -> bool
+   void symbol_table_visitor::handle_parameters(std::unique_ptr<symbol_table>& p_table)
+   {
+      const auto is_variable = [](symbol_kv& s) {
+         return s.val.kind() == symbol_type::e_variable;
+      };
+
+      // clang-format off
+      auto variables = m_symbols 
+         | vi::reverse 
+         | vi::take_while(is_variable) 
+         | vi::move;
+      // clang-format on
+
+      for (auto [key, symbol] : variables)
+      {
+         const auto name = symbol.name();
+         const auto type = symbol.type().substr(0, symbol.type().find_first_of('['));
+         const auto loc = symbol.location();
+
+         symbol.update_kind(symbol_type::e_parameter);
+
+         // clang-format off
+         std::vector index_data = symbol.type()
+            | vi::split('[') 
+            | vi::tail 
+            | ranges::to<std::vector<std::string>>;
+         // clang-format on
+
+         if (!std::empty(index_data) && index_data.back() == "]")
+         {
+            symbol.update_size(4);
+         }
+
+         if (!is_param_valid(symbol.type()))
+         {
+            const parse_error err{
+               .type = parse_error_type::e_semantic_error,
+               .pos = loc,
+               .lexeme = fmt::format("variable '{}' is invalid. Type '{}' cannot have '[]'", name,
+                                     symbol.type())};
+
+            m_errors.push_back(err);
+         }
+
+         if (is_pod(type))
+         {
+            const auto result = p_table->insert(key, std::move(symbol));
+            if (!result.is_inserted())
+            {
+               const parse_error err{
+                  .type = parse_error_type::e_semantic_error,
+                  .pos = loc,
+                  .lexeme =
+                     fmt::format("variable '{}' already declared on line '{}'", name, loc.line)};
+
+               m_errors.push_back(err);
+            }
+         }
+         else
+         {
+            const auto is_class = [](std::unique_ptr<symbol_table>& t) {
+               return t->kind() == symbol_table_type::e_class;
+            };
+
+            bool is_present = false;
+            for (const auto& test : m_tables | vi::filter(is_class))
+            {
+               if (test->name() == type)
+               {
+                  is_present = true;
+               }
+            }
+
+            if (is_present)
+            {
+               const auto result = p_table->insert(key, std::move(symbol));
+               if (!result.is_inserted())
+               {
+                  const parse_error err{
+                     .type = parse_error_type::e_semantic_error,
+                     .pos = loc,
+                     .lexeme =
+                        fmt::format("variable '{}' already declared on line '{}'", name, loc.line)};
+
+                  m_errors.push_back(err);
+               }
+            }
+            else
+            {
+               const parse_error err{
+                  .type = parse_error_type::e_semantic_error,
+                  .pos = loc,
+                  .lexeme = fmt::format("variable '{}' does not have a valid type", name)};
+
+               m_errors.push_back(err);
+            }
+         }
+
+         m_symbols.pop_back();
+      }
+   }
+   void symbol_table_visitor::handle_variables(std::unique_ptr<symbol_table>& p_table)
+   {
+      const auto is_variable = [](symbol_kv& s) {
+         return s.val.kind() == symbol_type::e_variable;
+      };
+
+      // clang-format off
+      auto variables = m_symbols 
+         | vi::reverse 
+         | vi::take_while(is_variable) 
+         | vi::move;
+      // clang-format on
+
+      for (auto [key, symbol] : variables)
+      {
+         const auto name = symbol.name();
+         const auto type = symbol.type().substr(0, symbol.type().find_first_of('['));
+         const auto loc = symbol.location();
+
+         if (!is_variable_valid(symbol.type()))
+         {
+            const parse_error err{
+               .type = parse_error_type::e_semantic_error,
+               .pos = loc,
+               .lexeme = fmt::format("variable '{}' is invalid. Type '{}' cannot have '[]'", name,
+                                     symbol.type())};
+
+            m_errors.push_back(err);
+         }
+
+         if (is_pod(type))
+         {
+            const auto result = p_table->insert(key, std::move(symbol));
+            if (!result.is_inserted())
+            {
+               const parse_error err{
+                  .type = parse_error_type::e_semantic_error,
+                  .pos = loc,
+                  .lexeme =
+                     fmt::format("variable '{}' already declared on line '{}'", name, loc.line)};
+
+               m_errors.push_back(err);
+            }
+         }
+         else
+         {
+            const auto is_class = [](std::unique_ptr<symbol_table>& t) {
+               return t->kind() == symbol_table_type::e_class;
+            };
+
+            bool is_present = false;
+            for (const auto& test : m_tables | vi::filter(is_class))
+            {
+               if (test->name() == type)
+               {
+                  is_present = true;
+               }
+            }
+
+            if (is_present)
+            {
+               const auto result = p_table->insert(key, std::move(symbol));
+               if (!result.is_inserted())
+               {
+                  const parse_error err{
+                     .type = parse_error_type::e_semantic_error,
+                     .pos = loc,
+                     .lexeme =
+                        fmt::format("variable '{}' already declared on line '{}'", name, loc.line)};
+
+                  m_errors.push_back(err);
+               }
+            }
+            else
+            {
+               const parse_error err{
+                  .type = parse_error_type::e_semantic_error,
+                  .pos = loc,
+                  .lexeme = fmt::format("variable '{}' does not have a valid type", name)};
+
+               m_errors.push_back(err);
+            }
+         }
+
+         m_symbols.pop_back();
+      }
+   }
+
+   auto symbol_table_visitor::is_param_valid(const std::string_view type) -> bool
+   {
+      // clang-format off
+      std::vector index_data = type
+         | vi::split('[') 
+         | vi::tail 
+         | ranges::to<std::vector<std::string>>;
+      // clang-format on
+
+      for (const auto [index, str] : vi::enumerate(index_data))
+      {
+         if ((index != std::size(index_data) - 1) && str == "]")
+         {
+            return false;
+         }
+      }
+
+      return true;
+   }
+   auto symbol_table_visitor::is_variable_valid(const std::string_view type) -> bool
    {
       // clang-format off
       std::vector index_data = type

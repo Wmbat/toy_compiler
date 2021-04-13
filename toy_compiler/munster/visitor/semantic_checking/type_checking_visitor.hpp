@@ -29,6 +29,7 @@ namespace munster
 
       void visit(const ast::main_decl& node);
 
+      void visit(const ast::compound_params_decl& node);
       void visit(const ast::compound_variable_decl& node);
       void visit(const ast::variable_decl& node);
       void visit(const ast::compound_array_decl& node);

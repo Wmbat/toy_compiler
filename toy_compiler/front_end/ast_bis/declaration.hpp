@@ -25,22 +25,6 @@
 
 namespace munster::ast
 {
-   class visibility_decl : public decl
-   {
-   public:
-      visibility_decl(const std::string& name, const source_location& location);
-
-      [[nodiscard]] auto to_string() const -> std::string override;
-   };
-
-   class compound_params_decl : public decl
-   {
-   public:
-      compound_params_decl(std::vector<node_ptr>&& member_decl);
-
-      [[nodiscard]] auto to_string() const -> std::string override;
-   };
-
    class compound_array_index_access_decl : public decl
    {
    public:

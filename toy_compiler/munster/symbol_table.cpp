@@ -25,6 +25,7 @@ namespace munster
    auto symbol::link() const noexcept -> symbol_table* { return m_link.get(); }
    auto symbol::location() const noexcept -> const source_location& { return m_location; }
 
+   void symbol::update_kind(symbol_type kind) { m_kind = kind; }
    void symbol::update_size(std::int64_t size) { m_size = size; }
    void symbol::set_table(std::unique_ptr<symbol_table> table) { m_link = std::move(table); }
 

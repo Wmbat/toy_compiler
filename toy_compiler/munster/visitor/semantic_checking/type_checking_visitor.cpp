@@ -159,6 +159,8 @@ namespace munster
          m_tables.pop_back();
       }
    }
+
+   void type_checking_visitor::visit(const ast::compound_params_decl&) {}
    void type_checking_visitor::visit(const ast::compound_variable_decl&) {}
    void type_checking_visitor::visit(const ast::variable_decl&) {}
    void type_checking_visitor::visit(const ast::compound_array_decl&) {}

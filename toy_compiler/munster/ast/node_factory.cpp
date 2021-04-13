@@ -4,6 +4,7 @@
 #include <toy_compiler/munster/ast/decl/array_decl.hpp>
 #include <toy_compiler/munster/ast/decl/class_decl.hpp>
 #include <toy_compiler/munster/ast/decl/compound_member_decl.hpp>
+#include <toy_compiler/munster/ast/decl/compound_params_decl.hpp>
 #include <toy_compiler/munster/ast/decl/decl.hpp>
 #include <toy_compiler/munster/ast/decl/dot_decl.hpp>
 #include <toy_compiler/munster/ast/decl/func_body_decl.hpp>
@@ -18,6 +19,7 @@
 #include <toy_compiler/munster/ast/decl/translation_unit_decl.hpp>
 #include <toy_compiler/munster/ast/decl/type_decl.hpp>
 #include <toy_compiler/munster/ast/decl/variable_decl.hpp>
+#include <toy_compiler/munster/ast/decl/visibility_decl.hpp>
 #include <toy_compiler/munster/ast/expr/compound_param_expr_decl.hpp>
 #include <toy_compiler/munster/ast/expr/compound_var_expr_decl.hpp>
 #include <toy_compiler/munster/ast/expr/float_expr.hpp>
@@ -604,13 +606,10 @@ namespace munster::ast
          std::vector<node_ptr> nodes;
          auto null = pop(recs);
 
-         if (std::size(recs) >= 1 && dynamic_cast<stmt*>(recs.back().get()))
+         if (std::size(recs) >= 1)
          {
-            std::vector<node_ptr> placeholder;
-            for (auto& node : recs | vi::reverse | vi::take_while(detail::is_type<stmt>))
-            {
-               placeholder.push_back(std::move(node));
-            }
+            std::vector<node_ptr> placeholder = recs | vi::reverse |
+               vi::take_while(detail::is_type<stmt>) | vi::move | ranges::to<std::vector>;
 
             std::vector<node_ptr> nodes;
             for (auto& node : placeholder | vi::reverse)

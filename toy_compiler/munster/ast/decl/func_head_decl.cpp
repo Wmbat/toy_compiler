@@ -53,6 +53,11 @@ namespace munster::ast
    {
       using namespace mpark::patterns;
 
+      for (const auto& child : children())
+      {
+         child->accept(visitor);
+      }
+
       const auto visit = [this](auto& vis) {
          vis(*this);
       };

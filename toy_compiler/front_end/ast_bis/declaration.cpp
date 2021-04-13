@@ -13,23 +13,6 @@
 
 namespace munster::ast
 {
-   visibility_decl::visibility_decl(const std::string& name, const source_location& location) :
-      decl{name, location}
-   {}
-
-   auto visibility_decl::to_string() const -> std::string
-   {
-      return fmt::format("{} <line:{}, col:{}> '{}'", "visibility_decl", location().line,
-                         location().column, lexeme());
-   }
-
-   compound_params_decl::compound_params_decl(std::vector<node_ptr>&& param_decls)
-   {
-      make_family<variable_decl>(std::move(param_decls));
-   }
-
-   auto compound_params_decl::to_string() const -> std::string { return "compound_param_decl"; }
-
    compound_array_index_access_decl::compound_array_index_access_decl(
       std::vector<node_ptr>&& variables)
    {
