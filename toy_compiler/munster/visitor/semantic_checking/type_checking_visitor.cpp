@@ -20,8 +20,6 @@
 #include <toy_compiler/munster/ast/stmt/assign_stmt.hpp>
 #include <toy_compiler/munster/ast/stmt/func_stmt.hpp>
 
-#include <toy_compiler/front_end/ast_bis/declaration.hpp>
-
 #include <range/v3/action/split.hpp>
 #include <range/v3/algorithm/count_if.hpp>
 #include <range/v3/algorithm/find.hpp>

@@ -1,6 +1,6 @@
 #include <toy_compiler/munster/ast/node_factory.hpp>
 
-#include <toy_compiler/front_end/ast_bis/declaration.hpp>
+#include <toy_compiler/munster/ast/decl/array_access_decl.hpp>
 #include <toy_compiler/munster/ast/decl/array_decl.hpp>
 #include <toy_compiler/munster/ast/decl/class_decl.hpp>
 #include <toy_compiler/munster/ast/decl/compound_member_decl.hpp>
@@ -16,6 +16,7 @@
 #include <toy_compiler/munster/ast/decl/main_decl.hpp>
 #include <toy_compiler/munster/ast/decl/member_func_decl.hpp>
 #include <toy_compiler/munster/ast/decl/member_var_decl.hpp>
+#include <toy_compiler/munster/ast/decl/stmt_block_decl.hpp>
 #include <toy_compiler/munster/ast/decl/translation_unit_decl.hpp>
 #include <toy_compiler/munster/ast/decl/type_decl.hpp>
 #include <toy_compiler/munster/ast/decl/variable_decl.hpp>

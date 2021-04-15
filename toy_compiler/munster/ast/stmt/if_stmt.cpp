@@ -1,8 +1,8 @@
 #include <toy_compiler/munster/ast/stmt/if_stmt.hpp>
 
-#include <toy_compiler/front_end/ast_bis/declaration.hpp>
 #include <toy_compiler/munster/ast/decl/id_decl.hpp>
 #include <toy_compiler/munster/ast/decl/location_decl.hpp>
+#include <toy_compiler/munster/ast/decl/stmt_block_decl.hpp>
 #include <toy_compiler/munster/ast/expr/expr.hpp>
 #include <toy_compiler/munster/ast/op/op.hpp>
 

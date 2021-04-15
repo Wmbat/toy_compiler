@@ -3,8 +3,6 @@
 #include <toy_compiler/munster/ast/decl/array_decl.hpp>
 #include <toy_compiler/munster/ast/decl/variable_decl.hpp>
 
-#include <toy_compiler/front_end/ast_bis/declaration.hpp>
-
 #include <toy_compiler/munster/ast/utility.hpp>
 
 namespace munster::ast
@@ -72,8 +70,5 @@ namespace munster::ast
                          m_return_type, params_string());
    }
 
-   void member_func_decl::accept(visitor_variant& visitor) const
-   {
-      visit_node(visitor, *this);
-   }
+   void member_func_decl::accept(visitor_variant& visitor) const { visit_node(visitor, *this); }
 } // namespace munster::ast

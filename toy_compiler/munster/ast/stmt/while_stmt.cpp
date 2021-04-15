@@ -1,6 +1,5 @@
 #include <toy_compiler/munster/ast/stmt/while_stmt.hpp>
 
-#include <toy_compiler/front_end/ast_bis/declaration.hpp>
 #include <toy_compiler/munster/ast/decl/location_decl.hpp>
 
 namespace munster::ast

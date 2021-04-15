@@ -1,4 +1,3 @@
-#include "range/v3/view/enumerate.hpp"
 #include <toy_compiler/munster/visitor/symbol_table/symbol_table_visitor.hpp>
 
 #include <toy_compiler/munster/ast/decl/array_decl.hpp>
@@ -14,13 +13,12 @@
 #include <toy_compiler/munster/ast/decl/translation_unit_decl.hpp>
 #include <toy_compiler/munster/ast/decl/variable_decl.hpp>
 
-#include <toy_compiler/front_end/ast_bis/declaration.hpp>
-
 #include <fmt/color.h>
 #include <fmt/core.h>
 
 #include <range/v3/numeric/accumulate.hpp>
 #include <range/v3/range/conversion.hpp>
+#include <range/v3/view/enumerate.hpp>
 #include <range/v3/view/filter.hpp>
 #include <range/v3/view/map.hpp>
 #include <range/v3/view/move.hpp>
