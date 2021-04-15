@@ -15,6 +15,8 @@ namespace rv = ranges::views;
 
 namespace munster
 {
+   auto is_param(const symbol& symbol) -> bool { return symbol.kind() == symbol_type::e_parameter; }
+   auto is_var(const symbol& symbol) -> bool { return symbol.kind() == symbol_type::e_variable; }
    auto is_mem_var(const symbol& symbol) -> bool
    {
       return symbol.kind() == symbol_type::e_member_variable;
@@ -57,13 +59,13 @@ namespace munster
          };
 
          // clang-format off
-         
-         res.val().update_size(ranges::accumulate(class_table->symbols() 
-               | rv::values
-               | rv::filter(is_mem_var)
-               | rv::transform(get_size), 0L));
-
+         const auto size = ranges::accumulate(class_table->symbols() 
+               | rv::values 
+               | rv::filter(is_mem_var) 
+               | rv::transform(get_size), 0L);
          // clang-format on
+
+         res.val().update_size(size != 0 ? size : 1L);
       }
    }
    void memory_size_visitor::visit(const ast::compound_inheritance_decl&) {}
@@ -77,7 +79,8 @@ namespace munster
    {
       symbol_table* table = m_tables.back();
 
-      for (auto& symbol : table->symbols() | rv::values)
+      // const auto param_view = ;
+      for (auto& symbol : table->symbols() | rv::values | rv::filter(is_param))
       {
          if (!is_pod(symbol.type()))
          {
@@ -85,6 +88,33 @@ namespace munster
             if (auto res = mp_root->lookup(key))
             {
                symbol.update_size(res.val().size());
+            }
+         }
+      }
+
+      for (auto& symbol : table->symbols() | rv::values | rv::filter(is_var))
+      {
+         const auto type = symbol.type().substr(0, symbol.type().find_first_of('['));
+
+         if (!is_pod(type))
+         {
+            const std::string key{type};
+            if (auto res = mp_root->lookup(key))
+            {
+               // clang-format off
+               const auto type_data = symbol.type() 
+                  | rv::split('[') 
+                  | rv::tail
+                  | ranges::to<std::vector<std::string>>;
+               // clang-format on
+
+               std::int64_t size = res.val().size();
+               for (const auto& str : type_data)
+               {
+                  size *= std::stoi(str.substr(0, str.find_first_of(']')));
+               }
+
+               symbol.update_size(size);
             }
          }
       }
