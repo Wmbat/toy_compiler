@@ -3,6 +3,7 @@
 #include <toy_compiler/munster/grammar/actions.hpp>
 #include <toy_compiler/munster/lexer.hpp>
 #include <toy_compiler/munster/visitor/semantic_checking/type_checking_visitor.hpp>
+#include <toy_compiler/munster/visitor/symbol_table/memory_size_visitor.hpp>
 #include <toy_compiler/munster/visitor/symbol_table/symbol_table_visitor.hpp>
 #include <toy_compiler/munster/visitor/visitor.hpp>
 
@@ -19,7 +20,8 @@ namespace munster::ast
 
    using node_ptr = std::unique_ptr<node>;
 
-   using visitor_variant = std::variant<type_checking_visitor, symbol_table_visitor>;
+   using visitor_variant =
+      std::variant<type_checking_visitor, symbol_table_visitor, memory_size_visitor>;
 
    namespace detail
    {
@@ -31,9 +33,6 @@ namespace munster::ast
 
    } // namespace detail
 
-   /**
-    * @pre node is not nullptr. UB otherwise
-    */
    template <typename To, typename From>
    auto node_cast(std::unique_ptr<From>&& node) -> std::unique_ptr<To>
    {
@@ -66,6 +65,8 @@ namespace munster::ast
       [[nodiscard]] virtual auto to_string() const -> std::string = 0;
 
    protected:
+      void visit(visitor_variant& visitor);
+
       template <typename... NodeTypes>
       void make_family_e(std::vector<std::variant<std::unique_ptr<NodeTypes>...>>&& children)
       {

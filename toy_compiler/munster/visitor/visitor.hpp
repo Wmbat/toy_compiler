@@ -68,9 +68,6 @@ namespace munster
    template <typename Any>
    class visitor : public util::crtp<Any, visitor>
    {
-   private:
-      friend Any;
-
    public:
       void operator()(const ast::translation_unit_decl& tl) { this->underlying().visit(tl); }
 

@@ -1,8 +1,8 @@
 #include <toy_compiler/munster/ast/op/assign_op.hpp>
 
-#include <fmt/core.h>
+#include <toy_compiler/munster/ast/utility.hpp>
 
-#include <mpark/patterns.hpp>
+#include <fmt/core.h>
 
 #include <cassert>
 #include <utility>
@@ -18,19 +18,12 @@ namespace munster::ast
 
    void assign_op::accept(visitor_variant& visitor) const
    {
-      using namespace mpark::patterns;
-
       for (const auto& child : children())
       {
          child->accept(visitor);
       }
 
-      const auto visit = [this](auto& vis) {
-         vis(*this);
-      };
-
-      match(visitor)(pattern(as<symbol_table_visitor>(arg)) = visit,
-                     pattern(as<type_checking_visitor>(arg)) = visit);
+      visit_node(visitor, *this);
    }
 
    auto assign_op::to_string() const -> std::string

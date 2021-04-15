@@ -1,6 +1,6 @@
 #include <toy_compiler/munster/ast/decl/array_decl.hpp>
 
-#include <mpark/patterns.hpp>
+#include <toy_compiler/munster/ast/utility.hpp>
 
 namespace munster::ast
 {
@@ -25,17 +25,7 @@ namespace munster::ast
                          location().column, m_end_loc.line, m_end_loc.column, lexeme());
    }
 
-   void array_decl::accept(visitor_variant& visitor) const
-   {
-      using namespace mpark::patterns;
-
-      const auto visit = [this](auto& vis) {
-         vis(*this);
-      };
-
-      match(visitor)(pattern(as<symbol_table_visitor>(arg)) = visit,
-                     pattern(as<type_checking_visitor>(arg)) = visit);
-   }
+   void array_decl::accept(visitor_variant& visitor) const { visit_node(visitor, *this); }
 
    compound_array_decl::compound_array_decl(std::vector<node_ptr>&& array_decls)
    {
@@ -46,18 +36,11 @@ namespace munster::ast
 
    void compound_array_decl::accept(visitor_variant& visitor) const
    {
-      using namespace mpark::patterns;
-
       for (const auto& child : children())
       {
          child->accept(visitor);
       }
 
-      const auto visit = [this](auto& vis) {
-         vis(*this);
-      };
-
-      match(visitor)(pattern(as<symbol_table_visitor>(arg)) = visit,
-                     pattern(as<type_checking_visitor>(arg)) = visit);
+      visit_node(visitor, *this);
    }
 } // namespace munster::ast

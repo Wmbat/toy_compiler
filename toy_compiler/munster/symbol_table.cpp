@@ -76,6 +76,7 @@ namespace munster
    {
       return m_symbols;
    }
+   auto symbol_table::symbols() -> std::unordered_map<std::string, symbol>& { return m_symbols; }
 
    auto symbol_table::lookup(const std::string& name) -> lookup_kv_result
    {

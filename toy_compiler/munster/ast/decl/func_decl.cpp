@@ -3,7 +3,7 @@
 #include <toy_compiler/munster/ast/decl/func_body_decl.hpp>
 #include <toy_compiler/munster/ast/decl/func_head_decl.hpp>
 
-#include <mpark/patterns.hpp>
+#include <toy_compiler/munster/ast/utility.hpp>
 
 namespace munster::ast
 {
@@ -18,19 +18,12 @@ namespace munster::ast
 
    void func_decl::accept(visitor_variant& visitor) const
    {
-      using namespace mpark::patterns;
-
       for (const auto& child : children())
       {
          child->accept(visitor);
       }
 
-      const auto visit = [this](auto& vis) {
-         vis(*this);
-      };
-
-      match(visitor)(pattern(as<symbol_table_visitor>(arg)) = visit,
-                     pattern(as<type_checking_visitor>(arg)) = visit);
+      visit_node(visitor, *this);
    }
 
    auto func_decl::to_string() const -> std::string { return "func_decl"; }

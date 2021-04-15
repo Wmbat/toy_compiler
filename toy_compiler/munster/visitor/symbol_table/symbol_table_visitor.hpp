@@ -6,6 +6,8 @@ namespace munster
 {
    class symbol_table_visitor : public visitor<symbol_table_visitor>
    {
+      friend visitor<symbol_table_visitor>;
+
       struct symbol_kv
       {
          std::string key;
@@ -13,6 +15,9 @@ namespace munster
       };
 
    public:
+      [[nodiscard]] auto get_root_table() const -> symbol_table*;
+
+   private:
       void visit(const ast::translation_unit_decl& node);
 
       void visit(const ast::compound_class_decl& node);
@@ -58,8 +63,6 @@ namespace munster
       void visit(const ast::add_op& node);
       void visit(const ast::mult_op& node);
       void visit(const ast::rel_op& node);
-
-      [[nodiscard]] auto get_root_table() const -> symbol_table*;
 
    private:
       auto generate_var_symbols(const ast::node* head) -> std::vector<symbol>;

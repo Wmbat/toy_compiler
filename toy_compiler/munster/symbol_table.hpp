@@ -150,6 +150,7 @@ namespace munster
       auto name() const noexcept -> std::string_view;  // NOLINT
       auto kind() const noexcept -> symbol_table_type; // NOLINT
       auto symbols() const -> const std::unordered_map<std::string, symbol>&;
+      auto symbols() -> std::unordered_map<std::string, symbol>&;
 
       auto insert(const std::string& name, symbol&& value) -> insert_kv_result;
       auto lookup(const std::string& name) -> lookup_kv_result;

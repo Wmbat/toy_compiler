@@ -1,5 +1,7 @@
 #include <toy_compiler/munster/ast/expr/ternary_expr.hpp>
 
+#include <toy_compiler/munster/ast/utility.hpp>
+
 namespace munster::ast
 {
    ternary_expr::ternary_expr(node_ptr location, node_ptr condition, node_ptr expr_0,

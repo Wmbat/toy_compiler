@@ -168,12 +168,13 @@ namespace munster
 
    void type_checking_visitor::visit(const ast::main_decl&) {}
 
-   void type_checking_visitor::visit(const ast::func_expr& /*node*/) {}
+   void type_checking_visitor::visit(const ast::func_expr& /*node*/)
+   {
+      m_symbols.push_back(nullptr);
+   }
    void type_checking_visitor::visit(const ast::var_expr& node)
    {
       const std::string var_name{node.lexeme()};
-
-      fmt::print("var_expr: {}\n", var_name);
 
       if (std::size(m_tables) == 1u)
       {
@@ -262,7 +263,7 @@ namespace munster
       m_symbols.push_back(&res.val());
    }
 
-   void type_checking_visitor::visit(const ast::func_stmt& /*node*/) { fmt::print("func_stmt"); }
+   void type_checking_visitor::visit(const ast::func_stmt& /*node*/) {}
    void type_checking_visitor::visit(const ast::compound_stmt& /*node*/) {}
    void type_checking_visitor::visit(const ast::assign_stmt& /*node*/) {}
    void type_checking_visitor::visit(const ast::if_stmt& /*node*/) {}

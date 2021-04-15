@@ -1,5 +1,7 @@
 #include <toy_compiler/munster/ast/expr/not_expr.hpp>
 
+#include <toy_compiler/munster/ast/utility.hpp>
+
 #include <toy_compiler/munster/ast/decl/id_decl.hpp>
 #include <toy_compiler/munster/ast/op/mult_op.hpp>
 

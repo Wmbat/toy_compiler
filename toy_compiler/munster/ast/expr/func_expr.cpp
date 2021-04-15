@@ -1,5 +1,7 @@
 #include <toy_compiler/munster/ast/expr/func_expr.hpp>
 
+#include <toy_compiler/munster/ast/utility.hpp>
+
 namespace munster::ast
 {
    func_expr::func_expr(id_decl::ptr id,

@@ -1,5 +1,7 @@
 #include <toy_compiler/munster/ast/decl/main_decl.hpp>
 
+#include <toy_compiler/munster/ast/utility.hpp>
+
 namespace munster::ast
 {
    main_decl::main_decl(id_decl::ptr id, func_body_decl::ptr func_body) :
@@ -15,11 +17,7 @@ namespace munster::ast
          child->accept(visitor);
       }
 
-      std::visit(
-         [this](auto& visitor) {
-            visitor.visit(*this);
-         },
-         visitor);
+      visit_node(visitor, *this);
    }
 
    auto main_decl::to_string() const -> std::string

@@ -5,7 +5,7 @@
 
 #include <toy_compiler/front_end/ast_bis/declaration.hpp>
 
-#include <mpark/patterns.hpp>
+#include <toy_compiler/munster/ast/utility.hpp>
 
 namespace munster::ast
 {
@@ -74,13 +74,6 @@ namespace munster::ast
 
    void member_func_decl::accept(visitor_variant& visitor) const
    {
-      using namespace mpark::patterns;
-
-      const auto visit = [this](auto& vis) {
-         vis(*this);
-      };
-
-      match(visitor)(pattern(as<symbol_table_visitor>(arg)) = visit,
-                     pattern(as<type_checking_visitor>(arg)) = visit);
+      visit_node(visitor, *this);
    }
 } // namespace munster::ast

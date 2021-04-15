@@ -1,5 +1,7 @@
 #include <toy_compiler/munster/ast/expr/priority_expr.hpp>
 
+#include <toy_compiler/munster/ast/utility.hpp>
+
 #include <toy_compiler/munster/ast/decl/location_decl.hpp>
 #include <toy_compiler/munster/ast/op/op.hpp>
 

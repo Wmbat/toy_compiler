@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "toy_compiler/munster/visitor/symbol_table/memory_size_visitor.hpp"
 #include <toy_compiler/core/application.hpp>
 
 #include <toy_compiler/munster/visitor/semantic_checking/type_checking_visitor.hpp>
@@ -101,7 +102,7 @@ application::application(std::span<const std::string_view> args, util::logger_wr
                using namespace mpark::patterns;
                using namespace munster;
 
-               munster::ast::visitor_variant st_variant{symbol_table_visitor{}};
+               ast::visitor_variant st_variant{symbol_table_visitor{}};
                result.ast->accept(st_variant);
 
                auto* root_table = match(st_variant)(
@@ -111,15 +112,20 @@ application::application(std::span<const std::string_view> args, util::logger_wr
                      return vis.get_root_table();
                   });
 
+               ast::visitor_variant ms_variant{memory_size_visitor{root_table}};
+               result.ast->accept(ms_variant);
+
                write_symbol_tables_to_file(filepath, root_table);
 
-               munster::ast::visitor_variant tc_variant{type_checking_visitor{root_table}};
+               /*
+               ast::visitor_variant tc_variant{type_checking_visitor{root_table}};
                result.ast->accept(tc_variant);
 
                match(tc_variant)(
                   pattern(as<type_checking_visitor>(arg)) = [&](type_checking_visitor& vis) {
                      print_errors(vis.get_errors(), filepath);
                   });
+                  */
             }
          }
          else

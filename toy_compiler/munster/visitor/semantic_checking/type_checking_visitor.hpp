@@ -9,6 +9,8 @@ namespace munster
 {
    class type_checking_visitor : public visitor<type_checking_visitor>
    {
+      friend visitor<type_checking_visitor>;
+
    public:
       type_checking_visitor(symbol_table* p_root);
 

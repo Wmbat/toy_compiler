@@ -1,6 +1,6 @@
 #include <toy_compiler/munster/ast/decl/variable_decl.hpp>
 
-#include <mpark/patterns.hpp>
+#include <toy_compiler/munster/ast/utility.hpp>
 
 namespace munster::ast
 {
@@ -23,19 +23,12 @@ namespace munster::ast
 
    void variable_decl::accept(visitor_variant& visitor) const
    {
-      using namespace mpark::patterns;
-
       for (const auto& child : children())
       {
          child->accept(visitor);
       }
 
-      const auto visit = [this](auto& vis) {
-         vis(*this);
-      };
-
-      match(visitor)(pattern(as<symbol_table_visitor>(arg)) = visit,
-                     pattern(as<type_checking_visitor>(arg)) = visit);
+      visit_node(visitor, *this);
    }
 
    compound_variable_decl::compound_variable_decl(std::vector<node_ptr>&& variables)
@@ -45,19 +38,12 @@ namespace munster::ast
 
    void compound_variable_decl::accept(visitor_variant& visitor) const
    {
-      using namespace mpark::patterns;
-
       for (const auto& child : children())
       {
          child->accept(visitor);
       }
 
-      const auto visit = [this](auto& vis) {
-         vis(*this);
-      };
-
-      match(visitor)(pattern(as<symbol_table_visitor>(arg)) = visit,
-                     pattern(as<type_checking_visitor>(arg)) = visit);
+      visit_node(visitor, *this);
    }
 
    auto compound_variable_decl::to_string() const -> std::string

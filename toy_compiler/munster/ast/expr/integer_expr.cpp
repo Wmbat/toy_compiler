@@ -1,8 +1,6 @@
 #include <toy_compiler/munster/ast/expr/integer_expr.hpp>
 
-#include <mpark/patterns.hpp>
-
-using namespace mpark::patterns;
+#include <toy_compiler/munster/ast/utility.hpp>
 
 namespace munster::ast
 {
@@ -10,15 +8,7 @@ namespace munster::ast
       expr{lexeme, location}
    {}
 
-   void integer_expr::accept(visitor_variant& visitor) const
-   {
-      const auto visit = [this](auto& vis) {
-         vis(*this);
-      };
-
-      match(visitor)(pattern(as<symbol_table_visitor>(arg)) = visit,
-                     pattern(as<type_checking_visitor>(arg)) = visit);
-   }
+   void integer_expr::accept(visitor_variant& visitor) const { visit_node(visitor, *this); }
 
    auto integer_expr::to_string() const -> std::string
    {

@@ -1,6 +1,6 @@
 #include <toy_compiler/munster/ast/stmt/compound_stmt.hpp>
 
-#include <mpark/patterns.hpp>
+#include <toy_compiler/munster/ast/utility.hpp>
 
 namespace munster::ast
 {
@@ -16,13 +16,7 @@ namespace munster::ast
          child->accept(visitor);
       }
 
-      using namespace mpark::patterns;
-      const auto visit = [this](auto& vis) {
-         vis(*this);
-      };
-
-      match(visitor)(pattern(as<symbol_table_visitor>(arg)) = visit,
-                     pattern(as<type_checking_visitor>(arg)) = visit);
+      visit_node(visitor, *this);
    }
 
    auto compound_stmt::to_string() const -> std::string { return "compound_stmt"; }

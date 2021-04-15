@@ -1,5 +1,7 @@
 #include <toy_compiler/munster/ast/decl/visibility_decl.hpp>
 
+#include <toy_compiler/munster/ast/utility.hpp>
+
 namespace munster::ast
 {
    visibility_decl::visibility_decl(const std::string& name, const source_location& location) :
