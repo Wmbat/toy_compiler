@@ -11,6 +11,14 @@ namespace munster::ast
       make_family<expr, op>(std::move(params_decl));
    }
 
+   void compound_parameter_expr_decl::accept(visitor_variant& visitor) const
+   {
+      for (auto& child : children())
+      {
+         child->accept(visitor);
+      }
+   }
+
    auto compound_parameter_expr_decl::to_string() const -> std::string
    {
       return fmt::format("compound_parameter_expr_decl");

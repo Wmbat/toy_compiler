@@ -1,8 +1,12 @@
 #include <toy_compiler/munster/visitor/code_gen/code_gen_visitor.hpp>
 
+#include <toy_compiler/munster/ast/decl/func_body_decl.hpp>
+#include <toy_compiler/munster/ast/decl/func_decl.hpp>
+#include <toy_compiler/munster/ast/decl/func_head_decl.hpp>
 #include <toy_compiler/munster/ast/decl/main_decl.hpp>
 #include <toy_compiler/munster/ast/decl/variable_decl.hpp>
 #include <toy_compiler/munster/ast/expr/float_expr.hpp>
+#include <toy_compiler/munster/ast/expr/func_expr.hpp>
 #include <toy_compiler/munster/ast/expr/integer_expr.hpp>
 #include <toy_compiler/munster/ast/expr/var_expr.hpp>
 #include <toy_compiler/munster/ast/op/add_op.hpp>
@@ -45,6 +49,11 @@ namespace munster
       auto is_temp(const symbol& symbol) -> bool
       {
          return symbol.kind() == symbol_type::e_temporary;
+      }
+
+      auto is_param(const symbol& symbol) -> bool
+      {
+         return symbol.kind() == symbol_type::e_parameter;
       }
 
       auto trim_leading_whitespaces(std::string_view str) -> std::string_view
@@ -133,7 +142,39 @@ namespace munster
       }
    }
 
-   void code_gen_visitor::visit(const ast::translation_unit_decl&) {}
+   void code_gen_visitor::visit(const ast::translation_unit_decl&)
+   {
+      for (auto& symbol : mp_root->symbols() | rv::values)
+      {
+         const auto* p_table = symbol.link();
+         for (auto& symbol : p_table->symbols() | rv::values | rv::filter(is_var))
+         {
+            std::string_view var_name{symbol.name()};
+
+            const std::string label{fmt::format("{}_{}", p_table->name(), var_name)};
+
+            moon_code_output += fmt::format("{:<30} {} {}\n", label, "res", symbol.size());
+         }
+
+         for (auto& symbol : p_table->symbols() | rv::values | rv::filter(is_param))
+         {
+            std::string_view var_name{symbol.name()};
+
+            const std::string label{fmt::format("{}_{}", p_table->name(), var_name)};
+
+            moon_code_output += fmt::format("{:<30} {} {}\n", label, "res", symbol.size());
+         }
+
+         for (auto& symbol : p_table->symbols() | rv::values | rv::filter(is_temp))
+         {
+            std::string_view var_name{symbol.name()};
+
+            const std::string label{fmt::format("{}_{}", p_table->name(), var_name)};
+
+            moon_code_output += fmt::format("{:<30} {} {}\n", label, "res", symbol.size());
+         }
+      }
+   }
 
    void code_gen_visitor::visit(const ast::compound_class_decl&) {}
    void code_gen_visitor::visit(const ast::class_decl&) {}
@@ -144,33 +185,68 @@ namespace munster
    void code_gen_visitor::visit(const ast::member_var_decl&) {}
 
    void code_gen_visitor::visit(const ast::compound_function_decl&) {}
-   void code_gen_visitor::visit(const ast::func_decl&) {}
-   void code_gen_visitor::visit(const ast::func_head_decl&) {}
-   void code_gen_visitor::visit(const ast::func_body_decl&) {}
+   void code_gen_visitor::visit(const ast::func_decl&) { m_tables.pop_back(); }
+   void code_gen_visitor::visit(const ast::func_head_decl& node)
+   {
+      if (!node.class_name())
+      {
+         const auto func_name = node.lexeme();
+         const auto key = fmt::format("{} '{} ({})'", func_name, node.return_type(),
+                                      fmt::join(node.params(), ", "));
+
+         if (auto func_entry_res = mp_root->lookup(key))
+         {
+            m_tables.push_back(func_entry_res.val().link());
+         }
+      }
+   }
+   void code_gen_visitor::visit(const ast::func_body_decl&)
+   {
+      if (m_tables.back()->kind() != symbol_table_type::e_main)
+      {
+         const auto name = fmt::format("callsite{}", m_function_counter++);
+         m_tables.back()->insert(name,
+                                 symbol{{.name = name,
+                                         .kind = symbol_type::e_parameter,
+                                         .location = {},
+                                         .size = 4,
+                                         .type = "None"}});
+
+         const auto function_block = ranges::accumulate(m_blocks, std::string{});
+
+         m_blocks.clear();
+
+         const auto label = fmt::format("fn_{}_{}", m_tables.back()->name(), m_function_counter++);
+
+         moon_code_output += fmt::format("{} {}", label, trim_leading_whitespaces(function_block));
+         moon_code_output += fmt::format("{}lw r15, {}\n", spacing, name);
+         moon_code_output += fmt::format("{}jr r15\n\n", spacing);
+      }
+   }
    void code_gen_visitor::visit(const ast::stmt_block_decl&)
    {
       const auto reverse_view = m_blocks | rv::reverse;
       const auto it = ranges::find(reverse_view, std::string{"stmt_block"});
 
-      const std::int64_t dist = std::distance(it, std::end(reverse_view));
-      const std::span range{std::begin(m_blocks) + dist, std::end(m_blocks)};
-      const std::string block = ranges::accumulate(range, std::string{});
+      const std::int64_t dist_to_marker = std::distance(it, std::end(reverse_view));
+      const std::span stmt_data{std::begin(m_blocks) + dist_to_marker, std::end(m_blocks)};
+      const std::string stmt_block = ranges::accumulate(stmt_data, std::string{});
 
-      m_blocks.erase(std::begin(m_blocks) + dist - 1, std::end(m_blocks));
+      m_blocks.erase(std::begin(m_blocks) + dist_to_marker - 1, std::end(m_blocks));
 
-      const std::size_t first = block.find_first_not_of(' ');
+      const std::size_t first = stmt_block.find_first_not_of(' ');
 
       if (first == std::string::npos)
       {
-         m_blocks.emplace_back(block);
+         m_blocks.emplace_back(stmt_block);
       }
       else
       {
-         m_blocks.push_back(block.substr(first, std::size(block)));
+         m_blocks.push_back(stmt_block.substr(first, std::size(stmt_block)));
       }
    }
 
-   void code_gen_visitor::visit(const ast::main_decl& node)
+   void code_gen_visitor::visit(const ast::main_decl&)
    {
       moon_code_output += fmt::format("{}{}\n", spacing, "entry");
       moon_code_output += fmt::format("{}{}\n\n", spacing, "addi r14, r0, topaddr");
@@ -181,29 +257,6 @@ namespace munster
       }
 
       moon_code_output += fmt::format("{}hlt\n\n", spacing);
-
-      const std::string name{node.lexeme()};
-      if (const auto res = mp_root->lookup(name))
-      {
-         symbol_table* p_table = res.val().link();
-         for (auto& symbol : p_table->symbols() | rv::values | rv::filter(is_var))
-         {
-            std::string_view var_name{symbol.name()};
-
-            const std::string label{fmt::format("{}_{}", name, var_name)};
-
-            moon_code_output += fmt::format("{:<30} {} {}\n", label, "res", symbol.size());
-         }
-
-         for (auto& symbol : p_table->symbols() | rv::values | rv::filter(is_temp))
-         {
-            std::string_view var_name{symbol.name()};
-
-            const std::string label{fmt::format("{}_{}", name, var_name)};
-
-            moon_code_output += fmt::format("{:<30} {} {}\n", label, "res", symbol.size());
-         }
-      }
    }
 
    void code_gen_visitor::visit(const ast::compound_params_decl&) {}
@@ -218,7 +271,10 @@ namespace munster
    void code_gen_visitor::visit(const ast::compound_array_decl&) {}
    void code_gen_visitor::visit(const ast::array_decl&) {}
 
-   void code_gen_visitor::visit(const ast::func_expr&) {}
+   void code_gen_visitor::visit(const ast::func_expr& node)
+   {
+      const std::string func_name{node.lexeme()};
+   }
    void code_gen_visitor::visit(const ast::var_expr& node)
    {
       const std::string var_name{node.lexeme()};
@@ -329,7 +385,7 @@ namespace munster
 
       const auto temp_label = fmt::format("{}_{}", p_table->name(), p_expr_sym->name());
       const auto beg_while_label = fmt::format("wh_beg_{}", m_if_counter);
-      const auto end_while_label = fmt::format("wh_end_{}", m_if_counter);
+      const auto end_while_label = fmt::format("wh_end_{}", m_if_counter++);
 
       const auto comment = "% while statement";
       const auto load = fmt::format("{}lw {}, {}(r0) {}\n", spacing, r1, temp_label, comment);

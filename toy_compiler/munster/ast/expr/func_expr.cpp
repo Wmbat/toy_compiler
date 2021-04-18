@@ -14,6 +14,16 @@ namespace munster::ast
       }
    }
 
+   void func_expr::accept(visitor_variant& visitor) const
+   {
+      for (auto& child : children())
+      {
+         child->accept(visitor);
+      }
+
+      visit_node(visitor, *this);
+   }
+
    auto func_expr::to_string() const -> std::string
    {
       return fmt::format("function_expr <line:{1}, col:{2}> '{0}'", lexeme(), location().line,

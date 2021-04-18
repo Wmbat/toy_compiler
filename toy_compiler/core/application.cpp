@@ -80,21 +80,10 @@ application::application(std::span<const std::string_view> args, util::logger_wr
             const auto result = munster::parse_items(maybe.value(), m_logger);
             if (result.value == munster::parse_status::error)
             {
-               for (auto& err : result.errors.value())
-               {
-                  fmt::print(fmt::emphasis::bold, "{}:{}.{} - ", filepath.c_str(), err.pos.line,
-                             err.pos.column);
-                  fmt::print(fmt::fg(fmt::color::red) | fmt::emphasis::bold, "[{}]", err.type);
-
-                  if (err.type == munster::parse_error_type::e_syntax_error)
-                  {
-                     fmt::print(" expected '{}'\n", err.lexeme);
-                  }
-
-                  fmt::print("{}\n", err.line);
-               }
+               print_errors(result.errors.value(), filepath);
             }
 
+            write_lexing_to_file(filepath, maybe.value());
             write_ast_to_file(filepath, result.ast);
             write_derivations_to_file(filepath, result.derivation);
 
@@ -105,25 +94,29 @@ application::application(std::span<const std::string_view> args, util::logger_wr
                ast::visitor_variant st_variant{symbol_table_visitor{}};
                result.ast->accept(st_variant);
 
-               auto* root_table =
-                  match(st_variant)(pattern(as<symbol_table_visitor>(arg)) =
-                                       [&](symbol_table_visitor& vis) -> symbol_table* {
+               auto [has_error, p_root_table] = match(st_variant)(
+                  pattern(as<symbol_table_visitor>(arg)) =
+                     [&](symbol_table_visitor& vis) -> std::pair<bool, symbol_table*> {
                      print_errors(vis.get_errors(), filepath);
 
-                     return vis.get_root_table();
+                     return {!std::empty(vis.get_errors()), vis.get_root_table()};
                   });
 
-               ast::visitor_variant ms_variant{memory_size_visitor{root_table}};
+               ast::visitor_variant ms_variant{memory_size_visitor{p_root_table}};
                result.ast->accept(ms_variant);
 
-               write_symbol_tables_to_file(filepath, root_table);
+               write_symbol_tables_to_file(filepath, p_root_table);
 
-               ast::visitor_variant cg_variant{code_gen_visitor{root_table}};
-               result.ast->accept(cg_variant);
+               if (!has_error)
+               {
+                  ast::visitor_variant cg_variant{code_gen_visitor{p_root_table}};
+                  result.ast->accept(cg_variant);
 
-               match(cg_variant)(pattern(as<code_gen_visitor>(arg)) = [&](code_gen_visitor& vis) {
-                  write_moon_code_to_file(filepath, vis.moon_code());
-               });
+                  match(cg_variant)(
+                     pattern(as<code_gen_visitor>(arg)) = [&](code_gen_visitor& vis) {
+                        write_moon_code_to_file(filepath, vis.moon_code());
+                     });
+               }
 
                /*
                ast::visitor_variant tc_variant{type_checking_visitor{root_table}};
@@ -154,6 +147,17 @@ application::application(std::span<const std::string_view> args, util::logger_wr
                           filepath.c_str());
       }
    }
+}
+
+void application::write_lexing_to_file(const std::filesystem::path& path,
+                                       const std::span<munster::lex_item>& items) const
+{
+   auto output_path = path.parent_path();
+   output_path /= path.stem();
+   output_path += ".m";
+
+   std::ofstream output_file{output_path};
+   fmt::print(output_file, "{}", fmt::join(items, "\n"));
 }
 
 void application::write_moon_code_to_file(const std::filesystem::path& path,

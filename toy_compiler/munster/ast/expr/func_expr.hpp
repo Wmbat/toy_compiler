@@ -11,6 +11,8 @@ namespace munster::ast
    public:
       func_expr(id_decl::ptr id, compound_parameter_expr_decl::ptr compound_input_parameter);
 
+      void accept(visitor_variant &visitor) const override;
+
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 } // namespace munster::ast

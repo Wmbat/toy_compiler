@@ -72,6 +72,7 @@ namespace munster
       std::int64_t m_literal_counter = 0;
       std::int64_t m_temporary_counter = 0;
       std::int64_t m_if_counter = 0;
+      std::int64_t m_function_counter = 0;
 
       symbol_table* mp_root{};
 

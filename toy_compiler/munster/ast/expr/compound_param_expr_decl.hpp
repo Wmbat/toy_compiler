@@ -12,6 +12,8 @@ namespace munster::ast
    public:
       compound_parameter_expr_decl(std::vector<node_ptr>&& member_decl);
 
+      void accept(visitor_variant &visitor) const override;
+
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 } // namespace munster::ast
