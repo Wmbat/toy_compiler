@@ -2,6 +2,7 @@
 
 #include <toy_compiler/munster/ast/decl/class_decl.hpp>
 #include <toy_compiler/munster/ast/decl/func_head_decl.hpp>
+#include <toy_compiler/munster/ast/decl/main_decl.hpp>
 
 #include <range/v3/numeric/accumulate.hpp>
 #include <range/v3/range/conversion.hpp>
@@ -152,8 +153,42 @@ namespace munster
       }
    }
    void memory_size_visitor::visit(const ast::func_body_decl&) {}
+   void memory_size_visitor::visit(const ast::stmt_block_decl&) {}
 
-   void memory_size_visitor::visit(const ast::main_decl&) {}
+   void memory_size_visitor::visit(const ast::main_decl& node)
+   {
+      const std::string name{node.lexeme()};
+      if (auto res = mp_root->lookup(name))
+      {
+         symbol_table* p_main_table = res.val().link();
+         for (auto& symbol : p_main_table->symbols() | rv::values | rv::filter(is_var))
+         {
+            const auto type = symbol.type().substr(0, symbol.type().find_first_of('['));
+
+            if (!is_pod(type))
+            {
+               const std::string key{type};
+               if (auto res = mp_root->lookup(key))
+               {
+                  // clang-format off
+               const auto type_data = symbol.type() 
+                  | rv::split('[') 
+                  | rv::tail
+                  | ranges::to<std::vector<std::string>>;
+                  // clang-format on
+
+                  std::int64_t size = res.val().size();
+                  for (const auto& str : type_data)
+                  {
+                     size *= std::stoi(str.substr(0, str.find_first_of(']')));
+                  }
+
+                  symbol.update_size(size);
+               }
+            }
+         }
+      }
+   }
 
    void memory_size_visitor::visit(const ast::compound_params_decl&) {}
    void memory_size_visitor::visit(const ast::compound_variable_decl&) {}

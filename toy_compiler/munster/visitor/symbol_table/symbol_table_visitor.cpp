@@ -363,6 +363,7 @@ namespace munster
       m_tables.push_back(std::move(table));
    }
    void symbol_table_visitor::visit(const ast::func_body_decl&) {}
+   void symbol_table_visitor::visit(const ast::stmt_block_decl&) {}
 
    void symbol_table_visitor::visit(const ast::main_decl& md)
    {

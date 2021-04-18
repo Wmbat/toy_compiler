@@ -17,6 +17,7 @@ namespace munster::ast
 
       match(visitor)(pattern(as<symbol_table_visitor>(arg)) = visit,
                      pattern(as<memory_size_visitor>(arg)) = visit,
-                     pattern(as<type_checking_visitor>(arg)) = visit);
+                     pattern(as<type_checking_visitor>(arg)) = visit,
+                     pattern(as<code_gen_visitor>(arg)) = visit);
    }
 } // namespace munster::ast

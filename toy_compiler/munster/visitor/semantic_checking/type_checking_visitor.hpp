@@ -28,6 +28,7 @@ namespace munster
       void visit(const ast::func_decl&);
       void visit(const ast::func_head_decl&);
       void visit(const ast::func_body_decl&);
+      void visit(const ast::stmt_block_decl& node);
 
       void visit(const ast::main_decl& node);
 

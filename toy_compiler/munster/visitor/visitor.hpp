@@ -34,6 +34,8 @@ namespace munster
       class func_head_decl;
       class func_body_decl;
 
+      class stmt_block_decl;
+
       class func_expr;
       class var_expr;
       class float_expr;
@@ -86,6 +88,7 @@ namespace munster
       void operator()(const ast::func_decl& fd) { this->underlying().visit(fd); }
       void operator()(const ast::func_head_decl& fd) { this->underlying().visit(fd); }
       void operator()(const ast::func_body_decl& fbd) { this->underlying().visit(fbd); }
+      void operator()(const ast::stmt_block_decl& fbd) { this->underlying().visit(fbd); }
 
       void operator()(const ast::main_decl& main) { this->underlying().visit(main); }
 

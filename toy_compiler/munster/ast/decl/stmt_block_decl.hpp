@@ -12,6 +12,8 @@ namespace munster::ast
    public:
       stmt_block_decl(node_ptr node);
 
+      void accept(visitor_variant &visitor) const override;
+
       [[nodiscard]] auto to_string() const -> std::string override;
    };
 } // namespace munster::ast

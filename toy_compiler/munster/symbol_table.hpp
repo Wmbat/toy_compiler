@@ -31,7 +31,9 @@ namespace munster
       e_function,
       e_variable,
       e_parameter,
-      e_temporary
+      e_temporary,
+      e_float_lit,
+      e_integer_lit
    };
 
    enum struct symbol_table_type

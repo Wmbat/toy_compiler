@@ -5,6 +5,7 @@
 #include <toy_compiler/munster/ast/decl/stmt_block_decl.hpp>
 #include <toy_compiler/munster/ast/expr/expr.hpp>
 #include <toy_compiler/munster/ast/op/op.hpp>
+#include <toy_compiler/munster/ast/utility.hpp>
 
 namespace munster::ast
 {
@@ -25,6 +26,16 @@ namespace munster::ast
       make_child(std::move(expr_node));
       make_child(std::move(then_block));
       make_child(std::move(else_block));
+   }
+
+   void if_stmt::accept(visitor_variant& visitor) const
+   {
+      for (const auto& child : children())
+      {
+         child->accept(visitor);
+      }
+
+      visit_node(visitor, *this);
    }
 
    auto if_stmt::to_string() const -> std::string

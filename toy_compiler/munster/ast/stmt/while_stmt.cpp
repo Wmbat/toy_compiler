@@ -1,6 +1,7 @@
 #include <toy_compiler/munster/ast/stmt/while_stmt.hpp>
 
 #include <toy_compiler/munster/ast/decl/location_decl.hpp>
+#include <toy_compiler/munster/ast/utility.hpp>
 
 namespace munster::ast
 {
@@ -10,6 +11,16 @@ namespace munster::ast
 
       make_child(std::move(expr));
       make_child(std::move(stmt_block));
+   }
+
+   void while_stmt::accept(visitor_variant& visitor) const
+   {
+      for (const auto& child : children())
+      {
+         child->accept(visitor);
+      }
+
+      visit_node(visitor, *this);
    }
 
    auto while_stmt::to_string() const -> std::string

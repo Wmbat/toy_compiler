@@ -105,8 +105,9 @@ application::application(std::span<const std::string_view> args, util::logger_wr
                ast::visitor_variant st_variant{symbol_table_visitor{}};
                result.ast->accept(st_variant);
 
-               auto* root_table = match(st_variant)(
-                  pattern(as<symbol_table_visitor>(arg)) = [&](symbol_table_visitor& vis) {
+               auto* root_table =
+                  match(st_variant)(pattern(as<symbol_table_visitor>(arg)) =
+                                       [&](symbol_table_visitor& vis) -> symbol_table* {
                      print_errors(vis.get_errors(), filepath);
 
                      return vis.get_root_table();
@@ -116,6 +117,13 @@ application::application(std::span<const std::string_view> args, util::logger_wr
                result.ast->accept(ms_variant);
 
                write_symbol_tables_to_file(filepath, root_table);
+
+               ast::visitor_variant cg_variant{code_gen_visitor{root_table}};
+               result.ast->accept(cg_variant);
+
+               match(cg_variant)(pattern(as<code_gen_visitor>(arg)) = [&](code_gen_visitor& vis) {
+                  write_moon_code_to_file(filepath, vis.moon_code());
+               });
 
                /*
                ast::visitor_variant tc_variant{type_checking_visitor{root_table}};
@@ -146,6 +154,17 @@ application::application(std::span<const std::string_view> args, util::logger_wr
                           filepath.c_str());
       }
    }
+}
+
+void application::write_moon_code_to_file(const std::filesystem::path& path,
+                                          std::string_view code) const
+{
+   auto output_path = path.parent_path();
+   output_path /= path.stem();
+   output_path += ".m";
+
+   std::ofstream output_file{output_path};
+   fmt::print(output_file, "{}", code);
 }
 
 void application::write_derivations_to_file(const std::filesystem::path& path,

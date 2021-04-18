@@ -377,7 +377,7 @@ namespace munster::ast
 
          assert(dynamic_cast<id_decl*>(id.get())); // NOLINT
 
-         return std::make_unique<mult_op>(std::move(term_0), std::move(id), std::move(term_1));
+         return std::make_unique<rel_op>(std::move(term_0), std::move(id), std::move(term_1));
       }
 
       if (action == grammar::action::e_add_op)

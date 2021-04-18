@@ -2,6 +2,7 @@
 
 #include <toy_compiler/munster/grammar/actions.hpp>
 #include <toy_compiler/munster/lexer.hpp>
+#include <toy_compiler/munster/visitor/code_gen/code_gen_visitor.hpp>
 #include <toy_compiler/munster/visitor/semantic_checking/type_checking_visitor.hpp>
 #include <toy_compiler/munster/visitor/symbol_table/memory_size_visitor.hpp>
 #include <toy_compiler/munster/visitor/symbol_table/symbol_table_visitor.hpp>
@@ -20,8 +21,8 @@ namespace munster::ast
 
    using node_ptr = std::unique_ptr<node>;
 
-   using visitor_variant =
-      std::variant<type_checking_visitor, symbol_table_visitor, memory_size_visitor>;
+   using visitor_variant = std::variant<type_checking_visitor, symbol_table_visitor,
+                                        memory_size_visitor, code_gen_visitor>;
 
    namespace detail
    {

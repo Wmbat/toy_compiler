@@ -35,6 +35,7 @@ public:
    application(std::span<const std::string_view> args, util::logger_wrapper log = nullptr);
 
 private:
+   void write_moon_code_to_file(const std::filesystem::path& path, std::string_view code) const;
    void write_derivations_to_file(const std::filesystem::path& path,
                                   const std::string& derivation) const;
    void write_ast_to_file(const std::filesystem::path& path,
