@@ -154,7 +154,7 @@ void application::write_lexing_to_file(const std::filesystem::path& path,
 {
    auto output_path = path.parent_path();
    output_path /= path.stem();
-   output_path += ".m";
+   output_path += ".outlextokens";
 
    std::ofstream output_file{output_path};
    fmt::print(output_file, "{}", fmt::join(items, "\n"));
